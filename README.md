@@ -11,7 +11,7 @@ Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
 
 Install the Swashbuckle.OData NuGet package:
 
-    Install-Package Swashbuckle.OData
+    Install-Package Swashbuckle.OData -Pre
 
 Update your <code>SwaggerConfig</code> to accept an <code>IEdmModel</code>:
 
@@ -42,4 +42,4 @@ When you build your OData <code>IEdmModel</code>, pass it to <code>SwaggerConfig
         SwaggerConfig.Register(edmModel);
     }
 
-Note that, currently, the <code>ODataSwaggerProvider</code> assumes a ODataServiceRoute of "odata".
+Note that, currently, the <code>ODataSwaggerProvider</code> assumes an ODataServiceRoute of "odata".
