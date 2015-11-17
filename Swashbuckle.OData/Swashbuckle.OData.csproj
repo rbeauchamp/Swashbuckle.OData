@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ODataSwaggerConverter.cs" />
+    <Compile Include="ODataSwaggerProvider.cs" />
     <Compile Include="ODataSwaggerUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
