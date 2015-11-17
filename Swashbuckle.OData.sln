@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FF286327-C783-4F7A-AB73-9BCBAD0D4460}") = "Swashbuckle.OData.NuGet", "Swashbuckle.OData.Nuget\Swashbuckle.OData.NuGet.nuproj", "{5CD33FC5-9E4C-48E3-A69D-EF5F0BAC2162}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swashbuckle.OData", "Swashbuckle.OData\Swashbuckle.OData.csproj", "{AA7B6C37-092E-46EC-81A3-9865EFD646F1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5CD33FC5-9E4C-48E3-A69D-EF5F0BAC2162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CD33FC5-9E4C-48E3-A69D-EF5F0BAC2162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CD33FC5-9E4C-48E3-A69D-EF5F0BAC2162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CD33FC5-9E4C-48E3-A69D-EF5F0BAC2162}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA7B6C37-092E-46EC-81A3-9865EFD646F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA7B6C37-092E-46EC-81A3-9865EFD646F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA7B6C37-092E-46EC-81A3-9865EFD646F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA7B6C37-092E-46EC-81A3-9865EFD646F1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
