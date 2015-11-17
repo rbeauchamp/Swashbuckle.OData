@@ -19,24 +19,20 @@
   <Import Project="$(NuProjPath)\NuProj.props" Condition="Exists('$(NuProjPath)\NuProj.props')" />
   <PropertyGroup Label="Configuration">
     <Id>Swashbuckle.OData</Id>
-    <Version>1.0.0</Version>
-    <Title>Swashbuckle.OData</Title>
-    <Authors>rbeauchamp</Authors>
-    <Owners>rbeauchamp</Owners>
+    <Title>Swashbuckle.OData - OData support for Swashbuckle</Title>
+    <Authors>Richard Beauchamp</Authors>
+    <Owners>Richard Beauchamp</Owners>
     <Summary>Swashbuckle.OData</Summary>
     <Description>Extends Swashbuckle with WebApi OData support!</Description>
     <ReleaseNotes>
     </ReleaseNotes>
-    <ProjectUrl>
-    </ProjectUrl>
+    <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>
     </LicenseUrl>
     <Copyright>Copyright 2015</Copyright>
-    <Tags>Swashbuckle Swagger SwaggerUi Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
+    <Tags>Swashbuckle Swagger SwaggerUi OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
+    <Version>1.0.0</Version>
   </PropertyGroup>
-  <ItemGroup>
-    <Content Include="Readme.txt" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />
   </ItemGroup>
