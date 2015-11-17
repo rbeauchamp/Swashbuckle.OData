@@ -27,21 +27,21 @@ namespace Swashbuckle.OData
 
 In your <code>SwaggerConfig</code> configure the custom provider:
 ```csharp
-    // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
-    // alternative implementation for ISwaggerProvider with the CustomProvider option.
-    //
-    c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
+// Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
+// alternative implementation for ISwaggerProvider with the CustomProvider option.
+//
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
 ```
 
 When you build your OData <code>IEdmModel</code>, pass it to <code>SwaggerConfig</code> during registration. For example:
 ```csharp
-    public static void Register(HttpConfiguration config)
-    {
-        var builder = new ODataConventionModelBuilder();
-        var edmModel = builder.GetEdmModel();
-        config.MapODataServiceRoute("odata", "odata", edmModel);
+public static void Register(HttpConfiguration config)
+{
+    var builder = new ODataConventionModelBuilder();
+    var edmModel = builder.GetEdmModel();
+    config.MapODataServiceRoute("odata", "odata", edmModel);
 
-        SwaggerConfig.Register(edmModel);
-    }
+    SwaggerConfig.Register(edmModel);
+}
 ```
 Note that, currently, the <code>ODataSwaggerProvider</code> assumes an ODataServiceRoute of "odata".
