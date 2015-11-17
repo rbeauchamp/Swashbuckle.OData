@@ -27,8 +27,7 @@
     <ReleaseNotes>
     </ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
-    <LicenseUrl>
-    </LicenseUrl>
+    <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright 2015</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUi OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
     <Version>1.0.0</Version>
