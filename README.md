@@ -1,7 +1,7 @@
 Swashbuckle.OData 1.0.0-alpha
 =========
 
-Extends Swashbuckle with WebApi OData support!
+Extends Swashbuckle with WebApi OData v4 support!
 
 Implements a custom <code>ISwaggerProvider</code> that converts an <code>IEdmModel</code> to a <code>SwaggerDocument</code>.
 
