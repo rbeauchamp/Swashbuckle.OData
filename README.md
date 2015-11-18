@@ -1,4 +1,4 @@
-Swashbuckle.OData 1.0.0-alpha
+Swashbuckle.OData 1.1.0-alpha
 =========
 
 Extends Swashbuckle with WebApi OData v4 support!

@@ -24,13 +24,12 @@
     <Owners>Richard Beauchamp</Owners>
     <Summary>Swashbuckle.OData</Summary>
     <Description>Extends Swashbuckle with WebApi OData support!</Description>
-    <ReleaseNotes>
-    </ReleaseNotes>
+    <ReleaseNotes>Added $filter query parameter, improved the query paramter descriptions and added unit tests.</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright 2015</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUi OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
-    <Version>1.0.0-alpha</Version>
+    <Version>1.1.0-alpha</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />
