@@ -15,7 +15,7 @@ Try it out at http://swashbuckleodata.azurewebsites.net/swagger
 
 * Install the Swashbuckle.OData NuGet package:
 
-<code>Install-Package Swashbuckle.OData -Pre</code>
+<code>Install-Package Swashbuckle.OData</code>
 
 * Update your <code>SwaggerConfig</code> to accept an <code>IEdmModel</code>:
 ```csharp
