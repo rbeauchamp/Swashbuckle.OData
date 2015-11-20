@@ -5,7 +5,7 @@ Extends Swashbuckle with WebApi OData v4 support!
 
 Implements a custom <code>ISwaggerProvider</code> that converts an <code>IEdmModel</code> to a <code>SwaggerDocument</code>.
 
-See it in action here: http://swashbuckleodata.azurewebsites.net/swagger
+Try it out at http://swashbuckleodata.azurewebsites.net/swagger
 
 ## Getting Started ##
 
