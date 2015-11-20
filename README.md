@@ -1,6 +1,8 @@
 Swashbuckle.OData 1.1.0-alpha
 =========
 
+[![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata)
+
 Extends Swashbuckle with WebApi OData v4 support!
 
 Implements a custom <code>ISwaggerProvider</code> that converts an <code>IEdmModel</code> to a <code>SwaggerDocument</code>.
