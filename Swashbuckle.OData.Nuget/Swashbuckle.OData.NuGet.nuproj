@@ -23,7 +23,7 @@
     <Title>Swashbuckle.OData</Title>
     <Authors>Richard Beauchamp</Authors>
     <Owners>Richard Beauchamp</Owners>
-    <Summary>Swashbuckle.OData</Summary>
+    <Summary>Extends Swashbuckle with WebApi OData v4 support!</Summary>
     <Description>Extends Swashbuckle with WebApi OData v4 support!</Description>
     <ReleaseNotes>Added $filter query parameter, improved the query paramter descriptions and added unit tests.</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
