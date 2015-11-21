@@ -5,19 +5,19 @@ Swashbuckle.OData 1.1.0
 
 Extends Swashbuckle with WebApi OData v4 support!
 
-Implements a custom <code>ISwaggerProvider</code> that converts an <code>IEdmModel</code> to a <code>SwaggerDocument</code>.
+Implements a custom Swagger Provider that converts an Edm Model to a Swagger Document.
 
-####<a href="http://swashbuckleodata.azurewebsites.net/swagger/" target="_blank">Try it out!</a>####
+__<a href="http://swashbuckleodata.azurewebsites.net/swagger/" target="_blank">Try it out!</a>__
 
 ## Getting Started ##
 
-* Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
+Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
 
-* Install the Swashbuckle.OData NuGet package:
+Install the Swashbuckle.OData NuGet package:
 
-<code>Install-Package Swashbuckle.OData</code>
+    Install-Package Swashbuckle.OData
 
-* Update your <code>SwaggerConfig</code> to accept an <code>IEdmModel</code>:
+Update your Swagger Config to accept an Edm Model:
 ```csharp
 //[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
@@ -29,7 +29,7 @@ namespace Swashbuckle.OData
         {
 ```
 
-* In your <code>SwaggerConfig</code> configure the custom provider:
+In your Swagger Config configure the custom provider:
 ```csharp
 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
 // alternative implementation for ISwaggerProvider with the CustomProvider option.
@@ -37,7 +37,7 @@ namespace Swashbuckle.OData
 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
 ```
 
-* When you build your OData <code>IEdmModel</code>, pass it to <code>SwaggerConfig</code> during registration. For example:
+When you build your OData Edm Model, pass it to Swagger Config during registration. For example:
 ```csharp
 public static void Register(HttpConfiguration config)
 {
@@ -48,4 +48,5 @@ public static void Register(HttpConfiguration config)
     SwaggerConfig.Register(edmModel);
 }
 ```
+
 Note that, currently, the <code>ODataSwaggerProvider</code> assumes an ODataServiceRoute of "odata".
