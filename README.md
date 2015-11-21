@@ -17,7 +17,7 @@ Install the Swashbuckle.OData NuGet package:
 
     Install-Package Swashbuckle.OData
 
-Update your `SwaggerConfig` to accept an Edm Model:
+Update `SwaggerConfig` to accept an Edm Model:
 ```csharp
 //[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
@@ -28,7 +28,7 @@ namespace Swashbuckle.OData
         public static void Register(IEdmModel edmModel)
         {
 ```
-In your `SwaggerConfig` configure the custom provider:
+In `SwaggerConfig` configure the custom provider:
 ```csharp
 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
 // alternative implementation for ISwaggerProvider with the CustomProvider option.
