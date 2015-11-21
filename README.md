@@ -5,9 +5,9 @@ Swashbuckle.OData 1.1.0
 
 Extends Swashbuckle with WebApi OData v4 support!
 
-Implements a custom Swagger Provider that converts an Edm Model to a Swagger Document.
+Implements a custom Swagger Provider that converts an Entity Data Model to a Swagger Document.
 
-__<a href="http://swashbuckleodata.azurewebsites.net/swagger/" target="_blank">Try it out!</a>__
+### <a href="http://swashbuckleodata.azurewebsites.net/swagger/" target="_blank">Try it out!</a> ###
 
 ## Getting Started ##
 
@@ -17,7 +17,7 @@ Install the Swashbuckle.OData NuGet package:
 
     Install-Package Swashbuckle.OData
 
-Update `SwaggerConfig` to accept an Edm Model:
+Update `SwaggerConfig` to accept an Entity Data Model:
 ```csharp
 //[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
@@ -35,7 +35,7 @@ In `SwaggerConfig` configure the custom provider:
 //
 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
 ```
-When you build your OData Edm Model, pass it to `SwaggerConfig` during registration. For example:
+When you build your Entity Data Model, pass it to `SwaggerConfig` during registration. For example:
 ```csharp
 public static void Register(HttpConfiguration config)
 {
