@@ -17,30 +17,33 @@ Install the Swashbuckle.OData NuGet package:
 
     Install-Package Swashbuckle.OData
 
-Update your Swagger Config to accept an Edm Model:
+Update your `SwaggerConfig` to accept an Edm Model:
+```csharp
+//[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
-    //[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
-    
-    namespace Swashbuckle.OData
+namespace Swashbuckle.OData
+{
+    public class SwaggerConfig
     {
-        public class SwaggerConfig
+        public static void Register(IEdmModel edmModel)
         {
-            public static void Register(IEdmModel edmModel)
-            {
+```
+In your `SwaggerConfig` configure the custom provider:
+```csharp
+// Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
+// alternative implementation for ISwaggerProvider with the CustomProvider option.
+//
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
+```
+When you build your OData Edm Model, pass it to `SwaggerConfig` during registration. For example:
+```csharp
+public static void Register(HttpConfiguration config)
+{
+    var builder = new ODataConventionModelBuilder();
+    var edmModel = builder.GetEdmModel();
+    config.MapODataServiceRoute("odata", "odata", edmModel);
 
-In your Swagger Config configure the custom provider:
-
-    c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
-
-When you build your OData Edm Model, pass it to Swagger Config during registration. For example:
-
-    public static void Register(HttpConfiguration config)
-    {
-        var builder = new ODataConventionModelBuilder();
-        var edmModel = builder.GetEdmModel();
-        config.MapODataServiceRoute("odata", "odata", edmModel);
-    
-        SwaggerConfig.Register(edmModel);
-    }
-
+    SwaggerConfig.Register(edmModel);
+}
+```
 Note that, currently, the <code>ODataSwaggerProvider</code> assumes an ODataServiceRoute of "odata".
