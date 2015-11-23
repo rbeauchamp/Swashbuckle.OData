@@ -1,7 +1,9 @@
-Swashbuckle.OData 1.1.0
+Swashbuckle.OData
 =========
 
-[![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata)
+[![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata/)
+[![NuGet](https://img.shields.io/nuget/v/Swashbuckle.OData.svg?style=flat)](https://www.nuget.org/packages/Swashbuckle.OData/)
+[![Issue Stats](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData/badge/issue)](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData)
 
 Extends Swashbuckle with WebApi OData v4 support!
 
