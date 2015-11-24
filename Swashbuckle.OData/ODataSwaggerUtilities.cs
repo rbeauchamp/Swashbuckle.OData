@@ -33,7 +33,9 @@ namespace Swashbuckle.OData
 
             return new PathItem
             {
-                get = new Operation().Summary("Get EntitySet " + entitySet.Name)
+                get = new Operation()
+                    .Summary("Get EntitySet " + entitySet.Name)
+                    .OperationId(entitySet.Name + "_Get")
                     .Description("Returns the EntitySet " + entitySet.Name)
                     .Tags(entitySet.Name)
                     .Parameters(new List<Parameter>()
@@ -46,7 +48,9 @@ namespace Swashbuckle.OData
                         .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean"))
                     .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType())
                         .DefaultErrorResponse()),
-                post = new Operation().Summary("Post a new entity to EntitySet " + entitySet.Name)
+                post = new Operation()
+                    .Summary("Post a new entity to EntitySet " + entitySet.Name)
+                    .OperationId(entitySet.Name + "_Post")
                     .Description("Post a new entity to EntitySet " + entitySet.Name)
                     .Tags(entitySet.Name)
                     .Parameters(new List<Parameter>().Parameter(entitySet.EntityType()
@@ -80,25 +84,32 @@ namespace Swashbuckle.OData
 
             return new PathItem
             {
-                get = new Operation().Summary("Get entity from " + entitySet.Name + " by key.")
+                get = new Operation()
+                    .Summary("Get entity from " + entitySet.Name + " by key.")
+                    .OperationId(entitySet.Name + "_GetById")
                     .Description("Returns the entity with the key from " + entitySet.Name)
                     .Tags(entitySet.Name)
                     .Parameters(keyParameters.DeepClone().Parameter("$expand", "query", "Expands related entities inline.", "string"))
                     .Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string"))
                     .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType())
                         .DefaultErrorResponse()),
-                patch = new Operation().Summary("Update entity in EntitySet " + entitySet.Name)
+                patch = new Operation()
+                    .Summary("Update entity in EntitySet " + entitySet.Name)
+                    .OperationId(entitySet.Name + "_PatchById")
                     .Description("Update entity in EntitySet " + entitySet.Name)
                     .Tags(entitySet.Name)
                     .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType()
                         .Name, "body", "The entity to patch", entitySet.EntityType()))
                     .Responses(new Dictionary<string, Response>().Response("204", "Empty response")
                         .DefaultErrorResponse()),
-                delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
+                delete = new Operation()
+                    .Summary("Delete entity in EntitySet " + entitySet.Name)
+                    .OperationId(entitySet.Name + "_DeleteById")
                     .Description("Delete entity in EntitySet " + entitySet.Name)
                     .Tags(entitySet.Name)
                     .Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string"))
-                    .Responses(new Dictionary<string, Response>().Response("204", "Empty response")
+                    .Responses(new Dictionary<string, Response>()
+                        .Response("204", "Empty response")
                         .DefaultErrorResponse())
             };
         }
@@ -133,6 +144,7 @@ namespace Swashbuckle.OData
             }
 
             var swaggerOperationImport = new Operation().Summary("Call operation import  " + operationImport.Name)
+                .OperationId(operationImport.Name + (isFunctionImport ? "_FunctionImportGet" : "_ActionImportPost"))
                 .Description("Call operation import  " + operationImport.Name)
                 .Tags(isFunctionImport ? "Function Import" : "Action Import");
 
@@ -187,8 +199,11 @@ namespace Swashbuckle.OData
                 swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.Definition);
             }
 
-            var swaggerOperation = new Operation().Summary("Call operation  " + operation.Name)
+            var swaggerOperation = new Operation()
+                .Summary("Call operation  " + operation.Name)
+                .OperationId(operation.Name + (isFunction ? "_FunctionGet" : "_ActionPost"))
                 .Description("Call operation  " + operation.Name)
+                .OperationId(operation.Name + (isFunction ? "_FunctionGetById" : "_ActionPostById"))
                 .Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
             if (swaggerParameters.Count > 0)
@@ -675,13 +690,19 @@ namespace Swashbuckle.OData
             return obj;
         }
 
-        /// <summary>
-        /// Perform a deep Copy of the object, using Json as a serialisation method.
-        /// </summary>
-        /// <typeparam name="T">The type of object being copied.</typeparam>
-        /// <param name="source">The object instance to copy.</param>
-        /// <returns>The copied object.</returns>
-        public static T DeepClone<T>(this T source)
+        private static Operation OperationId(this Operation obj, string operationId)
+        {
+            obj.operationId = operationId;
+            return obj;
+        }
+
+    /// <summary>
+    /// Perform a deep Copy of the object, using Json as a serialisation method.
+    /// </summary>
+    /// <typeparam name="T">The type of object being copied.</typeparam>
+    /// <param name="source">The object instance to copy.</param>
+    /// <returns>The copied object.</returns>
+    public static T DeepClone<T>(this T source)
         {
             // Don't serialize a null object, simply return the default for that object
             return ReferenceEquals(source, null) 
