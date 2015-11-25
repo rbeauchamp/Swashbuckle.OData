@@ -1,18 +1,17 @@
 using System.Web.Http;
-using Microsoft.OData.Edm;
 using Swashbuckle.Application;
 using Swashbuckle.OData;
+using SwashbuckleODataSample;
+using WebActivatorEx;
 
-//[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
+[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
 namespace SwashbuckleODataSample
 {
     public class SwaggerConfig
     {
-        public static void Register(IEdmModel edmModel)
+        public static void Register()
         {
-            var thisAssembly = typeof (SwaggerConfig).Assembly;
-
             GlobalConfiguration.Configuration.EnableSwagger(c =>
             {
                 // By default, the service root url is inferred from the request used to access the docs.
@@ -164,7 +163,7 @@ namespace SwashbuckleODataSample
                 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
                 // alternative implementation for ISwaggerProvider with the CustomProvider option.
                 //
-                c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
+                c.CustomProvider(defaultProvider => new ODataSwaggerProvider());
             })
                 .EnableSwaggerUi(c =>
                 {

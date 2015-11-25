@@ -1,4 +1,4 @@
-Swashbuckle.OData
+Swashbuckle.OData v2.0.0-alpha
 =========
 
 [![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata/)
@@ -19,33 +19,35 @@ Install the Swashbuckle.OData NuGet package:
 
     Install-Package Swashbuckle.OData
 
-Update `SwaggerConfig` to accept an Entity Data Model:
-```csharp
-//[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
-
-namespace Swashbuckle.OData
-{
-    public class SwaggerConfig
-    {
-        public static void Register(IEdmModel edmModel)
-        {
-```
 In `SwaggerConfig` configure the custom provider:
 ```csharp
 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
 // alternative implementation for ISwaggerProvider with the CustomProvider option.
 //
-c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider());
 ```
-When you build your Entity Data Model, pass it to `SwaggerConfig` during registration. For example:
-```csharp
-public static void Register(HttpConfiguration config)
-{
-    var builder = new ODataConventionModelBuilder();
-    var edmModel = builder.GetEdmModel();
-    config.MapODataServiceRoute("odata", "odata", edmModel);
 
-    SwaggerConfig.Register(edmModel);
-}
+### OWIN  ###
+
+If your service is hosted using OWIN middleware, configure the custom provider as follows:
+```csharp
+httpConfiguration
+    .EnableSwagger(c =>
+    {
+        // Use "SingleApiVersion" to describe a single version API. Swagger 2.0 includes an "Info" object to
+        // hold additional metadata for an API. Version and title are required but you can also provide
+        // additional fields by chaining methods off SingleApiVersion.
+        //
+        c.SingleApiVersion("v1", "A title for your API");
+
+        // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
+        // alternative implementation for ISwaggerProvider with the CustomProvider option.
+        //
+        c.CustomProvider(defaultProvider => new ODataSwaggerProvider(() => httpConfiguration));
+    })
+    .EnableSwaggerUi();
 ```
-Note that, currently, the <code>ODataSwaggerProvider</code> assumes an ODataServiceRoute of "odata".
+
+### Upgrading to Swashbuckle.OData 2.0 ###
+
+To simplify configuration, this version of Swashbuckle.OData leverages .NET 4.5. Previous versions were compiled against .NET 4.0.
