@@ -19,33 +19,10 @@ Install the Swashbuckle.OData NuGet package:
 
     Install-Package Swashbuckle.OData
 
-Update `SwaggerConfig` to accept an Entity Data Model:
-```csharp
-//[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
-
-namespace Swashbuckle.OData
-{
-    public class SwaggerConfig
-    {
-        public static void Register(IEdmModel edmModel)
-        {
-```
 In `SwaggerConfig` configure the custom provider:
 ```csharp
 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
 // alternative implementation for ISwaggerProvider with the CustomProvider option.
 //
-c.CustomProvider(defaultProvider => new ODataSwaggerProvider(edmModel));
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider());
 ```
-When you build your Entity Data Model, pass it to `SwaggerConfig` during registration. For example:
-```csharp
-public static void Register(HttpConfiguration config)
-{
-    var builder = new ODataConventionModelBuilder();
-    var edmModel = builder.GetEdmModel();
-    config.MapODataServiceRoute("odata", "odata", edmModel);
-
-    SwaggerConfig.Register(edmModel);
-}
-```
-Note that, currently, the <code>ODataSwaggerProvider</code> assumes an ODataServiceRoute of "odata".
