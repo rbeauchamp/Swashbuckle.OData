@@ -52,9 +52,9 @@ httpConfiguration
 
 To simplify configuration, this version of Swashbuckle.OData leverages .NET 4.5. Previous versions were compiled against .NET 4.0.
 
-Also, if upgrading from v1.0, you can now revert the previously recommended `SwaggerConfig` changes:
+Also, if upgrading from v1.0, revert the previously recommended `SwaggerConfig` changes:
 
-Revert `SwaggerConfig` to:
+Revert `SwaggerConfig` to the original `Swashbuckle`-supplied version:
 ```csharp
 [assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
