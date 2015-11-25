@@ -24,7 +24,7 @@
     <Authors>Richard Beauchamp</Authors>
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with WebApi OData v4 support!</Summary>
-    <Description>Extends Swashbuckle with WebApi OData v4 support!</Description>
+    <Description>Extends Swashbuckle with WebApi OData v4 support! Configuration has been simplified in this version. See https://github.com/rbeauchamp/Swashbuckle.OData/blob/feature/2/README.md</Description>
     <ReleaseNotes>Simplified configuration, upgraded to .NET 4.5, fixed metadata path in Swagger UI, uses correct OData route prefix</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
