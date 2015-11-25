@@ -1,4 +1,4 @@
-Swashbuckle.OData v2.0.0-alpha ([v1 documentation](https://github.com/rbeauchamp/Swashbuckle.OData/tree/v1.1.0))
+Swashbuckle.OData
 =========
 
 [![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata/)
@@ -17,7 +17,7 @@ Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
 
 Install the Swashbuckle.OData NuGet package:
 
-    Install-Package Swashbuckle.OData -Pre
+    Install-Package Swashbuckle.OData
 
 In `SwaggerConfig` configure the custom provider:
 ```csharp
