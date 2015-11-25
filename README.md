@@ -1,4 +1,4 @@
-Swashbuckle.OData v2.0.0-alpha ([v1 documentation](https://github.com/rbeauchamp/Swashbuckle.OData/tree/b4b1b208a5e61a16bb0a8b56d52ff9ab7a8d6d67))
+Swashbuckle.OData v2.0.0-alpha ([v1 documentation](https://github.com/rbeauchamp/Swashbuckle.OData/tree/v1.1.0))
 =========
 
 [![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata/)
