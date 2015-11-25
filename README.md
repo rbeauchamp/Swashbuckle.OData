@@ -17,7 +17,7 @@ Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
 
 Install the Swashbuckle.OData NuGet package:
 
-    Install-Package Swashbuckle.OData
+    Install-Package Swashbuckle.OData -Pre
 
 In `SwaggerConfig` configure the custom provider:
 ```csharp
@@ -51,3 +51,29 @@ httpConfiguration
 ### Upgrading to Swashbuckle.OData 2.0 ###
 
 To simplify configuration, this version of Swashbuckle.OData leverages .NET 4.5. Previous versions were compiled against .NET 4.0.
+
+Also, if upgrading from v1.0, you can now revert the previously recommended `SwaggerConfig` changes:
+
+Revert `SwaggerConfig` to:
+```csharp
+[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
+
+namespace Swashbuckle.OData
+{
+    public class SwaggerConfig
+    {
+        public static void Register()
+        {
+```
+
+Remove the call to `SwaggerConfig.Register(edmModel);`:
+```csharp
+public static void Register(HttpConfiguration config)
+{
+    var builder = new ODataConventionModelBuilder();
+    var edmModel = builder.GetEdmModel();
+    config.MapODataServiceRoute("odata", "odata", edmModel);
+
+    //SwaggerConfig.Register(edmModel);
+}
+```
