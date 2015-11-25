@@ -4,106 +4,78 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Routing;
 using Flurl;
-using Microsoft.OData.Edm;
+using Swashbuckle.Application;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
 {
     public class ODataSwaggerProvider : ISwaggerProvider
     {
-        private readonly IEdmModel _edmModel;
-        private readonly string _routePrefix;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataSwaggerProvider"/> class.
-        /// Sets the OData route prefix to "odata".
-        /// </summary>
-        /// <param name="edmModel">The edm model.</param>
-        public ODataSwaggerProvider(IEdmModel edmModel) : this(edmModel, "odata")
-        {
-            Contract.Requires(edmModel != null);
-        }
+        private readonly ISwaggerProvider _defaultProvider;
+        // Here for future use against the OData API...
+        private readonly SwaggerDocsConfig _swaggerDocsConfig;
+        private readonly Func<HttpConfiguration> _httpConfigurationProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
         /// </summary>
-        /// <param name="edmModel">The edm model.</param>
-        /// <param name="routePrefix">The OData route prefix.</param>
-        public ODataSwaggerProvider(IEdmModel edmModel, string routePrefix)
+        /// <param name="defaultProvider">The default provider.</param>
+        /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
+        public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerDocsConfig swaggerDocsConfig) 
+            : this(defaultProvider, swaggerDocsConfig, () => GlobalConfiguration.Configuration)
         {
-            Contract.Requires(edmModel != null);
-            Contract.Requires(routePrefix != null);
-
-            _edmModel = edmModel;
-            _routePrefix = routePrefix;
+            Contract.Requires(defaultProvider != null);
+            Contract.Requires(swaggerDocsConfig != null);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
-        /// This constructor requires that an IEdmModel has been set on the
-        /// current HttpConfiguration, for example
-        /// <code>
-        /// public static void Register(HttpConfiguration config)
-        /// {
-        ///     var builder = new ODataConventionModelBuilder();
-        ///     var edmModel = builder.GetEdmModel();
-        ///     config.MapODataServiceRoute("odata", "odata", edmModel);
-        /// }
-        /// </code>
+        /// Use this constructor for self-hosted scenarios.
         /// </summary>
-        /// <exception cref="Exception">This constructor requires that an IEdmModel has been set on the current HttpConfiguration, typically via a call to config.MapODataServiceRoute(string, string, IEdmModel)</exception>
-        public ODataSwaggerProvider() : this(() => GlobalConfiguration.Configuration)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
-        /// This constructor requires that an IEdmModel has been set on the
-        /// current HttpConfiguration, for example
-        /// <code>
-        /// public static void Register(HttpConfiguration config)
-        /// {
-        ///     var builder = new ODataConventionModelBuilder();
-        ///     var edmModel = builder.GetEdmModel();
-        ///     config.MapODataServiceRoute("odata", "odata", edmModel);
-        /// }
-        /// </code>
-        /// </summary>
+        /// <param name="defaultProvider">The default provider.</param>
+        /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
         /// <param name="httpConfigurationProvider">A function that will return the HttpConfiguration that contains the OData Edm Model.</param>
-        /// <exception cref="Exception">This constructor requires that an IEdmModel has been set on the current HttpConfiguration, typically via a call to config.MapODataServiceRoute(string, string, IEdmModel)</exception>
-        public ODataSwaggerProvider(Func<HttpConfiguration> httpConfigurationProvider)
+        public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerDocsConfig swaggerDocsConfig, Func<HttpConfiguration> httpConfigurationProvider)
         {
-            var oDataRoute = httpConfigurationProvider().Routes.SingleOrDefault(route => route is ODataRoute) as ODataRoute;
+            Contract.Requires(defaultProvider != null);
+            Contract.Requires(swaggerDocsConfig != null);
+            Contract.Requires(httpConfigurationProvider != null);
 
-            if (oDataRoute == null)
-            {
-                throw new Exception("This constructor requires that an IEdmModel has been set on the current HttpConfiguration, typically via a call to config.MapODataServiceRoute(string, string, IEdmModel)");
-            }
-
-            var oDataPathRouteConstraint = oDataRoute.Constraints.Values.SingleOrDefault(value => value is ODataPathRouteConstraint) as ODataPathRouteConstraint;
-
-            _edmModel = oDataPathRouteConstraint.EdmModel;
-            _routePrefix = oDataRoute.RoutePrefix;
+            _defaultProvider = defaultProvider;
+            _swaggerDocsConfig = swaggerDocsConfig;
+            _httpConfigurationProvider = httpConfigurationProvider;
         }
 
         public SwaggerDocument GetSwagger(string rootUrl, string apiVersion)
         {
-            var oDataSwaggerConverter = new ODataSwaggerConverter(_edmModel);
+            var oDataRoute = _httpConfigurationProvider().Routes.SingleOrDefault(route => route is ODataRoute) as ODataRoute;
 
-            var rootUri = new Uri(rootUrl);
+            if (oDataRoute != null)
+            {
+                var oDataPathRouteConstraint = oDataRoute.Constraints.Values.SingleOrDefault(value => value is ODataPathRouteConstraint) as ODataPathRouteConstraint;
 
-            var basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : "/" + _routePrefix;
+                var edmModel = oDataPathRouteConstraint.EdmModel;
+                var routePrefix = oDataRoute.RoutePrefix;
 
-            oDataSwaggerConverter.MetadataUri = new Uri(rootUrl.AppendPathSegments(basePath, "$metadata"));
+                var oDataSwaggerConverter = new ODataSwaggerConverter(edmModel);
 
-            var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
+                var rootUri = new Uri(rootUrl);
 
-            var edmSwaggerDocument = oDataSwaggerConverter.ConvertToSwaggerModel();
-            edmSwaggerDocument.host = rootUri.Host + port;
-            edmSwaggerDocument.basePath = basePath;
-            edmSwaggerDocument.schemes = new[] { rootUri.Scheme }.ToList();
+                var basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : "/" + routePrefix;
 
-            return edmSwaggerDocument;
+                oDataSwaggerConverter.MetadataUri = new Uri(rootUrl.AppendPathSegments(basePath, "$metadata"));
+
+                var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
+
+                var edmSwaggerDocument = oDataSwaggerConverter.ConvertToSwaggerModel();
+                edmSwaggerDocument.host = rootUri.Host + port;
+                edmSwaggerDocument.basePath = basePath;
+                edmSwaggerDocument.schemes = new[] { rootUri.Scheme }.ToList();
+
+                return edmSwaggerDocument;
+            }
+
+            return _defaultProvider.GetSwagger(rootUrl, apiVersion);
         }
     }
 }

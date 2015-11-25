@@ -23,7 +23,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient();
 
                 // Act
                 var swaggerDocument = await httpClient.GetAsync<SwaggerDocument>("swagger/docs/v1");
@@ -31,15 +31,6 @@ namespace Swashbuckle.OData.Tests
                 // Assert
                 swaggerDocument.basePath.ShouldBeEquivalentTo("/" + WebApiConfig.ODataRoutePrefix);
             }
-        }
-
-        private static HttpClient GetHttpClient()
-        {
-            return new HttpClient
-            {
-                BaseAddress = new Uri(TestWebApiStartup.BaseAddress.AppendPathSegment(WebApiConfig.ODataRoutePrefix)),
-                Timeout = TimeSpan.FromMilliseconds(5 * 60 * 1000)
-            };
         }
     }
 }

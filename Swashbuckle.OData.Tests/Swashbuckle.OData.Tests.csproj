@@ -113,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Customer.cs" />
+    <Compile Include="HttpClientUtils.cs" />
     <Compile Include="HttpConfigurationRoutesTests.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="GetQueryParametersTests.cs" />

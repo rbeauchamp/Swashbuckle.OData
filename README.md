@@ -23,7 +23,7 @@ In `SwaggerConfig` configure the custom provider:
 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
 // alternative implementation for ISwaggerProvider with the CustomProvider option.
 //
-c.CustomProvider(defaultProvider => new ODataSwaggerProvider());
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
 ```
 
 ### OWIN  ###

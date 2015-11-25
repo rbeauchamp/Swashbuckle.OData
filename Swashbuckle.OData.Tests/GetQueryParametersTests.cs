@@ -1,7 +1,9 @@
 ﻿using System.Linq;
-using System.Web.OData.Builder;
+using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Owin.Hosting;
 using NUnit.Framework;
+using Swashbuckle.OData.Tests.WebHost;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Tests
@@ -10,27 +12,26 @@ namespace Swashbuckle.OData.Tests
     public class GetQueryParametersTests
     {
         [Test]
-        public void It_includes_the_filter_parameter()
+        public async Task It_includes_the_filter_parameter()
         {
-            // Arrange
-            var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Customer>("Customers");
-            builder.EntitySet<Order>("Orders");
-            var edmModel = builder.GetEdmModel();
-            var provider = new ODataSwaggerProvider(edmModel);
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
 
-            // Act
-            var swaggerDocument = provider.GetSwagger("http://localhost/", "1.0");
+                // Act
+                var swaggerDocument = await httpClient.GetAsync<SwaggerDocument>("swagger/docs/v1");
 
-            // Assert
-            PathItem pathItem;
-            swaggerDocument.paths.TryGetValue("/Customers", out pathItem);
-            pathItem.Should().NotBeNull();
-            var filterParameter = pathItem.get.parameters.SingleOrDefault(parameter => parameter.name == "$filter");
-            filterParameter.Should().NotBeNull();
-            filterParameter.description.Should().NotBeNullOrWhiteSpace();
-            filterParameter.type.ShouldBeEquivalentTo("string");
-            filterParameter.@in.ShouldBeEquivalentTo("query");
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Customers", out pathItem);
+                pathItem.Should().NotBeNull();
+                var filterParameter = pathItem.get.parameters.SingleOrDefault(parameter => parameter.name == "$filter");
+                filterParameter.Should().NotBeNull();
+                filterParameter.description.Should().NotBeNullOrWhiteSpace();
+                filterParameter.type.ShouldBeEquivalentTo("string");
+                filterParameter.@in.ShouldBeEquivalentTo("query");
+            }
         }
     }
 }

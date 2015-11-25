@@ -30,7 +30,7 @@ namespace SwashbuckleODataSample
                 // hold additional metadata for an API. Version and title are required but you can also provide
                 // additional fields by chaining methods off SingleApiVersion.
                 //
-                c.SingleApiVersion("v1", "SwashbuckleODataSample");
+                c.SingleApiVersion("v1", "Swashbuckle.OData Sample App");
 
                 // If your API has multiple versions, use "MultipleApiVersions" instead of "SingleApiVersion".
                 // In this case, you must provide a lambda that tells Swashbuckle which actions should be
@@ -163,7 +163,7 @@ namespace SwashbuckleODataSample
                 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
                 // alternative implementation for ISwaggerProvider with the CustomProvider option.
                 //
-                c.CustomProvider(defaultProvider => new ODataSwaggerProvider());
+                c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
             })
                 .EnableSwaggerUi(c =>
                 {
