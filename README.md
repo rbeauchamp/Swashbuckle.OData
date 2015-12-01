@@ -17,7 +17,7 @@ Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
 
 Install the Swashbuckle.OData NuGet package:
 
-    Install-Package Swashbuckle.OData
+    [Install-Package Swashbuckle.OData](https://www.nuget.org/packages/Swashbuckle.OData/)
 
 In `SwaggerConfig` configure the custom provider:
 ```csharp
