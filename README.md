@@ -50,7 +50,7 @@ httpConfiguration
 
 ### Upgrading to Swashbuckle.OData 2.0 ###
 
-To simplify configuration, this version of Swashbuckle.OData leverages .NET 4.5. Previous versions were compiled against .NET 4.0.
+To simplify configuration, this version of Swashbuckle.OData leverages .NET 4.5.2. Previous versions were compiled against .NET 4.0.
 
 Also, if upgrading from v1.0, revert the previously recommended `SwaggerConfig` changes:
 
