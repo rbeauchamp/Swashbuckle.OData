@@ -48,6 +48,8 @@ namespace Swashbuckle.OData
 
         public SwaggerDocument GetSwagger(string rootUrl, string apiVersion)
         {
+            var apiDescriptions = _httpConfigurationProvider().Services.GetApiExplorer().ApiDescriptions;
+
             var oDataRoute = _httpConfigurationProvider().Routes.SingleOrDefault(route => route is ODataRoute) as ODataRoute;
 
             if (oDataRoute != null)

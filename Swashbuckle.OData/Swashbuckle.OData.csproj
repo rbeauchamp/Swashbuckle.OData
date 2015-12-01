@@ -169,10 +169,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ODataApiExplorer.cs" />
     <Compile Include="ODataSwaggerConverter.cs" />
     <Compile Include="ODataSwaggerProvider.cs" />
     <Compile Include="ODataSwaggerUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RouteValueKeys.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

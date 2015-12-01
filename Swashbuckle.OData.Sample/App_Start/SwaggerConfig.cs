@@ -1,4 +1,5 @@
 using System.Web.Http;
+using System.Web.Http.Description;
 using Swashbuckle.Application;
 using Swashbuckle.OData;
 using SwashbuckleODataSample;
@@ -12,6 +13,8 @@ namespace SwashbuckleODataSample
     {
         public static void Register()
         {
+            //GlobalConfiguration.Configuration.Services.Replace(typeof(IApiExplorer), new ODataApiExplorer(GlobalConfiguration.Configuration));
+
             GlobalConfiguration.Configuration.EnableSwagger(c =>
             {
                 // By default, the service root url is inferred from the request used to access the docs.
