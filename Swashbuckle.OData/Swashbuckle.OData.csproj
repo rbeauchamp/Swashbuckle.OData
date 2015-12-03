@@ -187,7 +187,9 @@
     <Compile Include="ApiExplorer\HttpParsedRoute.cs" />
     <Compile Include="ApiExplorer\HttpRouteDataExtensions.cs" />
     <Compile Include="ApiExplorer\HttpRouteExtensions.cs" />
-    <Compile Include="ApiExplorer\ODataApiExplorer.cs" />
+    <Compile Include="ApiExplorer\ApiExplorerFromMicrosoft.cs" />
+    <Compile Include="CollectionExtentions.cs" />
+    <Compile Include="ODataApiExplorer.cs" />
     <Compile Include="ODataSwaggerConverter.cs" />
     <Compile Include="ODataSwaggerProvider.cs" />
     <Compile Include="ODataSwaggerUtilities.cs" />

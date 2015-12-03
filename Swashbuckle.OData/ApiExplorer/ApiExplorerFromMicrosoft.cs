@@ -17,18 +17,16 @@ using System.Web.Http.Description;
 using System.Web.Http.ModelBinding.Binders;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
-using System.Web.OData.Routing;
 
 namespace Swashbuckle.OData.ApiExplorer
 {
     /// <summary>
-    ///     Explores the URI space of the service based on routes, controllers and actions available in the system.
+    /// This is here so I can debug and understand how ApiExploring is implemented. Will be removed after ODataApiExplorer is completed.
     /// </summary>
-    public class ODataApiExplorer : IApiExplorer
+    public class ApiExplorerFromMicrosoft : IApiExplorer
     {
         private static readonly Regex _actionVariableRegex = new Regex(string.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteValueKeys.Action), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        //private static readonly Regex _controllerVariableRegex = new Regex(string.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteValueKeys.Controller), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        private static readonly Regex _controllerVariableRegex = new Regex(string.Format(CultureInfo.CurrentCulture, "{{{0}}}", ODataRouteConstants.ODataPath), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _controllerVariableRegex = new Regex(string.Format(CultureInfo.CurrentCulture, "{{{0}}}", RouteValueKeys.Controller), RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private readonly Lazy<Collection<ApiDescription>> _apiDescriptions;
         private readonly HttpConfiguration _config;
 
@@ -36,7 +34,7 @@ namespace Swashbuckle.OData.ApiExplorer
         ///     Initializes a new instance of the <see cref="ApiExplorer" /> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public ODataApiExplorer(HttpConfiguration configuration)
+        public ApiExplorerFromMicrosoft(HttpConfiguration configuration)
         {
             _config = configuration;
             _apiDescriptions = new Lazy<Collection<ApiDescription>>(InitializeApiDescriptions);
