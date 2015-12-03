@@ -2,6 +2,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Swashbuckle.Application;
 using Swashbuckle.OData;
+using Swashbuckle.OData.ApiExplorer;
 using SwashbuckleODataSample;
 using WebActivatorEx;
 
@@ -13,7 +14,7 @@ namespace SwashbuckleODataSample
     {
         public static void Register()
         {
-            //GlobalConfiguration.Configuration.Services.Replace(typeof(IApiExplorer), new ODataApiExplorer(GlobalConfiguration.Configuration));
+            GlobalConfiguration.Configuration.Services.Replace(typeof(IApiExplorer), new ODataApiExplorer(GlobalConfiguration.Configuration));
 
             GlobalConfiguration.Configuration.EnableSwagger(c =>
             {

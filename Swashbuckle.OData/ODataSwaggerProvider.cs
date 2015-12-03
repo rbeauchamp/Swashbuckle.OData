@@ -12,29 +12,31 @@ namespace Swashbuckle.OData
     public class ODataSwaggerProvider : ISwaggerProvider
     {
         private readonly ISwaggerProvider _defaultProvider;
+        private readonly Func<HttpConfiguration> _httpConfigurationProvider;
         // Here for future use against the OData API...
         private readonly SwaggerDocsConfig _swaggerDocsConfig;
-        private readonly Func<HttpConfiguration> _httpConfigurationProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
+        ///     Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
         /// </summary>
         /// <param name="defaultProvider">The default provider.</param>
         /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
-        public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerDocsConfig swaggerDocsConfig) 
-            : this(defaultProvider, swaggerDocsConfig, () => GlobalConfiguration.Configuration)
+        public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerDocsConfig swaggerDocsConfig) : this(defaultProvider, swaggerDocsConfig, () => GlobalConfiguration.Configuration)
         {
             Contract.Requires(defaultProvider != null);
             Contract.Requires(swaggerDocsConfig != null);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
-        /// Use this constructor for self-hosted scenarios.
+        ///     Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
+        ///     Use this constructor for self-hosted scenarios.
         /// </summary>
         /// <param name="defaultProvider">The default provider.</param>
         /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
-        /// <param name="httpConfigurationProvider">A function that will return the HttpConfiguration that contains the OData Edm Model.</param>
+        /// <param name="httpConfigurationProvider">
+        ///     A function that will return the HttpConfiguration that contains the OData Edm
+        ///     Model.
+        /// </param>
         public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerDocsConfig swaggerDocsConfig, Func<HttpConfiguration> httpConfigurationProvider)
         {
             Contract.Requires(defaultProvider != null);
@@ -72,7 +74,10 @@ namespace Swashbuckle.OData
                 var edmSwaggerDocument = oDataSwaggerConverter.ConvertToSwaggerModel();
                 edmSwaggerDocument.host = rootUri.Host + port;
                 edmSwaggerDocument.basePath = basePath;
-                edmSwaggerDocument.schemes = new[] { rootUri.Scheme }.ToList();
+                edmSwaggerDocument.schemes = new[]
+                {
+                    rootUri.Scheme
+                }.ToList();
 
                 return edmSwaggerDocument;
             }
