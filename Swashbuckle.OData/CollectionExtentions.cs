@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 
 namespace Swashbuckle.OData
@@ -14,7 +15,7 @@ namespace Swashbuckle.OData
         /// The collection whose elements should be added to the end of the <see cref="Collection{T}"/>. 
         /// The collection itself cannot be null, but it can contain elements that are null, if type T is a reference type.
         /// </param>
-        public static void AddRange<T>(this Collection<T> source, Collection<T> collection)
+        public static void AddRange<T>(this Collection<T> source, IEnumerable<T> collection)
         {
             Contract.Requires(source != null);
             Contract.Requires(collection != null);
