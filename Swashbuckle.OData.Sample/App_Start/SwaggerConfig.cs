@@ -2,7 +2,6 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using Swashbuckle.Application;
 using Swashbuckle.OData;
-using Swashbuckle.OData.ApiExplorer;
 using SwashbuckleODataSample;
 using WebActivatorEx;
 
@@ -14,8 +13,6 @@ namespace SwashbuckleODataSample
     {
         public static void Register()
         {
-            GlobalConfiguration.Configuration.Services.Replace(typeof(IApiExplorer), new ODataApiExplorer(GlobalConfiguration.Configuration));
-
             GlobalConfiguration.Configuration.EnableSwagger(c =>
             {
                 // By default, the service root url is inferred from the request used to access the docs.
@@ -167,7 +164,7 @@ namespace SwashbuckleODataSample
                 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
                 // alternative implementation for ISwaggerProvider with the CustomProvider option.
                 //
-                //c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
+                c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
             })
                 .EnableSwaggerUi(c =>
                 {

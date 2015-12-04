@@ -38,13 +38,13 @@ namespace Swashbuckle.OData
                 .OperationId(entitySet.Name + "_Get")
                 .Description("Returns the EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(new List<Parameter>().Parameter("$expand", "query", "Expands related entities inline.", "string")
-                .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string")
-                .Parameter("$select", "query", "Selects which properties to include in the response.", "string")
-                .Parameter("$orderby", "query", "Sorts the results.", "string")
-                .Parameter("$top", "query", "Returns only the first n results.", "integer", "int32")
-                .Parameter("$skip", "query", "Skips the first n results.", "integer", "int32")
-                .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean"))
+                .Parameters(new List<Parameter>().Parameter("$expand", "query", "Expands related entities inline.", "string", required: false)
+                .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string", required: false)
+                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", required: false)
+                .Parameter("$orderby", "query", "Sorts the results.", "string", required: false)
+                .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
+                .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
+                .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean", required: false))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
                 post = new Operation()
                 .Summary("Post a new entity to EntitySet " + entitySet.Name)
@@ -74,7 +74,7 @@ namespace Swashbuckle.OData
             {
                 string format;
                 var type = GetPrimitiveTypeAndFormat(key.Type.Definition as IEdmPrimitiveType, out format);
-                keyParameters.Parameter(key.Name, "path", "key: " + key.Name, type, format);
+                keyParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
             }
 
             return new PathItem
@@ -84,8 +84,8 @@ namespace Swashbuckle.OData
                 .OperationId(entitySet.Name + "_GetById")
                 .Description("Returns the entity with the key from " + entitySet.Name)
                 .Tags(entitySet.Name).Parameters(keyParameters.DeepClone()
-                .Parameter("$expand", "query", "Expands related entities inline.", "string"))
-                .Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string"))
+                .Parameter("$expand", "query", "Expands related entities inline.", "string", false))
+                .Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
 
                 patch = new Operation()
@@ -100,7 +100,7 @@ namespace Swashbuckle.OData
                 .OperationId(entitySet.Name + "_DeleteById")
                 .Description("Delete entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string"))
+                .Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string", false))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse())
             };
         }
@@ -223,7 +223,7 @@ namespace Swashbuckle.OData
             {
                 string format;
                 var type = GetPrimitiveTypeAndFormat(key.Type.Definition as IEdmPrimitiveType, out format);
-                swaggerParameters.Parameter(key.Name, "path", "key: " + key.Name, type, format);
+                swaggerParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
             }
 
             foreach (var parameter in operation.Parameters.Skip(1))
@@ -597,7 +597,7 @@ namespace Swashbuckle.OData
             return obj;
         }
 
-        private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, string type, string format = null)
+        private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, string type, bool required, string format = null)
         {
             parameters.Add(new Parameter
             {
@@ -605,7 +605,8 @@ namespace Swashbuckle.OData
                 @in = kind,
                 description = description,
                 type = type,
-                format = format
+                format = format,
+                required = required
             });
 
             //if (!string.IsNullOrEmpty(format))

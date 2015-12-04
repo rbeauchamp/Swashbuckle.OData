@@ -19,15 +19,15 @@ namespace Swashbuckle.OData
     {
         private const string ServiceRoot = "http://any/";
         private readonly Lazy<Collection<ApiDescription>> _apiDescriptions;
-        private readonly HttpConfiguration _config;
+        private readonly Func<HttpConfiguration> _config;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ODataApiExplorer" /> class.
+        /// Initializes a new instance of the <see cref="ODataApiExplorer" /> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        public ODataApiExplorer(HttpConfiguration configuration)
+        /// <param name="httpConfigurationProvider">The HTTP configuration provider.</param>
+        public ODataApiExplorer(Func<HttpConfiguration> httpConfigurationProvider)
         {
-            _config = configuration;
+            _config = httpConfigurationProvider;
             _apiDescriptions = new Lazy<Collection<ApiDescription>>(GetApiDescriptions);
         }
 
@@ -43,7 +43,7 @@ namespace Swashbuckle.OData
         {
             var apiDescriptions = new Collection<ApiDescription>();
 
-            foreach (var odataRoute in FlattenRoutes(_config.Routes).OfType<ODataRoute>())
+            foreach (var odataRoute in FlattenRoutes(_config().Routes).OfType<ODataRoute>())
             {
                 apiDescriptions.AddRange(GetApiDescriptions(odataRoute));
             }
@@ -96,13 +96,13 @@ namespace Swashbuckle.OData
                         RouteData = new HttpRouteData(new HttpRoute())
                     };
 
-                    var actionMappings = _config.Services.GetActionSelector().GetActionMapping(httpControllerDescriptor);
+                    var actionMappings = _config().Services.GetActionSelector().GetActionMapping(httpControllerDescriptor);
 
                     var action = GetActionName(oDataPathRouteConstraint, odataPath, controllerContext, actionMappings);
 
                     if (action != null)
                     {
-                        return GetApiDescription(actionMappings[action].First(), httpMethod, potentialOperation, oDataRoute, odataPath, potentialPathTemplate);
+                        return GetApiDescription(actionMappings[action].First(), httpMethod, potentialOperation, oDataRoute, potentialPathTemplate);
                     }
                 }
             }
@@ -110,7 +110,7 @@ namespace Swashbuckle.OData
             return null;
         }
 
-        private ApiDescription GetApiDescription(HttpActionDescriptor actionDescriptor, HttpMethod httpMethod, Operation operation, ODataRoute route, ODataPath path, string potentialPathTemplate)
+        private ApiDescription GetApiDescription(HttpActionDescriptor actionDescriptor, HttpMethod httpMethod, Operation operation, ODataRoute route, string potentialPathTemplate)
         {
             var apiDocumentation = GetApiDocumentation(actionDescriptor);
 
@@ -185,7 +185,7 @@ namespace Swashbuckle.OData
 
         private ApiParameterDescription GetParameterDescription(Parameter parameter, HttpActionDescriptor actionDescriptor)
         {
-            var httpParameterDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == parameter.name);
+            var httpParameterDescriptor = GetHttpParameterDescriptor(parameter, actionDescriptor);
             if (httpParameterDescriptor != null)
             {
                 return new ApiParameterDescription
@@ -198,15 +198,26 @@ namespace Swashbuckle.OData
             }
             return new ApiParameterDescription
             {
-                ParameterDescriptor = new ODataParameterDescriptor(parameter.name, GetType(parameter))
+                ParameterDescriptor = new ODataParameterDescriptor(parameter.name, GetType(parameter), parameter.required.Value)
                 {
-                    Configuration = _config,
+                    Configuration = _config(),
                     ActionDescriptor = actionDescriptor
                 },
                 Name = parameter.name,
                 Documentation = parameter.description,
                 Source = parameter.@in == "path" || parameter.@in == "query" ? ApiParameterSource.FromUri : ApiParameterSource.FromBody
             };
+        }
+
+        private static HttpParameterDescriptor GetHttpParameterDescriptor(Parameter parameter, HttpActionDescriptor actionDescriptor)
+        {
+            var httpParameterDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == parameter.name);
+            // Maybe the parameter is a key parameter, e.g., where Id in the URI path maps to a parameter named 'key'
+            if (httpParameterDescriptor == null && parameter.description.StartsWith("key:"))
+            {
+                httpParameterDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == "key");
+            }
+            return httpParameterDescriptor;
         }
 
         private static string GetApiParameterDocumentation(HttpParameterDescriptor parameterDescriptor)
@@ -333,7 +344,7 @@ namespace Swashbuckle.OData
 
             var controllerName = GetControllerName(oDataPathRouteConstraint, potentialPath);
 
-            var controllerMappings = _config.Services.GetHttpControllerSelector().GetControllerMapping();
+            var controllerMappings = _config().Services.GetHttpControllerSelector().GetControllerMapping();
 
             HttpControllerDescriptor controllerDescriptor = null;
             if (controllerName != null && controllerMappings != null)
@@ -403,14 +414,17 @@ namespace Swashbuckle.OData
 
     internal class ODataParameterDescriptor : HttpParameterDescriptor
     {
-        public ODataParameterDescriptor(string parameterName, Type parameterType)
+        public ODataParameterDescriptor(string parameterName, Type parameterType, bool isOptional)
         {
             ParameterName = parameterName;
             ParameterType = parameterType;
+            IsOptional = isOptional;
         }
 
         public override string ParameterName { get; }
 
         public override Type ParameterType { get; }
+
+        public override bool IsOptional { get; }
     }
 }

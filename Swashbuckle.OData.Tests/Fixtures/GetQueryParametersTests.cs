@@ -33,5 +33,23 @@ namespace Swashbuckle.OData.Tests
                 filterParameter.@in.ShouldBeEquivalentTo("query");
             }
         }
+
+        [Test]
+        public async Task It_has_all_optional_odata_query_parameters()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Customers", out pathItem);
+                pathItem.get.parameters.Where(parameter => parameter.name.StartsWith("$")).Should().OnlyContain(parameter => parameter.required == false);
+            }
+        }
     }
 }
