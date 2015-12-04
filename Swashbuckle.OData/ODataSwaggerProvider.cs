@@ -132,6 +132,8 @@ namespace Swashbuckle.OData
 
                 //return edmSwaggerDocument;
 
+                var routePrefix = oDataRoute.RoutePrefix;
+
                 var rootUri = new Uri(rootUrl);
                 var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
 
@@ -139,7 +141,7 @@ namespace Swashbuckle.OData
                 {
                     info = info,
                     host = rootUri.Host + port,
-                    basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : null,
+                    basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : "/" + routePrefix,
                     schemes = _options.Schemes != null ? _options.Schemes.ToList() : new[] { rootUri.Scheme }.ToList(),
                     paths = paths,
                     definitions = schemaRegistry.Definitions,
@@ -208,7 +210,7 @@ namespace Swashbuckle.OData
                 .Select(paramDesc =>
                 {
                     var inPath = apiDescription.RelativePathSansQueryString().Contains("{" + paramDesc.Name + "}");
-                    return CreateParameter(paramDesc, inPath, schemaRegistry);
+                    return CreateParameter(paramDesc as SwaggerApiParameterDescription, inPath, schemaRegistry);
                 })
                  .ToList();
 
@@ -238,15 +240,16 @@ namespace Swashbuckle.OData
             return operation;
         }
 
-        private static Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
+        private static Parameter CreateParameter(SwaggerApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
         {
             var @in = inPath
                 ? "path"
-                : paramDesc.Source == ApiParameterSource.FromUri ? "query" : "body";
+                : MapToSwaggerParameterLocation(paramDesc.SwaggerSource);
 
             var parameter = new Parameter
             {
                 name = paramDesc.Name,
+                description = paramDesc.Documentation,
                 @in = @in
             };
 
@@ -269,11 +272,28 @@ namespace Swashbuckle.OData
             return parameter;
         }
 
+        private static string MapToSwaggerParameterLocation(SwaggerApiParameterSource swaggerSource)
+        {
+            switch (swaggerSource)
+            {
+                case SwaggerApiParameterSource.Query:
+                    return "query";
+                case SwaggerApiParameterSource.Header:
+                    return "header";
+                case SwaggerApiParameterSource.Path:
+                    return "path";
+                case SwaggerApiParameterSource.FormData:
+                    return "formData";
+                case SwaggerApiParameterSource.Body:
+                    return "body";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(swaggerSource), swaggerSource, null);
+            }
+        }
+
         private IEnumerable<ApiDescription> GetApiDescriptionsFor(string apiVersion)
         {
-            return _options.VersionSupportResolver == null
-                ? _apiExplorer.ApiDescriptions
-                : _apiExplorer.ApiDescriptions.Where(apiDesc => _options.VersionSupportResolver(apiDesc, apiVersion));
+            return _options.VersionSupportResolver == null ? _apiExplorer.ApiDescriptions : _apiExplorer.ApiDescriptions.Where(apiDesc => _options.VersionSupportResolver(apiDesc, apiVersion));
         }
     }
 }

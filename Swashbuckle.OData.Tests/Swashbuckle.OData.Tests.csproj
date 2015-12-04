@@ -112,6 +112,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fixtures\PutTests.cs" />
     <Compile Include="HttpClientUtils.cs" />
     <Compile Include="Fixtures\HttpConfigurationRoutesTests.cs" />
     <Compile Include="Fixtures\GetQueryParametersTests.cs" />
