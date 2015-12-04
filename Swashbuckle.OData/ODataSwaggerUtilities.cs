@@ -33,8 +33,26 @@ namespace Swashbuckle.OData
 
             return new PathItem
             {
-                get = new Operation().Summary("Get EntitySet " + entitySet.Name).OperationId(entitySet.Name + "_Get").Description("Returns the EntitySet " + entitySet.Name).Tags(entitySet.Name).Parameters(new List<Parameter>().Parameter("$expand", "query", "Expands related entities inline.", "string").Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string").Parameter("$select", "query", "Selects which properties to include in the response.", "string").Parameter("$orderby", "query", "Sorts the results.", "string").Parameter("$top", "query", "Returns only the first n results.", "integer").Parameter("$skip", "query", "Skips the first n results.", "integer").Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean")).Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
-                post = new Operation().Summary("Post a new entity to EntitySet " + entitySet.Name).OperationId(entitySet.Name + "_Post").Description("Post a new entity to EntitySet " + entitySet.Name).Tags(entitySet.Name).Parameters(new List<Parameter>().Parameter(entitySet.EntityType().Name, "body", "The entity to post", entitySet.EntityType())).Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse())
+                get = new Operation()
+                .Summary("Get EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_Get")
+                .Description("Returns the EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name)
+                .Parameters(new List<Parameter>().Parameter("$expand", "query", "Expands related entities inline.", "string")
+                .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string")
+                .Parameter("$select", "query", "Selects which properties to include in the response.", "string")
+                .Parameter("$orderby", "query", "Sorts the results.", "string")
+                .Parameter("$top", "query", "Returns only the first n results.", "integer", "int32")
+                .Parameter("$skip", "query", "Skips the first n results.", "integer", "int32")
+                .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean"))
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
+                post = new Operation()
+                .Summary("Post a new entity to EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_Post")
+                .Description("Post a new entity to EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name).Parameters(new List<Parameter>()
+                .Parameter(entitySet.EntityType().Name, "body", "The entity to post", entitySet.EntityType()))
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse())
             };
         }
 
@@ -61,9 +79,29 @@ namespace Swashbuckle.OData
 
             return new PathItem
             {
-                get = new Operation().Summary("Get entity from " + entitySet.Name + " by key.").OperationId(entitySet.Name + "_GetById").Description("Returns the entity with the key from " + entitySet.Name).Tags(entitySet.Name).Parameters(keyParameters.DeepClone().Parameter("$expand", "query", "Expands related entities inline.", "string")).Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string")).Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
-                patch = new Operation().Summary("Update entity in EntitySet " + entitySet.Name).OperationId(entitySet.Name + "_PatchById").Description("Update entity in EntitySet " + entitySet.Name).Tags(entitySet.Name).Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType().Name, "body", "The entity to patch", entitySet.EntityType())).Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
-                delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name).OperationId(entitySet.Name + "_DeleteById").Description("Delete entity in EntitySet " + entitySet.Name).Tags(entitySet.Name).Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string")).Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse())
+                get = new Operation()
+                .Summary("Get entity from " + entitySet.Name + " by key.")
+                .OperationId(entitySet.Name + "_GetById")
+                .Description("Returns the entity with the key from " + entitySet.Name)
+                .Tags(entitySet.Name).Parameters(keyParameters.DeepClone()
+                .Parameter("$expand", "query", "Expands related entities inline.", "string"))
+                .Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string"))
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
+
+                patch = new Operation()
+                .Summary("Update entity in EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_PatchById")
+                .Description("Update entity in EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name)
+                .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType().Name, "body", "The entity to patch", entitySet.EntityType()))
+                .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
+
+                delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_DeleteById")
+                .Description("Delete entity in EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name)
+                .Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string"))
+                .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse())
             };
         }
 
@@ -566,13 +604,14 @@ namespace Swashbuckle.OData
                 name = name,
                 @in = kind,
                 description = description,
-                type = type
+                type = type,
+                format = format
             });
 
-            if (!string.IsNullOrEmpty(format))
-            {
-                parameters.First().format = format;
-            }
+            //if (!string.IsNullOrEmpty(format))
+            //{
+            //    parameters.First().format = format;
+            //}
 
             return parameters;
         }

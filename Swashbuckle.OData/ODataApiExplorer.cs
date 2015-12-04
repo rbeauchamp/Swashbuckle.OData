@@ -102,7 +102,7 @@ namespace Swashbuckle.OData
 
                     if (action != null)
                     {
-                        return GetApiDescription(actionMappings[action].First(), httpMethod, potentialOperation, oDataRoute, odataPath);
+                        return GetApiDescription(actionMappings[action].First(), httpMethod, potentialOperation, oDataRoute, odataPath, potentialPathTemplate);
                     }
                 }
             }
@@ -110,11 +110,11 @@ namespace Swashbuckle.OData
             return null;
         }
 
-        private ApiDescription GetApiDescription(HttpActionDescriptor actionDescriptor, HttpMethod httpMethod, Operation operation, ODataRoute route, ODataPath path)
+        private ApiDescription GetApiDescription(HttpActionDescriptor actionDescriptor, HttpMethod httpMethod, Operation operation, ODataRoute route, ODataPath path, string potentialPathTemplate)
         {
             var apiDocumentation = GetApiDocumentation(actionDescriptor);
 
-            var parameterDescriptions = CreateParameterDescriptions(operation);
+            var parameterDescriptions = CreateParameterDescriptions(operation, actionDescriptor);
 
             // request formatters
             var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.Source == ApiParameterSource.FromBody);
@@ -137,7 +137,7 @@ namespace Swashbuckle.OData
             {
                 Documentation = apiDocumentation,
                 HttpMethod = httpMethod,
-                RelativePath = path.PathTemplate,
+                RelativePath = potentialPathTemplate.TrimStart('/'),
                 ActionDescriptor = actionDescriptor,
                 Route = route
             };
@@ -173,26 +173,49 @@ namespace Swashbuckle.OData
         private static string GetApiResponseDocumentation(HttpActionDescriptor actionDescriptor)
         {
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
-            if (documentationProvider != null)
+            return documentationProvider != null 
+                ? documentationProvider.GetResponseDocumentation(actionDescriptor) 
+                : null;
+        }
+
+        private List<ApiParameterDescription> CreateParameterDescriptions(Operation operation, HttpActionDescriptor actionDescriptor)
+        {
+            return operation.parameters.Select(parameter => GetParameterDescription(parameter, actionDescriptor)).ToList();
+        }
+
+        private ApiParameterDescription GetParameterDescription(Parameter parameter, HttpActionDescriptor actionDescriptor)
+        {
+            var httpParameterDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == parameter.name);
+            if (httpParameterDescriptor != null)
             {
-                return documentationProvider.GetResponseDocumentation(actionDescriptor);
+                return new ApiParameterDescription
+                {
+                    ParameterDescriptor = httpParameterDescriptor,
+                    Name = httpParameterDescriptor.Prefix ?? httpParameterDescriptor.ParameterName,
+                    Documentation = GetApiParameterDocumentation(httpParameterDescriptor),
+                    Source = parameter.@in == "path" || parameter.@in == "query" ? ApiParameterSource.FromUri : ApiParameterSource.FromBody
+                };
             }
-
-            return null;
+            return new ApiParameterDescription
+            {
+                ParameterDescriptor = new ODataParameterDescriptor(parameter.name, GetType(parameter))
+                {
+                    Configuration = _config,
+                    ActionDescriptor = actionDescriptor
+                },
+                Name = parameter.name,
+                Documentation = parameter.description,
+                Source = parameter.@in == "path" || parameter.@in == "query" ? ApiParameterSource.FromUri : ApiParameterSource.FromBody
+            };
         }
 
-        private IList<ApiParameterDescription> CreateParameterDescriptions(Operation operation)
+        private static string GetApiParameterDocumentation(HttpParameterDescriptor parameterDescriptor)
         {
-            return operation.parameters.Select(GetParameterDescription).ToList();
-        }
+            var documentationProvider = parameterDescriptor.Configuration.Services.GetDocumentationProvider();
 
-        private ApiParameterDescription GetParameterDescription(Parameter parameter)
-        {
-            //return new ApiParameterDescription
-            //{
-            //    ParameterDescriptor = new 
-            //};
-            throw new NotImplementedException();
+            return documentationProvider != null 
+                ? documentationProvider.GetDocumentation(parameterDescriptor) 
+                : null;
         }
 
         private static string GetApiDocumentation(HttpActionDescriptor actionDescriptor)
@@ -248,7 +271,7 @@ namespace Swashbuckle.OData
                         case "boolean":
                             return "true";
                         default:
-                            throw new Exception(string.Format("Could not generate sample value for query parameter type {0} and format {1}", type, format));
+                            throw new Exception(string.Format("Could not generate sample value for query parameter type {0} and format {1}", type, "null"));
                     }
                 case "int32":
                 case "int64":
@@ -265,6 +288,42 @@ namespace Swashbuckle.OData
                     return "2.0f";
                 default:
                     throw new Exception(string.Format("Could not generate sample value for query parameter type {0} and format {1}", type, format));
+            }
+        }
+
+        private static Type GetType(Parameter queryParameter)
+        {
+            var type = queryParameter.type;
+            var format = queryParameter.format;
+
+            switch (format)
+            {
+                case null:
+                    switch (type)
+                    {
+                        case "string":
+                            return typeof(string);
+                        case "boolean":
+                            return typeof(bool);
+                        default:
+                            throw new Exception(string.Format("Could not determine .NET type for parameter type {0} and format {1}", type, "null"));
+                    }
+                case "int32":
+                    return typeof(int);
+                case "int64":
+                    return typeof(long);
+                case "byte":
+                    return typeof(byte);
+                case "date":
+                    return typeof(DateTime);
+                case "date-time":
+                    return typeof(DateTimeOffset);
+                case "double":
+                    return typeof(double);
+                case "float":
+                    return typeof(float);
+                default:
+                    throw new Exception(string.Format("Could not determine .NET type for parameter type {0} and format {1}", type, format));
             }
         }
 
@@ -304,15 +363,7 @@ namespace Swashbuckle.OData
 
         public static string FindMatchingAction(ILookup<string, HttpActionDescriptor> actionMap, params string[] targetActionNames)
         {
-            foreach (var targetActionName in targetActionNames)
-            {
-                if (actionMap.Contains(targetActionName))
-                {
-                    return targetActionName;
-                }
-            }
-
-            return null;
+            return targetActionNames.FirstOrDefault(actionMap.Contains);
         }
 
         private static SwaggerDocument GetDefaultEdmSwaggerDocument(ODataRoute oDataRoute)
@@ -348,5 +399,18 @@ namespace Swashbuckle.OData
                 }
             }
         }
+    }
+
+    internal class ODataParameterDescriptor : HttpParameterDescriptor
+    {
+        public ODataParameterDescriptor(string parameterName, Type parameterType)
+        {
+            ParameterName = parameterName;
+            ParameterType = parameterType;
+        }
+
+        public override string ParameterName { get; }
+
+        public override Type ParameterType { get; }
     }
 }
