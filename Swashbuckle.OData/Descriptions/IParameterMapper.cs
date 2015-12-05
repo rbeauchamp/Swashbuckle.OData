@@ -26,7 +26,17 @@ namespace Swashbuckle.OData
             // Maybe the parameter is a key parameter, e.g., where Id in the URI path maps to a parameter named 'key'
             if (parameter.description.StartsWith("key:"))
             {
-                return actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == "key");
+                var parameterDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == "key");
+                if (parameterDescriptor != null)
+                {
+                    // Need to assign the correct name expected by OData
+                    return new ODataParameterDescriptor(parameter.name, parameterDescriptor.ParameterType, parameterDescriptor.IsOptional)
+                    {
+                        Configuration = actionDescriptor.ControllerDescriptor.Configuration,
+                        ActionDescriptor = actionDescriptor,
+                        ParameterBinderAttribute = parameterDescriptor.ParameterBinderAttribute
+                    };
+                }
             }
             return null;
         }
@@ -38,7 +48,17 @@ namespace Swashbuckle.OData
         {
             if (parameter.@in != "query" && index < actionDescriptor.GetParameters().Count)
             {
-                return actionDescriptor.GetParameters()[index];
+                var parameterDescriptor = actionDescriptor.GetParameters()[index];
+                if (parameterDescriptor != null)
+                {
+                    // Need to assign the correct name expected by OData
+                    return new ODataParameterDescriptor(parameter.name, parameterDescriptor.ParameterType, parameterDescriptor.IsOptional)
+                    {
+                        Configuration = actionDescriptor.ControllerDescriptor.Configuration,
+                        ActionDescriptor = actionDescriptor,
+                        ParameterBinderAttribute = parameterDescriptor.ParameterBinderAttribute
+                    };
+                }
             }
             return null;
         }

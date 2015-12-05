@@ -4,12 +4,11 @@ namespace SwashbuckleODataSample.Models
 {
     public class SwashbuckleODataContext : DbContext
     {
-        // You can add custom code to this file. Changes will not be overwritten.
-        // 
-        // If you want Entity Framework to drop and regenerate your database
-        // automatically whenever you change your model schema, please use data migrations.
-        // For more information refer to the documentation:
-        // http://msdn.microsoft.com/en-us/data/jj591621.aspx
+        static SwashbuckleODataContext()
+        {
+            Database.SetInitializer(new SwashbuckleODataInitializer());
+        }
+
 
         public SwashbuckleODataContext() : base("name=SwashbuckleODataContext")
         {
@@ -22,5 +21,27 @@ namespace SwashbuckleODataSample.Models
         public DbSet<Client> Clients { get; set; }
 
         public DbSet<Project> Projects { get; set; }
+    }
+
+    public class SwashbuckleODataInitializer : DropCreateDatabaseAlways<SwashbuckleODataContext>
+    {
+        protected override void Seed(SwashbuckleODataContext context)
+        {
+            var clientOne = new Client { Name = "ClientOne" };
+            context.Clients.Add(clientOne);
+            context.Clients.Add(new Client { Name = "ClientTwo" });
+
+            context.Projects.Add(new Project { ProjectName = "ProjectOne", Client = clientOne});
+            context.Projects.Add(new Project { ProjectName = "ProjectTwo", Client = clientOne});
+
+            var customerOne = new Customer { Name = "CustomerOne" };
+            context.Customers.Add(customerOne);
+            context.Customers.Add(new Customer { Name = "CustomerTwo" });
+
+            context.Orders.Add(new Order { OrderName = "OrderOne", Customer = customerOne });
+            context.Orders.Add(new Order { OrderName = "OrderTwo", Customer = customerOne });
+
+            base.Seed(context);
+        }
     }
 }

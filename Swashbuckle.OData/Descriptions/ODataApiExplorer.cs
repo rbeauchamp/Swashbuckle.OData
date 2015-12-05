@@ -9,6 +9,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
+using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Swashbuckle.Swagger;
@@ -137,14 +138,14 @@ namespace Swashbuckle.OData
             // request formatters
             var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == SwaggerApiParameterSource.Body);
             var supportedRequestBodyFormatters = bodyParameter != null 
-                ? actionDescriptor.Configuration.Formatters.Where(f => f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) 
+                ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter) 
                 : Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters
             var responseDescription = CreateResponseDescription(actionDescriptor);
             var returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
             var supportedResponseFormatters = returnType != null && returnType != typeof (void) 
-                ? actionDescriptor.Configuration.Formatters.Where(f => f.CanWriteType(returnType)) 
+                ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) 
                 : Enumerable.Empty<MediaTypeFormatter>();
 
             // Replacing the formatter tracers with formatters if tracers are present.
@@ -212,18 +213,6 @@ namespace Swashbuckle.OData
                 Documentation = GetApiParameterDocumentation(parameter, httpParameterDescriptor),
                 SwaggerSource = MapSource(parameter)
             };
-
-            //return new SwaggerApiParameterDescription
-            //{
-            //    ParameterDescriptor = new ODataParameterDescriptor(parameter.name, GetType(parameter), !parameter.required.Value)
-            //    {
-            //        Configuration = _config(),
-            //        ActionDescriptor = actionDescriptor
-            //    },
-            //    Name = parameter.name,
-            //    Documentation = parameter.description,
-            //    SwaggerSource = MapSource(parameter)
-            //};
         }
 
         private static SwaggerApiParameterSource MapSource(Parameter parameter)
@@ -241,7 +230,7 @@ namespace Swashbuckle.OData
                 case "body":
                     return SwaggerApiParameterSource.Body;
                 default:
-                    throw new ArgumentOutOfRangeException("parameter");
+                    throw new ArgumentOutOfRangeException(nameof(parameter), parameter, null);
             }
         }
 
@@ -419,5 +408,7 @@ namespace Swashbuckle.OData
         public override Type ParameterType { get; }
 
         public override bool IsOptional { get; }
+
+
     }
 }
