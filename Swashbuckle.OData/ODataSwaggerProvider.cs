@@ -107,31 +107,6 @@ namespace Swashbuckle.OData
 
             if (oDataRoute != null)
             {
-                //var oDataPathRouteConstraint = oDataRoute.Constraints.Values.SingleOrDefault(value => value is ODataPathRouteConstraint) as ODataPathRouteConstraint;
-
-                //var edmModel = oDataPathRouteConstraint.EdmModel;
-                //var routePrefix = oDataRoute.RoutePrefix;
-
-                //var oDataSwaggerConverter = new ODataSwaggerConverter(edmModel);
-
-                //var rootUri = new Uri(rootUrl);
-
-                //var basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : "/" + routePrefix;
-
-                //oDataSwaggerConverter.MetadataUri = new Uri(rootUrl.AppendPathSegments(basePath, "$metadata"));
-
-                //var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
-
-                //var edmSwaggerDocument = oDataSwaggerConverter.ConvertToSwaggerModel();
-                //edmSwaggerDocument.host = rootUri.Host + port;
-                //edmSwaggerDocument.basePath = basePath;
-                //edmSwaggerDocument.schemes = new[]
-                //{
-                //    rootUri.Scheme
-                //}.ToList();
-
-                //return edmSwaggerDocument;
-
                 var routePrefix = oDataRoute.RoutePrefix;
 
                 var rootUri = new Uri(rootUrl);
@@ -223,6 +198,7 @@ namespace Swashbuckle.OData
 
             var operation = new Operation
             {
+                summary = apiDescription.Documentation,
                 tags = new[] { _options.GroupingKeySelector(apiDescription) },
                 operationId = apiDescription.FriendlyId(),
                 produces = apiDescription.Produces().ToList(),

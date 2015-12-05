@@ -94,7 +94,8 @@ namespace Swashbuckle.OData
                 .Description("Update entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType().Name, "body", "The entity to patch", entitySet.EntityType()))
-                .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
+                .Responses(new Dictionary<string, Response>()
+                .Response("204", "Empty response").DefaultErrorResponse()),
 
                 put = new Operation()
                 .Summary("Replace entity in EntitySet " + entitySet.Name)

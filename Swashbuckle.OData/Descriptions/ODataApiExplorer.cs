@@ -138,7 +138,7 @@ namespace Swashbuckle.OData
             // request formatters
             var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == SwaggerApiParameterSource.Body);
             var supportedRequestBodyFormatters = bodyParameter != null 
-                ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter) 
+                ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) 
                 : Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters

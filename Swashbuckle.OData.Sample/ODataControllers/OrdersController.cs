@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Description;
 using System.Web.OData;
 using SwashbuckleODataSample.Models;
 
@@ -20,47 +21,15 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // GET: odata/Orders(5)
+        [ResponseType(typeof(Order))]
         [EnableQuery]
         public SingleResult<Order> GetOrder([FromODataUri] int key)
         {
             return SingleResult.Create(_db.Orders.Where(order => order.OrderId == key));
         }
 
-        // PUT: odata/Orders(5)
-        public async Task<IHttpActionResult> Put([FromODataUri] int key, Delta<Order> patch)
-        {
-            Validate(patch.GetEntity());
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var order = await _db.Orders.FindAsync(key);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            patch.Put(order);
-
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderExists(key))
-                {
-                    return NotFound();
-                }
-                throw;
-            }
-
-            return Updated(order);
-        }
-
         // POST: odata/Orders
+        [ResponseType(typeof(Order))]
         public async Task<IHttpActionResult> Post(Order order)
         {
             if (!ModelState.IsValid)

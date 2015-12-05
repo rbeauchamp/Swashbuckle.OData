@@ -31,7 +31,7 @@ namespace Swashbuckle.OData.Tests
         }
 
         [Test]
-        public async Task It_has_a_parameter_with_a_name_equal_to_the_path_name()
+        public async Task It_has_a_summary()
         {
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
@@ -43,10 +43,10 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Customers({Id})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/Customers", out pathItem);
                 pathItem.Should().NotBeNull();
-                pathItem.get.Should().NotBeNull();
-                pathItem.get.parameters.Should().Contain(parameter => parameter.name == "Id");
+                pathItem.post.Should().NotBeNull();
+                pathItem.post.summary.Should().NotBeNullOrWhiteSpace();
             }
         }
     }

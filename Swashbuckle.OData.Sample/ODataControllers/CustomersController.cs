@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Description;
 using System.Web.OData;
 using SwashbuckleODataSample.Models;
 
@@ -20,6 +21,7 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // GET: odata/Customers(5)
+        [ResponseType(typeof(Customer))]
         [EnableQuery]
         public SingleResult<Customer> GetCustomer([FromODataUri] int key)
         {
@@ -61,6 +63,7 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // POST: odata/Customers
+        [ResponseType(typeof(Customer))]
         public async Task<IHttpActionResult> Post(Customer customer)
         {
             if (!ModelState.IsValid)

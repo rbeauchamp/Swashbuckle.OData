@@ -28,5 +28,24 @@ namespace Swashbuckle.OData.Tests
                 pathItem.put.Should().NotBeNull();
             }
         }
+
+        [Test]
+        public async Task It_does_not_exist_if_not_in_the_controller()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Orders({OrderId})", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.put.Should().BeNull();
+            }
+        }
     }
 }
