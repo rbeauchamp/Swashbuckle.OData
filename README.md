@@ -13,7 +13,7 @@ Extends Swashbuckle with WebApi OData v4 support!
 
 Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
 
-Install the [Swashbuckle.OData](https://www.nuget.org/packages/Swashbuckle.OData/) NuGet package:
+Install the [Swashbuckle.OData NuGet package](https://www.nuget.org/packages/Swashbuckle.OData/):
 
     Install-Package Swashbuckle.OData
 
