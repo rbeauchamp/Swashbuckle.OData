@@ -19,9 +19,6 @@ Install the [Swashbuckle.OData NuGet package](https://www.nuget.org/packages/Swa
 
 In `SwaggerConfig` configure the custom provider:
 ```csharp
-// Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
-// alternative implementation for ISwaggerProvider with the CustomProvider option.
-//
 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
 ```
 
