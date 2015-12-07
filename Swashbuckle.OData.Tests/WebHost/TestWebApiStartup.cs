@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using System;
+using System.Web.Http;
 using Owin;
 using Swashbuckle.Application;
 using SwashbuckleODataSample;
@@ -10,15 +11,17 @@ namespace Swashbuckle.OData.Tests.WebHost
         public const string BaseAddress = "http://localhost:8347/";
 
         /// <summary>
-        /// This code configures Web API. 
+        /// This code configures Web API.
         /// The TestWebApiStartup class is specified as a type parameter in the WebApp.Start method.
         /// </summary>
         /// <param name="appBuilder">The application builder.</param>
-        public void Configuration(IAppBuilder appBuilder)
+        /// <param name="unitTestConfigs">Additional unit test configurations.</param>
+        public void Configuration(IAppBuilder appBuilder, Action<SwaggerDocsConfig> unitTestConfigs = null)
         {
             var httpConfiguration = new HttpConfiguration();
 
             WebApiConfig.Register(httpConfiguration);
+            FormatterConfig.Register(httpConfiguration);
 
             httpConfiguration
                 .EnableSwagger(c =>
@@ -33,12 +36,12 @@ namespace Swashbuckle.OData.Tests.WebHost
                     // alternative implementation for ISwaggerProvider with the CustomProvider option.
                     //
                     c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, () => httpConfiguration));
+
+                    unitTestConfigs?.Invoke(c);
                 })
                 .EnableSwaggerUi();
 
             appBuilder.UseWebApi(httpConfiguration);
-
-            httpConfiguration.EnsureInitialized();
         }
     }
 }

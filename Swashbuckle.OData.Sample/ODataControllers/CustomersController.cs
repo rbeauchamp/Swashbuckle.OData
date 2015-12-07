@@ -3,31 +3,34 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Description;
 using System.Web.OData;
+using System.Web.OData.Results;
 using SwashbuckleODataSample.Models;
 
 namespace SwashbuckleODataSample.Controllers
 {
-    public class OrdersController : ODataController
+    public class CustomersController : ODataController
     {
         private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
-        // GET: odata/Orders
+        // GET: odata/Customers
         [EnableQuery]
-        public IQueryable<Order> GetOrders()
+        public IQueryable<Customer> GetCustomers()
         {
-            return _db.Orders;
+            return _db.Customers;
         }
 
-        // GET: odata/Orders(5)
+        // GET: odata/Customers(5)
         [EnableQuery]
-        public SingleResult<Order> GetOrder([FromODataUri] int key)
+        public SingleResult<Customer> GetCustomer([FromODataUri] int key)
         {
-            return SingleResult.Create(_db.Orders.Where(order => order.OrderId == key));
+            return SingleResult.Create(_db.Customers.Where(customer => customer.Id == key));
         }
 
-        // PUT: odata/Orders(5)
-        public async Task<IHttpActionResult> Put([FromODataUri] int key, Delta<Order> patch)
+        // PUT: odata/Customers(5)
+        [ResponseType(typeof(void))]
+        public async Task<IHttpActionResult> Put([FromODataUri] int key, Delta<Customer> patch)
         {
             Validate(patch.GetEntity());
 
@@ -36,13 +39,13 @@ namespace SwashbuckleODataSample.Controllers
                 return BadRequest(ModelState);
             }
 
-            var order = await _db.Orders.FindAsync(key);
-            if (order == null)
+            var customer = await _db.Customers.FindAsync(key);
+            if (customer == null)
             {
                 return NotFound();
             }
 
-            patch.Put(order);
+            patch.Put(customer);
 
             try
             {
@@ -50,33 +53,35 @@ namespace SwashbuckleODataSample.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!OrderExists(key))
+                if (!CustomerExists(key))
                 {
                     return NotFound();
                 }
                 throw;
             }
 
-            return Updated(order);
+            return Updated(customer);
         }
 
-        // POST: odata/Orders
-        public async Task<IHttpActionResult> Post(Order order)
+        // POST: odata/Customers
+        [ResponseType(typeof(Customer))]
+        public async Task<IHttpActionResult> Post(Customer customer)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _db.Orders.Add(order);
+            _db.Customers.Add(customer);
             await _db.SaveChangesAsync();
 
-            return Created(order);
+            return Created(customer);
         }
 
-        // PATCH: odata/Orders(5)
+        // PATCH: odata/Customers(5)
+        [ResponseType(typeof(void))]
         [AcceptVerbs("PATCH", "MERGE")]
-        public async Task<IHttpActionResult> Patch([FromODataUri] int key, Delta<Order> patch)
+        public async Task<IHttpActionResult> Patch([FromODataUri] int key, Delta<Customer> patch)
         {
             Validate(patch.GetEntity());
 
@@ -85,13 +90,13 @@ namespace SwashbuckleODataSample.Controllers
                 return BadRequest(ModelState);
             }
 
-            var order = await _db.Orders.FindAsync(key);
-            if (order == null)
+            var customer = await _db.Customers.FindAsync(key);
+            if (customer == null)
             {
                 return NotFound();
             }
 
-            patch.Patch(order);
+            patch.Patch(customer);
 
             try
             {
@@ -99,37 +104,38 @@ namespace SwashbuckleODataSample.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!OrderExists(key))
+                if (!CustomerExists(key))
                 {
                     return NotFound();
                 }
                 throw;
             }
 
-            return Updated(order);
+            return Updated(customer);
         }
 
-        // DELETE: odata/Orders(5)
+        // DELETE: odata/Customers(5)
+        [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Delete([FromODataUri] int key)
         {
-            var order = await _db.Orders.FindAsync(key);
-            if (order == null)
+            var customer = await _db.Customers.FindAsync(key);
+            if (customer == null)
             {
                 return NotFound();
             }
 
-            _db.Orders.Remove(order);
+            _db.Customers.Remove(customer);
             await _db.SaveChangesAsync();
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // GET: odata/Orders(5)/Customer
+        // GET: odata/Customers(5)/Orders
         [EnableQuery]
-        public SingleResult<Customer> GetCustomer([FromODataUri] int key)
+        public IQueryable<Order> GetOrders([FromODataUri] int key)
         {
-            return SingleResult.Create(_db.Orders.Where(m => m.OrderId == key)
-                .Select(m => m.Customer));
+            return _db.Customers.Where(m => m.Id == key)
+                .SelectMany(m => m.Orders);
         }
 
         protected override void Dispose(bool disposing)
@@ -141,9 +147,9 @@ namespace SwashbuckleODataSample.Controllers
             base.Dispose(disposing);
         }
 
-        private bool OrderExists(int key)
+        private bool CustomerExists(int key)
         {
-            return _db.Orders.Count(e => e.OrderId == key) > 0;
+            return _db.Customers.Count(e => e.Id == key) > 0;
         }
     }
 }

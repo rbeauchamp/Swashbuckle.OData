@@ -8,6 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
@@ -34,29 +35,25 @@ namespace Swashbuckle.OData
             return new PathItem
             {
                 get = new Operation()
-                    .Summary("Get EntitySet " + entitySet.Name)
-                    .OperationId(entitySet.Name + "_Get")
-                    .Description("Returns the EntitySet " + entitySet.Name)
-                    .Tags(entitySet.Name)
-                    .Parameters(new List<Parameter>()
-                        .Parameter("$expand", "query", "Expands related entities inline.", "string")
-                        .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string")
-                        .Parameter("$select", "query", "Selects which properties to include in the response.", "string")
-                        .Parameter("$orderby", "query", "Sorts the results.", "string")
-                        .Parameter("$top", "query", "Returns only the first n results.", "integer")
-                        .Parameter("$skip", "query", "Skips the first n results.", "integer")
-                        .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean"))
-                    .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType())
-                        .DefaultErrorResponse()),
+                .Summary("Get EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_Get")
+                .Description("Returns the EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name)
+                .Parameters(new List<Parameter>().Parameter("$expand", "query", "Expands related entities inline.", "string", false)
+                .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string", false)
+                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false)
+                .Parameter("$orderby", "query", "Sorts the results.", "string", false)
+                .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
+                .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
+                .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean", false))
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
                 post = new Operation()
-                    .Summary("Post a new entity to EntitySet " + entitySet.Name)
-                    .OperationId(entitySet.Name + "_Post")
-                    .Description("Post a new entity to EntitySet " + entitySet.Name)
-                    .Tags(entitySet.Name)
-                    .Parameters(new List<Parameter>().Parameter(entitySet.EntityType()
-                        .Name, "body", "The entity to post", entitySet.EntityType()))
-                    .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType())
-                        .DefaultErrorResponse())
+                .Summary("Post a new entity to EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_Post")
+                .Description("Post a new entity to EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name).Parameters(new List<Parameter>()
+                .Parameter(entitySet.EntityType().Name, "body", "The entity to post", entitySet.EntityType()))
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse())
             };
         }
 
@@ -74,43 +71,47 @@ namespace Swashbuckle.OData
             }
 
             var keyParameters = new List<Parameter>();
-            foreach (var key in entitySet.EntityType()
-                .Key())
+            foreach (var key in entitySet.EntityType().Key())
             {
                 string format;
                 var type = GetPrimitiveTypeAndFormat(key.Type.Definition as IEdmPrimitiveType, out format);
-                keyParameters.Parameter(key.Name, "path", "key: " + key.Name, type, format);
+                keyParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
             }
 
             return new PathItem
             {
                 get = new Operation()
-                    .Summary("Get entity from " + entitySet.Name + " by key.")
-                    .OperationId(entitySet.Name + "_GetById")
-                    .Description("Returns the entity with the key from " + entitySet.Name)
-                    .Tags(entitySet.Name)
-                    .Parameters(keyParameters.DeepClone().Parameter("$expand", "query", "Expands related entities inline.", "string"))
-                    .Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string"))
-                    .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType())
-                        .DefaultErrorResponse()),
+                .Summary("Get entity from " + entitySet.Name + " by key.")
+                .OperationId(entitySet.Name + "_GetById")
+                .Description("Returns the entity with the key from " + entitySet.Name)
+                .Tags(entitySet.Name).Parameters(keyParameters.DeepClone()
+                .Parameter("$expand", "query", "Expands related entities inline.", "string", false))
+                .Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
+
                 patch = new Operation()
-                    .Summary("Update entity in EntitySet " + entitySet.Name)
-                    .OperationId(entitySet.Name + "_PatchById")
-                    .Description("Update entity in EntitySet " + entitySet.Name)
-                    .Tags(entitySet.Name)
-                    .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType()
-                        .Name, "body", "The entity to patch", entitySet.EntityType()))
-                    .Responses(new Dictionary<string, Response>().Response("204", "Empty response")
-                        .DefaultErrorResponse()),
-                delete = new Operation()
-                    .Summary("Delete entity in EntitySet " + entitySet.Name)
-                    .OperationId(entitySet.Name + "_DeleteById")
-                    .Description("Delete entity in EntitySet " + entitySet.Name)
-                    .Tags(entitySet.Name)
-                    .Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string"))
-                    .Responses(new Dictionary<string, Response>()
-                        .Response("204", "Empty response")
-                        .DefaultErrorResponse())
+                .Summary("Update entity in EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_PatchById")
+                .Description("Update entity in EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name)
+                .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType().Name, "body", "The entity to patch", entitySet.EntityType()))
+                .Responses(new Dictionary<string, Response>()
+                .Response("204", "Empty response").DefaultErrorResponse()),
+
+                put = new Operation()
+                .Summary("Replace entity in EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_PutById")
+                .Description("Replace entity in EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name)
+                .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType().Name, "body", "The entity to put", entitySet.EntityType()))
+                .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
+
+                delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
+                .OperationId(entitySet.Name + "_DeleteById")
+                .Description("Delete entity in EntitySet " + entitySet.Name)
+                .Tags(entitySet.Name)
+                .Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string", false))
+                .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse())
             };
         }
 
@@ -143,10 +144,7 @@ namespace Swashbuckle.OData
                 swaggerResponses.Response("200", "Response from " + operationImport.Name, operationImport.Operation.ReturnType.Definition);
             }
 
-            var swaggerOperationImport = new Operation().Summary("Call operation import  " + operationImport.Name)
-                .OperationId(operationImport.Name + (isFunctionImport ? "_FunctionImportGet" : "_ActionImportPost"))
-                .Description("Call operation import  " + operationImport.Name)
-                .Tags(isFunctionImport ? "Function Import" : "Action Import");
+            var swaggerOperationImport = new Operation().Summary("Call operation import  " + operationImport.Name).OperationId(operationImport.Name + (isFunctionImport ? "_FunctionImportGet" : "_ActionImportPost")).Description("Call operation import  " + operationImport.Name).Tags(isFunctionImport ? "Function Import" : "Action Import");
 
             if (swaggerParameters.Count > 0)
             {
@@ -154,15 +152,13 @@ namespace Swashbuckle.OData
             }
             swaggerOperationImport.Responses(swaggerResponses.DefaultErrorResponse());
 
-            return isFunctionImport 
-                ? new PathItem
-                {
-                    get = swaggerOperationImport
-                } 
-                : new PathItem
-                {
-                    post = swaggerOperationImport
-                };
+            return isFunctionImport ? new PathItem
+            {
+                get = swaggerOperationImport
+            } : new PathItem
+            {
+                post = swaggerOperationImport
+            };
         }
 
         /// <summary>
@@ -199,12 +195,7 @@ namespace Swashbuckle.OData
                 swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.Definition);
             }
 
-            var swaggerOperation = new Operation()
-                .Summary("Call operation  " + operation.Name)
-                .OperationId(operation.Name + (isFunction ? "_FunctionGet" : "_ActionPost"))
-                .Description("Call operation  " + operation.Name)
-                .OperationId(operation.Name + (isFunction ? "_FunctionGetById" : "_ActionPostById"))
-                .Tags(entitySet.Name, isFunction ? "Function" : "Action");
+            var swaggerOperation = new Operation().Summary("Call operation  " + operation.Name).OperationId(operation.Name + (isFunction ? "_FunctionGet" : "_ActionPost")).Description("Call operation  " + operation.Name).OperationId(operation.Name + (isFunction ? "_FunctionGetById" : "_ActionPostById")).Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
             if (swaggerParameters.Count > 0)
             {
@@ -212,15 +203,13 @@ namespace Swashbuckle.OData
             }
             swaggerOperation.Responses(swaggerResponses.DefaultErrorResponse());
 
-            return isFunction
-                ? new PathItem
-                {
-                    get = swaggerOperation
-                }
-                : new PathItem
-                {
-                    post = swaggerOperation
-                };
+            return isFunction ? new PathItem
+            {
+                get = swaggerOperation
+            } : new PathItem
+            {
+                post = swaggerOperation
+            };
         }
 
         /// <summary>
@@ -240,12 +229,11 @@ namespace Swashbuckle.OData
             var isFunction = operation is IEdmFunction;
             var swaggerParameters = new List<Parameter>();
 
-            foreach (var key in entitySet.EntityType()
-                .Key())
+            foreach (var key in entitySet.EntityType().Key())
             {
                 string format;
                 var type = GetPrimitiveTypeAndFormat(key.Type.Definition as IEdmPrimitiveType, out format);
-                swaggerParameters.Parameter(key.Name, "path", "key: " + key.Name, type, format);
+                swaggerParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
             }
 
             foreach (var parameter in operation.Parameters.Skip(1))
@@ -263,9 +251,7 @@ namespace Swashbuckle.OData
                 swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.Definition);
             }
 
-            var swaggerOperation = new Operation().Summary("Call operation  " + operation.Name)
-                .Description("Call operation  " + operation.Name)
-                .Tags(entitySet.Name, isFunction ? "Function" : "Action");
+            var swaggerOperation = new Operation().Summary("Call operation  " + operation.Name).Description("Call operation  " + operation.Name).Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
             if (swaggerParameters.Count > 0)
             {
@@ -273,15 +259,13 @@ namespace Swashbuckle.OData
             }
             swaggerOperation.Responses(swaggerResponses.DefaultErrorResponse());
 
-            return isFunction
-                ? new PathItem
-                {
-                    get = swaggerOperation
-                }
-                : new PathItem
-                {
-                    post = swaggerOperation
-                };
+            return isFunction ? new PathItem
+            {
+                get = swaggerOperation
+            } : new PathItem
+            {
+                post = swaggerOperation
+            };
         }
 
         /// <summary>
@@ -298,8 +282,7 @@ namespace Swashbuckle.OData
             }
 
             var singleEntityPath = "/" + entitySet.Name + "(";
-            foreach (var key in entitySet.EntityType()
-                .Key())
+            foreach (var key in entitySet.EntityType().Key())
             {
                 if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
                 {
@@ -422,11 +405,11 @@ namespace Swashbuckle.OData
         }
 
         /// <summary>
-        /// Create the Swagger definition for the structure Edm type.
+        ///     Create the Swagger definition for the structure Edm type.
         /// </summary>
         /// <param name="edmType">The structure Edm type.</param>
         /// <returns>
-        /// The <see cref="Schema" /> represents the related structure Edm type.
+        ///     The <see cref="Schema" /> represents the related structure Edm type.
         /// </returns>
         public static Schema CreateSwaggerDefinitionForStructureType(IEdmStructuredType edmType)
         {
@@ -624,20 +607,22 @@ namespace Swashbuckle.OData
             return obj;
         }
 
-        private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, string type, string format = null)
+        private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, string type, bool required, string format = null)
         {
             parameters.Add(new Parameter
             {
                 name = name,
                 @in = kind,
                 description = description,
-                type = type
+                type = type,
+                format = format,
+                required = required
             });
 
-            if (!string.IsNullOrEmpty(format))
-            {
-                parameters.First().format = format;
-            }
+            //if (!string.IsNullOrEmpty(format))
+            //{
+            //    parameters.First().format = format;
+            //}
 
             return parameters;
         }
@@ -696,18 +681,24 @@ namespace Swashbuckle.OData
             return obj;
         }
 
-    /// <summary>
-    /// Perform a deep Copy of the object, using Json as a serialisation method.
-    /// </summary>
-    /// <typeparam name="T">The type of object being copied.</typeparam>
-    /// <param name="source">The object instance to copy.</param>
-    /// <returns>The copied object.</returns>
-    public static T DeepClone<T>(this T source)
+        /// <summary>
+        ///     Perform a deep Copy of the object, using Json as a serialisation method.
+        /// </summary>
+        /// <typeparam name="T">The type of object being copied.</typeparam>
+        /// <param name="source">The object instance to copy.</param>
+        /// <returns>The copied object.</returns>
+        public static T DeepClone<T>(this T source)
         {
+            var serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                MetadataPropertyHandling = MetadataPropertyHandling.Ignore
+            };
             // Don't serialize a null object, simply return the default for that object
-            return ReferenceEquals(source, null) 
-                ? default(T) 
-                : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source));
+            return ReferenceEquals(source, null) ? default(T) : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, serializerSettings), serializerSettings);
         }
     }
 }

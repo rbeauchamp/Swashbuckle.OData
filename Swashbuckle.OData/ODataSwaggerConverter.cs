@@ -137,10 +137,19 @@ namespace Swashbuckle.OData
                     version = "0.1.0"
                 },
                 host = Host,
-                schemes = new List<string> { "http" },
+                schemes = new List<string>
+                {
+                    "http"
+                },
                 basePath = BasePath,
-                consumes = new List<string> { "application/json" },
-                produces = new List<string> { "application/json" }
+                consumes = new List<string>
+                {
+                    "application/json"
+                },
+                produces = new List<string>
+                {
+                    "application/json"
+                }
             };
         }
 

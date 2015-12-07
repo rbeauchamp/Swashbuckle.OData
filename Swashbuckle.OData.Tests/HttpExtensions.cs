@@ -5,6 +5,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -46,13 +48,24 @@ namespace Swashbuckle.OData.Tests
         /// <param name="client">The client used to make the request.</param>
         /// <param name="requestUri">The Uri the request is sent to.</param><exception cref="T:System.ArgumentNullException">The <paramref name="requestUri"/> was null.</exception>
         /// <returns>The content deserialized as type T</returns>
-        public static async Task<T> GetAsync<T>(this HttpClient client, string requestUri)
+        public static async Task<T> GetJsonAsync<T>(this HttpClient client, string requestUri)
         {
             var response = await client.GetAsync(requestUri);
 
             await response.ValidateSuccessAsync();
 
-            return await response.Content.ReadAsAsync<T>();
+            var serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                MetadataPropertyHandling = MetadataPropertyHandling.Ignore
+            };
+
+            var responseJsonString = await response.Content.ReadAsStringAsync();
+
+            return JsonConvert.DeserializeObject<T>(responseJsonString, serializerSettings);
         }
 
         #endregion

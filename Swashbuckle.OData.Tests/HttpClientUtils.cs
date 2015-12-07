@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Flurl;
 using Swashbuckle.OData.Tests.WebHost;
 using SwashbuckleODataSample;
@@ -10,11 +11,16 @@ namespace Swashbuckle.OData.Tests
     {
         public static HttpClient GetHttpClient()
         {
-            return new HttpClient
+            var client =  new HttpClient
             {
                 BaseAddress = new Uri(TestWebApiStartup.BaseAddress.AppendPathSegment(WebApiConfig.ODataRoutePrefix)),
                 Timeout = TimeSpan.FromMilliseconds(5 * 60 * 1000)
             };
+
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ContentType.ApplicationJson));
+
+            return client;
         }
     }
 }

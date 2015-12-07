@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
@@ -9,10 +8,10 @@ using Swashbuckle.Swagger;
 namespace Swashbuckle.OData.Tests
 {
     [TestFixture]
-    public class GetQueryParametersTests
+    public class PostTests
     {
         [Test]
-        public async Task It_includes_the_filter_parameter()
+        public async Task It_has_a_summary()
         {
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
@@ -20,17 +19,14 @@ namespace Swashbuckle.OData.Tests
                 var httpClient = HttpClientUtils.GetHttpClient();
 
                 // Act
-                var swaggerDocument = await httpClient.GetAsync<SwaggerDocument>("swagger/docs/v1");
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
 
                 // Assert
                 PathItem pathItem;
                 swaggerDocument.paths.TryGetValue("/Customers", out pathItem);
                 pathItem.Should().NotBeNull();
-                var filterParameter = pathItem.get.parameters.SingleOrDefault(parameter => parameter.name == "$filter");
-                filterParameter.Should().NotBeNull();
-                filterParameter.description.Should().NotBeNullOrWhiteSpace();
-                filterParameter.type.ShouldBeEquivalentTo("string");
-                filterParameter.@in.ShouldBeEquivalentTo("query");
+                pathItem.post.Should().NotBeNull();
+                pathItem.post.summary.Should().NotBeNullOrWhiteSpace();
             }
         }
     }

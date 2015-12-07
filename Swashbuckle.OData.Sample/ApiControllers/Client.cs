@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace Swashbuckle.OData.Tests
+namespace SwashbuckleODataSample.Models
 {
-    public class Customer
+    public class Client
     {
         public int Id { get; set; }
 
         public string Name { get; set; }
 
-        public IList<Order> Orders { get; set; }
+        public IList<Project> Projects { get; set; }
     }
 }

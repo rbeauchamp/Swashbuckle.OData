@@ -1,4 +1,5 @@
 using System.Web.Http;
+using System.Web.Http.Description;
 using Swashbuckle.Application;
 using Swashbuckle.OData;
 using SwashbuckleODataSample;
