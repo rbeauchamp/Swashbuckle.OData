@@ -7,8 +7,6 @@ Swashbuckle.OData
 
 Extends Swashbuckle with WebApi OData v4 support!
 
-Implements a custom Swagger Provider that converts an Entity Data Model to a Swagger Document.
-
 ### <a href="http://swashbuckleodata.azurewebsites.net/swagger/" target="_blank">Try it out!</a> ###
 
 ## Getting Started ##

@@ -112,7 +112,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplyDocumentVendorExtensions.cs" />
     <Compile Include="ContentType.cs" />
+    <Compile Include="Fixtures\ODataSwaggerProviderTests.cs" />
     <Compile Include="Fixtures\PostTests.cs" />
     <Compile Include="Fixtures\PatchTests.cs" />
     <Compile Include="Fixtures\PutTests.cs" />
