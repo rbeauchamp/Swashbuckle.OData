@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.OData;
+using System.Web.OData.Results;
 using SwashbuckleODataSample.Models;
 
 namespace SwashbuckleODataSample.Controllers
@@ -21,7 +22,6 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // GET: odata/Customers(5)
-        [ResponseType(typeof(Customer))]
         [EnableQuery]
         public SingleResult<Customer> GetCustomer([FromODataUri] int key)
         {
@@ -29,6 +29,7 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // PUT: odata/Customers(5)
+        [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Put([FromODataUri] int key, Delta<Customer> patch)
         {
             Validate(patch.GetEntity());
@@ -78,6 +79,7 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // PATCH: odata/Customers(5)
+        [ResponseType(typeof(void))]
         [AcceptVerbs("PATCH", "MERGE")]
         public async Task<IHttpActionResult> Patch([FromODataUri] int key, Delta<Customer> patch)
         {
@@ -113,6 +115,7 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // DELETE: odata/Customers(5)
+        [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Delete([FromODataUri] int key)
         {
             var customer = await _db.Customers.FindAsync(key);

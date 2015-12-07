@@ -192,9 +192,7 @@ namespace Swashbuckle.OData
         private static string GetApiResponseDocumentation(HttpActionDescriptor actionDescriptor)
         {
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
-            return documentationProvider != null 
-                ? documentationProvider.GetResponseDocumentation(actionDescriptor) 
-                : null;
+            return documentationProvider?.GetResponseDocumentation(actionDescriptor);
         }
 
         private List<SwaggerApiParameterDescription> CreateParameterDescriptions(Operation operation, HttpActionDescriptor actionDescriptor)
@@ -208,7 +206,7 @@ namespace Swashbuckle.OData
 
             return new SwaggerApiParameterDescription
             {
-                ParameterDescriptor = GetHttpParameterDescriptor(parameter, index, actionDescriptor),
+                ParameterDescriptor = httpParameterDescriptor,
                 Name = httpParameterDescriptor.Prefix ?? httpParameterDescriptor.ParameterName,
                 Documentation = GetApiParameterDocumentation(parameter, httpParameterDescriptor),
                 SwaggerSource = MapSource(parameter)

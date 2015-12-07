@@ -123,6 +123,7 @@
     <Compile Include="ApiControllers\ClientsController.cs" />
     <Compile Include="ApiControllers\Project.cs" />
     <Compile Include="ApiControllers\ProjectsController.cs" />
+    <Compile Include="App_Start\FormatterConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="ODataControllers\Customer.cs" />

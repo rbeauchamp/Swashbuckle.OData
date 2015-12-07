@@ -19,6 +19,7 @@ namespace Swashbuckle.OData.Tests.WebHost
             var httpConfiguration = new HttpConfiguration();
 
             WebApiConfig.Register(httpConfiguration);
+            FormatterConfig.Register(httpConfiguration);
 
             httpConfiguration
                 .EnableSwagger(c =>
@@ -37,8 +38,6 @@ namespace Swashbuckle.OData.Tests.WebHost
                 .EnableSwaggerUi();
 
             appBuilder.UseWebApi(httpConfiguration);
-
-            httpConfiguration.EnsureInitialized();
         }
     }
 }

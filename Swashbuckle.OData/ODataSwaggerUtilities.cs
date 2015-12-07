@@ -8,6 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
@@ -688,8 +689,16 @@ namespace Swashbuckle.OData
         /// <returns>The copied object.</returns>
         public static T DeepClone<T>(this T source)
         {
+            var serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                MetadataPropertyHandling = MetadataPropertyHandling.Ignore
+            };
             // Don't serialize a null object, simply return the default for that object
-            return ReferenceEquals(source, null) ? default(T) : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source));
+            return ReferenceEquals(source, null) ? default(T) : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, serializerSettings), serializerSettings);
         }
     }
 }

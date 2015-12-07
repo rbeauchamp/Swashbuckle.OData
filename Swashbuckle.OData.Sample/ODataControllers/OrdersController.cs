@@ -21,7 +21,6 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // GET: odata/Orders(5)
-        [ResponseType(typeof(Order))]
         [EnableQuery]
         public SingleResult<Order> GetOrder([FromODataUri] int key)
         {
@@ -44,6 +43,7 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // PATCH: odata/Orders(5)
+        [ResponseType(typeof(void))]
         [AcceptVerbs("PATCH", "MERGE")]
         public async Task<IHttpActionResult> Patch([FromODataUri] int key, Delta<Order> patch)
         {
@@ -79,6 +79,7 @@ namespace SwashbuckleODataSample.Controllers
         }
 
         // DELETE: odata/Orders(5)
+        [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Delete([FromODataUri] int key)
         {
             var order = await _db.Orders.FindAsync(key);

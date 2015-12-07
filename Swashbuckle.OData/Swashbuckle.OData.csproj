@@ -180,6 +180,7 @@
     <Compile Include="ODataSwaggerUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionExtensions.cs" />
+    <Compile Include="SchemaRegistryExtensions.cs" />
     <Compile Include="SwaggerApiParameterDescription.cs" />
     <Compile Include="SwaggerApiParameterSource.cs" />
   </ItemGroup>

@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Web.OData;
 using System.Web.OData.Routing;
 using Swashbuckle.Application;
 using Swashbuckle.Swagger;
@@ -82,15 +83,7 @@ namespace Swashbuckle.OData
 
         public SwaggerDocument GetSwagger(string rootUrl, string apiVersion)
         {
-            var schemaRegistry = new SchemaRegistry(
-                _httpConfigurationProvider().SerializerSettingsOrDefault(),
-                _options.CustomSchemaMappings,
-                _options.SchemaFilters,
-                _options.ModelFilters,
-                _options.IgnoreObsoleteProperties,
-                _options.SchemaIdSelector,
-                _options.DescribeAllEnumsAsStrings,
-                _options.DescribeStringEnumsInCamelCase);
+            var schemaRegistry = GetSchemaRegistry();
 
             Info info;
             _apiVersions.TryGetValue(apiVersion, out info);
@@ -117,7 +110,7 @@ namespace Swashbuckle.OData
                     info = info,
                     host = rootUri.Host + port,
                     basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : "/" + routePrefix,
-                    schemes = _options.Schemes != null ? _options.Schemes.ToList() : new[] { rootUri.Scheme }.ToList(),
+                    schemes = _options.Schemes?.ToList() ?? new[] { rootUri.Scheme }.ToList(),
                     paths = paths,
                     definitions = schemaRegistry.Definitions,
                     securityDefinitions = _options.SecurityDefinitions
@@ -132,6 +125,18 @@ namespace Swashbuckle.OData
             }
 
             return _defaultProvider.GetSwagger(rootUrl, apiVersion);
+        }
+
+        private SchemaRegistry GetSchemaRegistry()
+        {
+            return new SchemaRegistry(
+                _httpConfigurationProvider().SerializerSettingsOrDefault(), 
+                _options.CustomSchemaMappings, _options.SchemaFilters, 
+                _options.ModelFilters, 
+                _options.IgnoreObsoleteProperties, 
+                _options.SchemaIdSelector, 
+                _options.DescribeAllEnumsAsStrings, 
+                _options.DescribeStringEnumsInCamelCase);
         }
 
         private PathItem CreatePathItem(IEnumerable<ApiDescription> apiDescriptions, SchemaRegistry schemaRegistry)
@@ -194,7 +199,7 @@ namespace Swashbuckle.OData
             if (responseType == null || responseType == typeof(void))
                 responses.Add("204", new Response { description = "No Content" });
             else
-                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegister(responseType) });
+                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegisterODataType(responseType) });
 
             var operation = new Operation
             {
@@ -239,7 +244,7 @@ namespace Swashbuckle.OData
             parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
             parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
 
-            var schema = schemaRegistry.GetOrRegister(paramDesc.ParameterDescriptor.ParameterType);
+            var schema = schemaRegistry.GetOrRegisterODataType(paramDesc.ParameterDescriptor.ParameterType);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else

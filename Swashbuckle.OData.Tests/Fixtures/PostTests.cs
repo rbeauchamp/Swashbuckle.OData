@@ -19,7 +19,7 @@ namespace Swashbuckle.OData.Tests
                 var httpClient = HttpClientUtils.GetHttpClient();
 
                 // Act
-                var swaggerDocument = await httpClient.GetAsync<SwaggerDocument>("swagger/docs/v1");
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
 
                 // Assert
                 PathItem pathItem;
