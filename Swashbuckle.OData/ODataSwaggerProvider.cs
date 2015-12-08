@@ -4,7 +4,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
-using System.Web.OData;
 using System.Web.OData.Routing;
 using Swashbuckle.Application;
 using Swashbuckle.Swagger;
@@ -61,10 +60,12 @@ namespace Swashbuckle.OData
         /// <returns></returns>
         private static IDictionary<string, Info> GetApiVersions(ISwaggerProvider defaultProvider)
         {
-            var swaggerGenerator = defaultProvider as SwaggerGenerator;
-            Contract.Assert(swaggerGenerator != null, "The ODataSwaggerProvider currently requires a defaultProvider of type SwaggerGenerator");
+            Contract.Requires(defaultProvider is SwaggerGenerator, "The ODataSwaggerProvider currently requires a defaultProvider of type SwaggerGenerator");
+
+            var swaggerGenerator = (SwaggerGenerator)defaultProvider;
+
             var apiVersions = typeof(SwaggerGenerator).GetInstanceField(swaggerGenerator, "_apiVersions") as IDictionary<string, Info>;
-            Contract.Assert(apiVersions != null, "The ODataSwaggerProvider currently requires that the SwaggerGenerator has a non-null field '_apiVersions' of type SwaggerGeneratorOptions");
+            Contract.Assume(apiVersions != null, "The ODataSwaggerProvider currently requires that the SwaggerGenerator has a non-null field '_apiVersions' of type SwaggerGeneratorOptions");
             return apiVersions;
         }
 
@@ -74,10 +75,12 @@ namespace Swashbuckle.OData
         /// <param name="defaultProvider">The default provider.</param>
         private static SwaggerGeneratorOptions GetSwaggerGeneratorOptions(ISwaggerProvider defaultProvider)
         {
-            var swaggerGenerator = defaultProvider as SwaggerGenerator;
-            Contract.Assert(swaggerGenerator != null, "The ODataSwaggerProvider currently requires a defaultProvider of type SwaggerGenerator");
+            Contract.Requires(defaultProvider is SwaggerGenerator, "The ODataSwaggerProvider currently requires a defaultProvider of type SwaggerGenerator");
+
+            var swaggerGenerator = (SwaggerGenerator) defaultProvider;
+
             var options = typeof (SwaggerGenerator).GetInstanceField(swaggerGenerator, "_options") as SwaggerGeneratorOptions;
-            Contract.Assert(options != null, "The ODataSwaggerProvider currently requires that the SwaggerGenerator has a non-null field '_options' of type SwaggerGeneratorOptions");
+            Contract.Assume(options != null, "The ODataSwaggerProvider currently requires that the SwaggerGenerator has a non-null field '_options' of type SwaggerGeneratorOptions");
             return options;
         }
 
@@ -151,7 +154,7 @@ namespace Swashbuckle.OData
             {
                 var httpMethod = group.Key;
 
-                var apiDescription = (group.Count() == 1)
+                var apiDescription = group.Count() == 1
                     ? group.First()
                     : _options.ConflictingActionsResolver(group);
 
@@ -186,6 +189,9 @@ namespace Swashbuckle.OData
 
         private Operation CreateOperation(ApiDescription apiDescription, SchemaRegistry schemaRegistry)
         {
+            Contract.Requires(apiDescription != null);
+            Contract.Requires(schemaRegistry != null);
+
             var parameters = apiDescription.ParameterDescriptions
                 .Select(paramDesc =>
                 {

@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Owin.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 using Swashbuckle.OData.Tests.WebHost;
 using Swashbuckle.Swagger;
@@ -71,6 +69,25 @@ namespace Swashbuckle.OData.Tests
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
                 pathItem.get.parameters.Should().Contain(parameter => parameter.name == "Id");
+            }
+        }
+
+        [Test]
+        public async Task It_supports_types_with_a_guid_primary_key()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Orders({OrderId})", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.get.Should().NotBeNull();
             }
         }
     }

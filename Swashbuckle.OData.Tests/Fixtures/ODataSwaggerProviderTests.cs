@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Owin.Hosting;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Swashbuckle.Application;
 using Swashbuckle.OData.Tests.WebHost;

@@ -17,7 +17,7 @@ namespace Swashbuckle.OData
     ///     Utility methods used to convert the Swagger model.
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o", Justification = "Utils is spelled correctly.")]
-    public static class ODataSwaggerUtilities
+    internal static class ODataSwaggerUtilities
     {
         /// <summary>
         ///     Create the Swagger path for the Edm entity set.
@@ -434,8 +434,8 @@ namespace Swashbuckle.OData
 
         private static void SetSwaggerType(Parameter obj, IEdmType edmType)
         {
-            Contract.Assert(obj != null);
-            Contract.Assert(edmType != null);
+            Contract.Requires(obj != null);
+            Contract.Requires(edmType != null);
 
             switch (edmType.TypeKind)
             {
@@ -475,8 +475,8 @@ namespace Swashbuckle.OData
 
         private static void SetSwaggerType(Schema obj, IEdmType edmType)
         {
-            Contract.Assert(obj != null);
-            Contract.Assert(edmType != null);
+            Contract.Requires(obj != null);
+            Contract.Requires(edmType != null);
 
             switch (edmType.TypeKind)
             {
@@ -516,12 +516,13 @@ namespace Swashbuckle.OData
 
         private static string GetPrimitiveTypeAndFormat(IEdmPrimitiveType primitiveType, out string format)
         {
-            Contract.Assert(primitiveType != null);
+            Contract.Requires(primitiveType != null);
 
             format = null;
             switch (primitiveType.PrimitiveKind)
             {
                 case EdmPrimitiveTypeKind.String:
+                case EdmPrimitiveTypeKind.None:
                     return "string";
                 case EdmPrimitiveTypeKind.Int16:
                 case EdmPrimitiveTypeKind.Int32:
@@ -547,6 +548,12 @@ namespace Swashbuckle.OData
                 case EdmPrimitiveTypeKind.Single:
                     format = "float";
                     return "number";
+                case EdmPrimitiveTypeKind.Guid:
+                    format = "guid";
+                    return "string";
+                case EdmPrimitiveTypeKind.Binary:
+                    format = "binary";
+                    return "string";
                 default:
                     return "string";
             }

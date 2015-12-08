@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Swashbuckle.OData
 {
-    public static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
         /// <summary>
         ///     Uses reflection to get the field value from an object.

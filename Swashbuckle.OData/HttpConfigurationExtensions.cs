@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Swashbuckle.OData
 {
-    public static class HttpConfigurationExtensions
+    internal static class HttpConfigurationExtensions
     {
         internal static JsonSerializerSettings SerializerSettingsOrDefault(this HttpConfiguration httpConfig)
         {

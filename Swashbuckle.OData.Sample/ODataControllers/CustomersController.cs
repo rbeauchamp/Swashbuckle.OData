@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.OData;
-using System.Web.OData.Results;
 using SwashbuckleODataSample.Models;
 
 namespace SwashbuckleODataSample.Controllers
@@ -14,21 +13,18 @@ namespace SwashbuckleODataSample.Controllers
     {
         private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
-        // GET: odata/Customers
         [EnableQuery]
         public IQueryable<Customer> GetCustomers()
         {
             return _db.Customers;
         }
 
-        // GET: odata/Customers(5)
         [EnableQuery]
         public SingleResult<Customer> GetCustomer([FromODataUri] int key)
         {
             return SingleResult.Create(_db.Customers.Where(customer => customer.Id == key));
         }
 
-        // PUT: odata/Customers(5)
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Put([FromODataUri] int key, Delta<Customer> patch)
         {
@@ -63,7 +59,6 @@ namespace SwashbuckleODataSample.Controllers
             return Updated(customer);
         }
 
-        // POST: odata/Customers
         [ResponseType(typeof(Customer))]
         public async Task<IHttpActionResult> Post(Customer customer)
         {
@@ -78,7 +73,6 @@ namespace SwashbuckleODataSample.Controllers
             return Created(customer);
         }
 
-        // PATCH: odata/Customers(5)
         [ResponseType(typeof(void))]
         [AcceptVerbs("PATCH", "MERGE")]
         public async Task<IHttpActionResult> Patch([FromODataUri] int key, Delta<Customer> patch)
@@ -114,7 +108,6 @@ namespace SwashbuckleODataSample.Controllers
             return Updated(customer);
         }
 
-        // DELETE: odata/Customers(5)
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Delete([FromODataUri] int key)
         {
@@ -130,7 +123,6 @@ namespace SwashbuckleODataSample.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // GET: odata/Customers(5)/Orders
         [EnableQuery]
         public IQueryable<Order> GetOrders([FromODataUri] int key)
         {

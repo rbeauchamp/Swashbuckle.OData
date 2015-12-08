@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Web.Http;
 using System.Web.OData;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
 {
-    public static class SchemaRegistryExtensions
+    internal static class SchemaRegistryExtensions
     {
         public static Schema GetOrRegisterODataType(this SchemaRegistry registry, Type type)
         {
+            Contract.Requires(type != null);
+
             var isAGenericODataType = IsAGenericODataType(type);
             return isAGenericODataType
                 ? registry.GetOrRegister(type.GetGenericArguments()[0]) 

@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 
 namespace Swashbuckle.OData
 {
-    public static class CollectionExtentions
+    internal static class CollectionExtentions
     {
         /// <summary>
         /// Adds the elements of the specified collection to the end of the <see cref="Collection{T}"/>.

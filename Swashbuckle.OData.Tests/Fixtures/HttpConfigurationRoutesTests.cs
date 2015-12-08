@@ -1,11 +1,8 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Swashbuckle.OData.Tests.WebHost;
-using Flurl;
 using Swashbuckle.Swagger;
 using SwashbuckleODataSample;
 

@@ -2,7 +2,7 @@
 
 namespace Swashbuckle.OData
 {
-    public class SwaggerApiParameterDescription : ApiParameterDescription
+    internal class SwaggerApiParameterDescription : ApiParameterDescription
     {
         public SwaggerApiParameterSource SwaggerSource { get; set; }
     }

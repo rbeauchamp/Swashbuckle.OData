@@ -6,7 +6,7 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
 {
-    public class SwaggerToApiExplorerMapper
+    internal class SwaggerToApiExplorerMapper
     {
         private readonly IEnumerable<IParameterMapper> _parameterMappers;
 
