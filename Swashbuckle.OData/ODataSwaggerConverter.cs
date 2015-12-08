@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.OData.Edm;
@@ -14,7 +13,7 @@ namespace Swashbuckle.OData
     /// <summary>
     ///     Represents an <see cref="ODataSwaggerConverter" /> used to converter an Edm model to Swagger model.
     /// </summary>
-    public class ODataSwaggerConverter
+    internal class ODataSwaggerConverter
     {
         private const string DefaultHost = "default";
         private const string DefaultbasePath = "/odata";
@@ -26,10 +25,7 @@ namespace Swashbuckle.OData
         /// <param name="model">The Edm model.</param>
         public ODataSwaggerConverter(IEdmModel model)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException("model");
-            }
+            Contract.Requires(model != null);
 
             EdmModel = model;
             MetadataUri = DefaultMetadataUri;
@@ -58,46 +54,27 @@ namespace Swashbuckle.OData
         public IEdmModel EdmModel { get; }
 
         /// <summary>
-        ///     Gets the Swagger model.
-        /// </summary>
-        public virtual SwaggerDocument SwaggerModel
-        {
-            get
-            {
-                if (SwaggerDoc == null)
-                {
-                    ConvertToSwaggerModel();
-                }
-
-                Contract.Assert(SwaggerDoc != null);
-                return SwaggerDoc;
-            }
-        }
-
-        /// <summary>
         ///     Gets the document in the Swagger.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:EnableSetterForProperty", Justification = "Enable setter for virtual property")]
-        protected virtual SwaggerDocument SwaggerDoc { get; set; }
+        private SwaggerDocument SwaggerDoc { get; set; }
 
         /// <summary>
         ///     Gets the paths in the Swagger.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:EnableSetterForProperty", Justification = "Enable setter for virtual property")]
-        protected virtual IDictionary<string, PathItem> SwaggerPaths { get; set; }
+        private IDictionary<string, PathItem> SwaggerPaths { get; set; }
 
         /// <summary>
         ///     Gets the definitions in the Swagger.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:EnableSetterForProperty", Justification = "Enable setter for virtual property")]
-        protected virtual IDictionary<string, Schema> SwaggerDefinitions { get; set; }
+        private IDictionary<string, Schema> SwaggerDefinitions { get; set; }
 
         /// <summary>
-        ///     Converts the Edm model to Swagger model.
+        /// Converts the Edm model to Swagger model.
         /// </summary>
-        /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject" /> represents the Swagger model.</returns>
-        public virtual SwaggerDocument ConvertToSwaggerModel()
+        public SwaggerDocument ConvertToSwaggerModel()
         {
+            Contract.Ensures(Contract.Result<SwaggerDocument>() != null);
+
             if (SwaggerDoc != null)
             {
                 return SwaggerDoc;
@@ -116,7 +93,7 @@ namespace Swashbuckle.OData
         /// <summary>
         ///     Start to initialize the Swagger model.
         /// </summary>
-        protected virtual void InitializeStart()
+        private void InitializeStart()
         {
             SwaggerDoc = null;
             SwaggerPaths = null;
@@ -126,7 +103,7 @@ namespace Swashbuckle.OData
         /// <summary>
         ///     Initialize the document of Swagger model.
         /// </summary>
-        protected virtual void InitializeDocument()
+        private void InitializeDocument()
         {
             SwaggerDoc = new SwaggerDocument
             {
@@ -156,10 +133,10 @@ namespace Swashbuckle.OData
         /// <summary>
         ///     Initialize the entity container to Swagger model.
         /// </summary>
-        protected virtual void InitializeContainer()
+        private void InitializeContainer()
         {
-            Contract.Assert(SwaggerDoc != null);
-            Contract.Assert(EdmModel != null);
+            Contract.Requires(SwaggerDoc != null);
+            Contract.Requires(EdmModel != null);
 
             SwaggerPaths = new Dictionary<string, PathItem>();
 
@@ -186,10 +163,10 @@ namespace Swashbuckle.OData
         /// <summary>
         ///     Initialize the type definitions to Swagger model.
         /// </summary>
-        protected virtual void InitializeTypeDefinitions()
+        private void InitializeTypeDefinitions()
         {
-            Contract.Assert(SwaggerDoc != null);
-            Contract.Assert(EdmModel != null);
+            Contract.Requires(SwaggerDoc != null);
+            Contract.Requires(EdmModel != null);
 
             SwaggerDefinitions = new Dictionary<string, Schema>();
             SwaggerDoc.definitions = SwaggerDefinitions;
@@ -203,11 +180,11 @@ namespace Swashbuckle.OData
         /// <summary>
         ///     Initialize the operations to Swagger model.
         /// </summary>
-        protected virtual void InitializeOperations()
+        private void InitializeOperations()
         {
-            Contract.Assert(SwaggerDoc != null);
-            Contract.Assert(EdmModel != null);
-            Contract.Assert(SwaggerPaths != null);
+            Contract.Requires(SwaggerDoc != null);
+            Contract.Requires(EdmModel != null);
+            Contract.Requires(SwaggerPaths != null);
 
             if (EdmModel.EntityContainer == null)
             {
@@ -255,9 +232,9 @@ namespace Swashbuckle.OData
         /// <summary>
         ///     End to initialize the Swagger model.
         /// </summary>
-        protected virtual void InitializeEnd()
+        private void InitializeEnd()
         {
-            Contract.Assert(SwaggerDefinitions != null);
+            Contract.Requires(SwaggerDefinitions != null);
 
             SwaggerDefinitions.Add("_Error", new Schema
             {

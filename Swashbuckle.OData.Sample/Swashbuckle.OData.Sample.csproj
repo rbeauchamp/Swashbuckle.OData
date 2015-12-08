@@ -135,6 +135,7 @@
     </Compile>
     <Compile Include="ODataControllers\SwashbuckleODataContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SequentialGuidGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />

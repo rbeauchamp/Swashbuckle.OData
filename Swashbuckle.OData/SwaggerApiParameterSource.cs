@@ -1,6 +1,6 @@
 ﻿namespace Swashbuckle.OData
 {
-    public enum SwaggerApiParameterSource
+    internal enum SwaggerApiParameterSource
     {
         Query,
         Header,

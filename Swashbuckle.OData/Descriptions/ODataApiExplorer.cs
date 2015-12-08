@@ -16,7 +16,7 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
 {
-    public class ODataApiExplorer : IApiExplorer
+    internal class ODataApiExplorer : IApiExplorer
     {
         private const string ServiceRoot = "http://any/";
         private readonly Lazy<Collection<ApiDescription>> _apiDescriptions;
@@ -296,7 +296,7 @@ namespace Swashbuckle.OData
                         case "boolean":
                             return "true";
                         default:
-                            throw new Exception(string.Format("Could not generate sample value for query parameter type {0} and format {1}", type, "null"));
+                            throw new Exception($"Could not generate sample value for query parameter type {type} and format {"null"}");
                     }
                 case "int32":
                 case "int64":
@@ -311,8 +311,12 @@ namespace Swashbuckle.OData
                     return "2.34d";
                 case "float":
                     return "2.0f";
+                case "guid":
+                    return Guid.NewGuid().ToString();
+                case "binary":
+                    return Convert.ToBase64String(new byte[]{ 130, 200, 234, 23 });
                 default:
-                    throw new Exception(string.Format("Could not generate sample value for query parameter type {0} and format {1}", type, format));
+                    throw new Exception($"Could not generate sample value for query parameter type {type} and format {format}");
             }
         }
 

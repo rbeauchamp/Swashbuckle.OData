@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
@@ -249,8 +250,7 @@ namespace Swashbuckle.OData.Tests
         /// <typeparam name="T">The type of object to serialize.</typeparam>
         public static Task<HttpResponseMessage> PatchAsync<T>(this HttpClient client, string requestUri, T value, MediaTypeFormatter formatter, MediaTypeHeaderValue mediaType, CancellationToken cancellationToken)
         {
-            if (client == null)
-                throw new ArgumentNullException("client");
+            Contract.Requires(client != null);
 
             var method = new HttpMethod("PATCH");
             var content = new ObjectContent<T>(value, formatter, mediaType);

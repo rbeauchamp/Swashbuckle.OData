@@ -1,4 +1,5 @@
-﻿using System.Data.Entity.Infrastructure;
+﻿using System;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -13,24 +14,23 @@ namespace SwashbuckleODataSample.Controllers
     {
         private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
-        // GET: odata/Orders
         [EnableQuery]
         public IQueryable<Order> GetOrders()
         {
             return _db.Orders;
         }
 
-        // GET: odata/Orders(5)
         [EnableQuery]
-        public SingleResult<Order> GetOrder([FromODataUri] int key)
+        public SingleResult<Order> GetOrder([FromODataUri] Guid key)
         {
             return SingleResult.Create(_db.Orders.Where(order => order.OrderId == key));
         }
 
-        // POST: odata/Orders
         [ResponseType(typeof(Order))]
         public async Task<IHttpActionResult> Post(Order order)
         {
+            order.OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -42,10 +42,9 @@ namespace SwashbuckleODataSample.Controllers
             return Created(order);
         }
 
-        // PATCH: odata/Orders(5)
         [ResponseType(typeof(void))]
         [AcceptVerbs("PATCH", "MERGE")]
-        public async Task<IHttpActionResult> Patch([FromODataUri] int key, Delta<Order> patch)
+        public async Task<IHttpActionResult> Patch([FromODataUri] Guid key, Delta<Order> patch)
         {
             Validate(patch.GetEntity());
 
@@ -78,9 +77,8 @@ namespace SwashbuckleODataSample.Controllers
             return Updated(order);
         }
 
-        // DELETE: odata/Orders(5)
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> Delete([FromODataUri] int key)
+        public async Task<IHttpActionResult> Delete([FromODataUri] Guid key)
         {
             var order = await _db.Orders.FindAsync(key);
             if (order == null)
@@ -94,9 +92,8 @@ namespace SwashbuckleODataSample.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // GET: odata/Orders(5)/Customer
         [EnableQuery]
-        public SingleResult<Customer> GetCustomer([FromODataUri] int key)
+        public SingleResult<Customer> GetCustomer([FromODataUri] Guid key)
         {
             return SingleResult.Create(_db.Orders.Where(m => m.OrderId == key)
                 .Select(m => m.Customer));
@@ -111,7 +108,7 @@ namespace SwashbuckleODataSample.Controllers
             base.Dispose(disposing);
         }
 
-        private bool OrderExists(int key)
+        private bool OrderExists(Guid key)
         {
             return _db.Orders.Count(e => e.OrderId == key) > 0;
         }

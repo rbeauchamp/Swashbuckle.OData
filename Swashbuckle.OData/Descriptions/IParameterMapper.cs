@@ -5,12 +5,12 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
 {
-    public interface IParameterMapper
+    internal interface IParameterMapper
     {
         HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor);
     }
 
-    public class MapByParameterName : IParameterMapper
+    internal class MapByParameterName : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
         {
@@ -19,7 +19,7 @@ namespace Swashbuckle.OData
         }
     }
 
-    public class MapByDescription : IParameterMapper
+    internal class MapByDescription : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
         {
@@ -42,7 +42,7 @@ namespace Swashbuckle.OData
         }
     }
 
-    public class MapByIndex : IParameterMapper
+    internal class MapByIndex : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
         {
@@ -64,7 +64,7 @@ namespace Swashbuckle.OData
         }
     }
 
-    public class MapToDefault : IParameterMapper
+    internal class MapToDefault : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
         {
@@ -75,7 +75,7 @@ namespace Swashbuckle.OData
             };
         }
 
-        private static Type GetType(Parameter queryParameter)
+        private static Type GetType(PartialSchema queryParameter)
         {
             var type = queryParameter.type;
             var format = queryParameter.format;
@@ -90,7 +90,7 @@ namespace Swashbuckle.OData
                         case "boolean":
                             return typeof(bool);
                         default:
-                            throw new Exception(string.Format("Could not determine .NET type for parameter type {0} and format {1}", type, "null"));
+                            throw new Exception($"Could not determine .NET type for parameter type {type} and format 'null'");
                     }
                 case "int32":
                     return typeof(int);
@@ -106,8 +106,12 @@ namespace Swashbuckle.OData
                     return typeof(double);
                 case "float":
                     return typeof(float);
+                case "guid":
+                    return typeof(Guid);
+                case "binary":
+                    return typeof(byte[]);
                 default:
-                    throw new Exception(string.Format("Could not determine .NET type for parameter type {0} and format {1}", type, format));
+                    throw new Exception($"Could not determine .NET type for parameter type {type} and format {format}");
             }
         }
     }
