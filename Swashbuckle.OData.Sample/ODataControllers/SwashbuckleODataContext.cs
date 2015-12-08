@@ -38,8 +38,8 @@ namespace SwashbuckleODataSample.Models
             context.Customers.Add(customerOne);
             context.Customers.Add(new Customer { Name = "CustomerTwo" });
 
-            context.Orders.Add(new Order { OrderName = "OrderOne", Customer = customerOne });
-            context.Orders.Add(new Order { OrderName = "OrderTwo", Customer = customerOne });
+            context.Orders.Add(new Order { OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd), OrderName = "OrderOne", Customer = customerOne });
+            context.Orders.Add(new Order { OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd), OrderName = "OrderTwo", Customer = customerOne });
 
             base.Seed(context);
         }
