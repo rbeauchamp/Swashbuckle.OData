@@ -119,7 +119,6 @@
     <Compile Include="Fixtures\PatchTests.cs" />
     <Compile Include="Fixtures\PutTests.cs" />
     <Compile Include="HttpClientUtils.cs" />
-    <Compile Include="Fixtures\HttpConfigurationRoutesTests.cs" />
     <Compile Include="Fixtures\GetTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpExtensions.cs" />

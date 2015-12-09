@@ -122,6 +122,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Flurl, Version=1.0.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Flurl.1.0.10\lib\portable-net40+sl50+win+wpa81+wp80+MonoAndroid10+MonoTouch10\Flurl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.OData.Core, Version=6.13.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.OData.Core.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Core.dll</HintPath>
       <Private>True</Private>
@@ -171,7 +175,7 @@
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\SwaggerToApiExplorerMapper.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
-    <Compile Include="ODataSwaggerConverter.cs" />
+    <Compile Include="SwaggerPathGenerator.cs" />
     <Compile Include="ODataSwaggerProvider.cs" />
     <Compile Include="ODataSwaggerUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -181,6 +185,7 @@
     <Compile Include="SwaggerApiParameterSource.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

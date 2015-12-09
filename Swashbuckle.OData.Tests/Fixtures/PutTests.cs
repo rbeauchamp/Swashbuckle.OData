@@ -23,7 +23,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Customers({Id})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Customers({Id})", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.put.Should().NotBeNull();
             }
@@ -42,7 +42,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Orders({OrderId})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Orders({OrderId})", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.put.Should().BeNull();
             }

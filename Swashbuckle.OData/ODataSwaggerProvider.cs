@@ -4,7 +4,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
-using System.Web.OData.Routing;
 using Swashbuckle.Application;
 using Swashbuckle.Swagger;
 
@@ -99,35 +98,28 @@ namespace Swashbuckle.OData
                 .GroupBy(apiDesc => apiDesc.RelativePathSansQueryString())
                 .ToDictionary(group => "/" + group.Key, group => CreatePathItem(group, schemaRegistry));
 
-            var oDataRoute = _httpConfigurationProvider().Routes.SingleOrDefault(route => route is ODataRoute) as ODataRoute;
+            var rootUri = new Uri(rootUrl);
+            var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
 
-            if (oDataRoute != null)
+            var swaggerDoc = new SwaggerDocument
             {
-                var routePrefix = oDataRoute.RoutePrefix;
+                info = info,
+                host = rootUri.Host + port,
+                basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : null,
+                schemes = _options.Schemes?.ToList() ?? new[] { rootUri.Scheme }.ToList(),
+                paths = paths,
+                definitions = schemaRegistry.Definitions,
+                securityDefinitions = _options.SecurityDefinitions
+            };
 
-                var rootUri = new Uri(rootUrl);
-                var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
-
-                var swaggerDoc = new SwaggerDocument
-                {
-                    info = info,
-                    host = rootUri.Host + port,
-                    basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : "/" + routePrefix,
-                    schemes = _options.Schemes?.ToList() ?? new[] { rootUri.Scheme }.ToList(),
-                    paths = paths,
-                    definitions = schemaRegistry.Definitions,
-                    securityDefinitions = _options.SecurityDefinitions
-                };
-
-                foreach (var filter in _options.DocumentFilters)
-                {
-                    filter.Apply(swaggerDoc, schemaRegistry, _apiExplorer);
-                }
-
-                return swaggerDoc;
+            foreach (var filter in _options.DocumentFilters)
+            {
+                filter.Apply(swaggerDoc, schemaRegistry, _apiExplorer);
             }
 
-            return _defaultProvider.GetSwagger(rootUrl, apiVersion);
+            return swaggerDoc.paths.Any() 
+                ? swaggerDoc 
+                : _defaultProvider.GetSwagger(rootUrl, apiVersion);
         }
 
         private SchemaRegistry GetSchemaRegistry()

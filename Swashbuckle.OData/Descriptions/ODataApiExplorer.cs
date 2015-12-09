@@ -11,6 +11,7 @@ using System.Web.Http.Routing;
 using System.Web.Http.Services;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
+using Flurl;
 using Microsoft.OData.Edm;
 using Swashbuckle.Swagger;
 
@@ -48,12 +49,9 @@ namespace Swashbuckle.OData
         }
 
         /// <summary>
-        ///     Gets the API descriptions. The descriptions are initialized on the first access.
+        /// Gets the API descriptions. The descriptions are initialized on the first access.
         /// </summary>
-        public Collection<ApiDescription> ApiDescriptions
-        {
-            get { return _apiDescriptions.Value; }
-        }
+        public Collection<ApiDescription> ApiDescriptions => _apiDescriptions.Value;
 
         private Collection<ApiDescription> GetApiDescriptions()
         {
@@ -76,7 +74,7 @@ namespace Swashbuckle.OData
         {
             var apiDescriptions = new Collection<ApiDescription>();
 
-            foreach (var potentialPathTemplateAndOperations in GetDefaultEdmSwaggerDocument(oDataRoute).paths)
+            foreach (var potentialPathTemplateAndOperations in GetDefaultEdmSwaggerDocument(oDataRoute))
             {
                 apiDescriptions.AddRange(GetApiDescriptions(oDataRoute, potentialPathTemplateAndOperations.Key, potentialPathTemplateAndOperations.Value));
             }
@@ -262,7 +260,7 @@ namespace Swashbuckle.OData
 
             var model = GetEdmModel(oDataRoute);
 
-            return oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot, sampleODataPathString);
+            return oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot.AppendPathSegment(oDataRoute.RoutePrefix), sampleODataPathString);
         }
 
         private static string GenerateSampleODataPathString(string pathTemplate, Operation operation)
@@ -361,9 +359,9 @@ namespace Swashbuckle.OData
             return targetActionNames.FirstOrDefault(actionMap.Contains);
         }
 
-        private static SwaggerDocument GetDefaultEdmSwaggerDocument(ODataRoute oDataRoute)
+        private static Dictionary<string, PathItem> GetDefaultEdmSwaggerDocument(ODataRoute oDataRoute)
         {
-            return new ODataSwaggerConverter(GetEdmModel(oDataRoute)).ConvertToSwaggerModel();
+            return new SwaggerPathGenerator(oDataRoute.RoutePrefix, GetEdmModel(oDataRoute)).GenerateSwaggerPaths();
         }
 
         private static IEdmModel GetEdmModel(ODataRoute oDataRoute)

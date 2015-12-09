@@ -21,6 +21,7 @@ namespace Swashbuckle.OData.Tests.WebHost
             var httpConfiguration = new HttpConfiguration();
 
             WebApiConfig.Register(httpConfiguration);
+            ODataConfig.Register(httpConfiguration);
             FormatterConfig.Register(httpConfiguration);
 
             httpConfiguration

@@ -7,8 +7,12 @@ namespace SwashbuckleODataSample
     {
         protected void Application_Start()
         {
-            GlobalConfiguration.Configure(WebApiConfig.Register);
-            GlobalConfiguration.Configure(FormatterConfig.Register);
+            GlobalConfiguration.Configure(config =>
+            {
+                WebApiConfig.Register(config);
+                ODataConfig.Register(config);
+                FormatterConfig.Register(config);
+            });
         }
     }
 }

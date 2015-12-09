@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Flurl;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -16,7 +16,6 @@ namespace Swashbuckle.OData
     /// <summary>
     ///     Utility methods used to convert the Swagger model.
     /// </summary>
-    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "o", Justification = "Utils is spelled correctly.")]
     internal static class ODataSwaggerUtilities
     {
         /// <summary>
@@ -269,11 +268,23 @@ namespace Swashbuckle.OData
         }
 
         /// <summary>
+        /// Gets the path for entity set.
+        /// </summary>
+        /// <param name="routePrefix">The route prefix.</param>
+        /// <param name="entitySet">The entity set.</param>
+        /// <returns></returns>
+        public static Url GetPathForEntitySet(string routePrefix, IEdmEntitySet entitySet)
+        {
+            return routePrefix.AppendPathSegment(entitySet.Name);
+        }
+
+        /// <summary>
         ///     Get the Uri Swagger path for the Edm entity set.
         /// </summary>
+        /// <param name="routePrefix"></param>
         /// <param name="navigationSource">The Edm navigation source.</param>
         /// <returns>The <see cref="System.String" /> path represents the related Edm entity set.</returns>
-        public static string GetPathForEntity(IEdmNavigationSource navigationSource)
+        public static string GetPathForEntity(string routePrefix, IEdmNavigationSource navigationSource)
         {
             var entitySet = navigationSource as IEdmEntitySet;
             if (entitySet == null)
@@ -281,7 +292,7 @@ namespace Swashbuckle.OData
                 return string.Empty;
             }
 
-            var singleEntityPath = "/" + entitySet.Name + "(";
+            var singleEntityPath = GetPathForEntitySet(routePrefix, entitySet) + "(";
             foreach (var key in entitySet.EntityType().Key())
             {
                 if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
@@ -333,8 +344,9 @@ namespace Swashbuckle.OData
         /// </summary>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="navigationSource">The Edm navigation source.</param>
+        /// <param name="routePrefix"></param>
         /// <returns>The <see cref="System.String" /> path represents the related Edm operation.</returns>
-        public static string GetPathForOperationOfEntitySet(IEdmOperation operation, IEdmNavigationSource navigationSource)
+        public static string GetPathForOperationOfEntitySet(IEdmOperation operation, IEdmNavigationSource navigationSource, string routePrefix)
         {
             var entitySet = navigationSource as IEdmEntitySet;
             if (operation == null || entitySet == null)
@@ -342,7 +354,7 @@ namespace Swashbuckle.OData
                 return string.Empty;
             }
 
-            var swaggerOperationPath = "/" + entitySet.Name + "/" + operation.FullName() + "(";
+            var swaggerOperationPath = GetPathForEntitySet(routePrefix, entitySet) +"/" + operation.FullName() + "(";
             if (operation.IsFunction())
             {
                 foreach (var parameter in operation.Parameters.Skip(1))
@@ -367,12 +379,15 @@ namespace Swashbuckle.OData
         }
 
         /// <summary>
-        ///     Get the Uri Swagger path for Edm operation bound to entity.
+        /// Get the Uri Swagger path for Edm operation bound to entity.
         /// </summary>
+        /// <param name="routePrefix">The route prefix.</param>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="navigationSource">The Edm navigation source.</param>
-        /// <returns>The <see cref="System.String" /> path represents the related Edm operation.</returns>
-        public static string GetPathForOperationOfEntity(IEdmOperation operation, IEdmNavigationSource navigationSource)
+        /// <returns>
+        /// The <see cref="System.String" /> path represents the related Edm operation.
+        /// </returns>
+        public static string GetPathForOperationOfEntity(string routePrefix, IEdmOperation operation, IEdmNavigationSource navigationSource)
         {
             var entitySet = navigationSource as IEdmEntitySet;
             if (operation == null || entitySet == null)
@@ -380,7 +395,7 @@ namespace Swashbuckle.OData
                 return string.Empty;
             }
 
-            var swaggerOperationPath = GetPathForEntity(entitySet) + "/" + operation.FullName() + "(";
+            var swaggerOperationPath = GetPathForEntity(routePrefix, entitySet) + "/" + operation.FullName() + "(";
             if (operation.IsFunction())
             {
                 foreach (var parameter in operation.Parameters.Skip(1))

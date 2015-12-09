@@ -24,7 +24,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Customers", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Customers", out pathItem);
                 pathItem.Should().NotBeNull();
                 var filterParameter = pathItem.get.parameters.SingleOrDefault(parameter => parameter.name == "$filter");
                 filterParameter.Should().NotBeNull();
@@ -47,7 +47,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Customers", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Customers", out pathItem);
                 pathItem.get.parameters.Where(parameter => parameter.name.StartsWith("$")).Should().OnlyContain(parameter => parameter.required == false);
             }
         }
@@ -65,7 +65,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Customers({Id})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Customers({Id})", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
                 pathItem.get.parameters.Should().Contain(parameter => parameter.name == "Id");
@@ -85,7 +85,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Orders({OrderId})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Orders({OrderId})", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
             }

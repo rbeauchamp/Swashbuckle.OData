@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Swashbuckle.Application;
 using Swashbuckle.OData.Tests.WebHost;
 using Swashbuckle.Swagger;
+using SwashbuckleODataSample;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -26,6 +27,22 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 swaggerDocument.host.Should().Be("foo");
+            }
+        }
+
+        [Test]
+        public async Task It_supports_multiple_odata_routes()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                swaggerDocument.Should().NotBeNull();
             }
         }
     }
