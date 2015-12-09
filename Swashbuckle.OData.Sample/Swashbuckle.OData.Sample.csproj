@@ -131,6 +131,7 @@
     <Compile Include="ODataControllers\CustomersV1Controller.cs" />
     <Compile Include="ODataControllers\CustomersController.cs" />
     <Compile Include="ODataControllers\Order.cs" />
+    <Compile Include="ODataControllers\OrdersV1Controller.cs" />
     <Compile Include="ODataControllers\OrdersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

@@ -6,7 +6,6 @@ using NUnit.Framework;
 using Swashbuckle.Application;
 using Swashbuckle.OData.Tests.WebHost;
 using Swashbuckle.Swagger;
-using SwashbuckleODataSample;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -43,6 +42,30 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 swaggerDocument.Should().NotBeNull();
+            }
+        }
+
+        [Test]
+        public async Task It_explores_the_correct_controller()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem versionedCustomerController;
+                swaggerDocument.paths.TryGetValue("/odata/v1/Customers({Id})", out versionedCustomerController);
+                versionedCustomerController.Should().NotBeNull();
+                versionedCustomerController.put.Should().BeNull();
+
+                PathItem defaultCustomerController;
+                swaggerDocument.paths.TryGetValue("/odata/Customers({Id})", out defaultCustomerController);
+                defaultCustomerController.Should().NotBeNull();
+                defaultCustomerController.put.Should().NotBeNull();
             }
         }
     }
