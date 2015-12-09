@@ -116,21 +116,6 @@ namespace Swashbuckle.OData
                     requestContext.Url = new UrlHelper(request);
                     requestContext.VirtualPathRoot = perControllerConfig.VirtualPathRoot;
 
-                    //var oDataPathRouteConstraint = GetODataPathRouteConstraint(oDataRoute);
-
-                    //var controllerContext = new HttpControllerContext
-                    //{
-                    //    Configuration = perControllerConfig,
-                    //    Request = request,
-                    //    RequestContext = requestContext,
-                    //    RouteData = request.GetRouteData(),
-                    //    ControllerDescriptor = httpControllerDescriptor
-                    //};
-
-                    //var actionMappings = perControllerConfig.Services.GetActionSelector().GetActionMapping(httpControllerDescriptor);
-
-                    //var action = GetActionName(oDataPathRouteConstraint, odataPath, controllerContext, actionMappings);
-
                     var controller = controllerDesciptor.CreateController(request);
                     HttpActionDescriptor actionDescriptor;
                     using (controller as IDisposable)
@@ -363,28 +348,18 @@ namespace Swashbuckle.OData
 
         private HttpControllerDescriptor GetControllerDesciptor(HttpRequestMessage request)
         {
-            return _config().Services.GetHttpControllerSelector().SelectController(request);
-        }
-
-        /// <summary>
-        /// Selects the name of the controller to dispatch the request to.
-        /// </summary>
-        /// <param name="oDataPathRouteConstraint">The o data path route constraint.</param>
-        /// <param name="path">The OData path of the request.</param>
-        /// <param name="request">The request.</param>
-        /// <returns>
-        /// The name of the controller to dispatch to, or <c>null</c> if one cannot be resolved.
-        /// </returns>
-        private static string GetControllerName(ODataPathRouteConstraint oDataPathRouteConstraint, ODataPath path, HttpRequestMessage request)
-        {
-            return oDataPathRouteConstraint.RoutingConventions
-                .Select(routingConvention => routingConvention.SelectController(path, request))
-                .FirstOrDefault(controllerName => controllerName != null);
-        }
-
-        private static string GetActionName(ODataPathRouteConstraint oDataPathRouteConstraint, ODataPath path, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
-        {
-            return oDataPathRouteConstraint.RoutingConventions.Select(routingConvention => routingConvention.SelectAction(path, controllerContext, actionMap)).FirstOrDefault(action => action != null);
+            try
+            {
+                return _config().Services.GetHttpControllerSelector().SelectController(request);
+            }
+            catch (HttpResponseException ex)
+            {
+                if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+                throw;
+            }
         }
 
         public static string FindMatchingAction(ILookup<string, HttpActionDescriptor> actionMap, params string[] targetActionNames)

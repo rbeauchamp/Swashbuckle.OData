@@ -46,6 +46,22 @@ namespace Swashbuckle.OData.Tests
         }
 
         [Test]
+        public async Task It_supports_odata_routes_that_dont_map_to_a_controller()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                swaggerDocument.Should().NotBeNull();
+            }
+        }
+
+        [Test]
         public async Task It_explores_the_correct_controller()
         {
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
