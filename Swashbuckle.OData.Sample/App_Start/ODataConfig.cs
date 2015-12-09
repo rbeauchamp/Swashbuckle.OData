@@ -21,6 +21,10 @@ namespace SwashbuckleODataSample
             config.MapODataServiceRoute("V1RouteVersioning", "odata/v1", GetModel());
             controllerSelector.RouteVersionSuffixMapping.Add("V1RouteVersioning", "V1");
 
+            // Define a versioned route that doesn't map to any controller
+            config.MapODataServiceRoute("odata/v2", "odata/v2", GetFakeModel());
+            controllerSelector.RouteVersionSuffixMapping.Add("odata/v2", "V2");
+
             // Define a default non-versioned route
             config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetModel());
         }
@@ -30,6 +34,13 @@ namespace SwashbuckleODataSample
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetFakeModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("FakeCustomers");
             return builder.GetEdmModel();
         }
     }

@@ -30,7 +30,7 @@
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright 2015</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUi OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
-    <Version>2.2.1</Version>
+    <Version>2.2.2</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />
