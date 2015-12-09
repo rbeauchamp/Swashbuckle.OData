@@ -13,7 +13,7 @@ namespace Swashbuckle.OData.Tests
         {
             var client =  new HttpClient
             {
-                BaseAddress = new Uri(TestWebApiStartup.BaseAddress.AppendPathSegment(WebApiConfig.ODataRoutePrefix)),
+                BaseAddress = new Uri(TestWebApiStartup.BaseAddress.AppendPathSegment(ODataConfig.ODataRoutePrefix)),
                 Timeout = TimeSpan.FromMilliseconds(5 * 60 * 1000)
             };
 

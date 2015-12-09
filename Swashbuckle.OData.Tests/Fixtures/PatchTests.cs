@@ -24,7 +24,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Orders({OrderId})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Orders({OrderId})", out pathItem);
                 pathItem.patch.parameters.Single(parameter => parameter.@in == "body").schema.Should().NotBeNull();
                 pathItem.patch.parameters.Single(parameter => parameter.@in == "body").schema.@ref.Should().Be("#/definitions/Order");
             }
