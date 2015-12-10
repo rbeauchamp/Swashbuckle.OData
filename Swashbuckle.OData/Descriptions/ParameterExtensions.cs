@@ -67,6 +67,15 @@ namespace Swashbuckle.OData
             return FindType(fullTypeName);
         }
 
+        public static Type GetEntitySetType(this Schema schema)
+        {
+            Contract.Requires(schema.type == "array");
+            var queryableType = typeof(IQueryable<>);
+            var fullTypeName = schema.items.@ref.Replace("#/definitions/", string.Empty);
+            var entityType = FindType(fullTypeName);
+            return queryableType.MakeGenericType(entityType);
+        }
+
         /// <summary>
         /// Looks in all loaded assemblies for the given type.
         /// </summary>

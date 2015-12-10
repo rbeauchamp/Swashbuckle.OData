@@ -225,6 +225,14 @@ namespace Swashbuckle.OData
                         ControllerDescriptor = actionDescriptor.ControllerDescriptor
                     };
                 }
+                if (response?.schema?.type == "array")
+                {
+                    return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods)
+                    {
+                        Configuration = actionDescriptor.Configuration,
+                        ControllerDescriptor = actionDescriptor.ControllerDescriptor
+                    };
+                }
             }
             return actionDescriptor;
         }
@@ -430,55 +438,5 @@ namespace Swashbuckle.OData
                 }
             }
         }
-    }
-
-    internal class ODataParameterDescriptor : HttpParameterDescriptor
-    {
-        public ODataParameterDescriptor(string parameterName, Type parameterType, bool isOptional)
-        {
-            ParameterName = parameterName;
-            ParameterType = parameterType;
-            IsOptional = isOptional;
-        }
-
-        public override string ParameterName { get; }
-
-        public override Type ParameterType { get; }
-
-        public override bool IsOptional { get; }
-
-
-    }
-
-    internal class RestierParameterDescriptor : HttpParameterDescriptor
-    {
-        public RestierParameterDescriptor(Parameter parameter)
-        {
-            Parameter = parameter;
-            DefaultValue = null;
-            Prefix = null;
-            ParameterName = parameter.name;
-            IsOptional = !parameter.required ?? false;
-            ParameterType = parameter.GetClrType();
-        }
-
-        public Parameter Parameter { get; }
-
-        public override string ParameterName { get; }
-
-        public override Type ParameterType { get; }
-
-        public override bool IsOptional { get; }
-
-        public override Collection<T> GetCustomAttributes<T>()
-        {
-            return null;
-        }
-
-        public override object DefaultValue { get; }
-
-        public override string Prefix { get; }
-
-        public override ParameterBindingAttribute ParameterBinderAttribute { get; set; }
     }
 }

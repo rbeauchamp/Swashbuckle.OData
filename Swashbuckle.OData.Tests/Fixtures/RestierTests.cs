@@ -68,5 +68,29 @@ namespace Swashbuckle.OData.Tests
                 getByIdResponse.Value.schema.@ref.Should().Be("#/definitions/User");
             }
         }
+
+        [Test]
+        public async Task It_has_a_restier_get_users_response_of_type_array()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/restier/Users", out pathItem);
+                var getUsersResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
+                getUsersResponse.Should().NotBeNull();
+                getUsersResponse.Value.schema.@ref.Should().BeNull();
+                getUsersResponse.Value.schema.items.@ref.Should().Be("#/definitions/User");
+                getUsersResponse.Value.schema.type.Should().Be("array");
+            }
+        }
+
+
     }
 }

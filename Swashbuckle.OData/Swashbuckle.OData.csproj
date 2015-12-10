@@ -172,7 +172,14 @@
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
     <Compile Include="Descriptions\IParameterMapper.cs" />
+    <Compile Include="Descriptions\MapByDescription.cs" />
+    <Compile Include="Descriptions\MapByIndex.cs" />
+    <Compile Include="Descriptions\MapByParameterName.cs" />
+    <Compile Include="Descriptions\MapRestierParameter.cs" />
+    <Compile Include="Descriptions\MapToDefault.cs" />
+    <Compile Include="Descriptions\ODataParameterDescriptor.cs" />
     <Compile Include="Descriptions\ParameterExtensions.cs" />
+    <Compile Include="Descriptions\RestierParameterDescriptor.cs" />
     <Compile Include="Descriptions\SwaggerApiHttpActionDescriptor.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\SwaggerToApiExplorerMapper.cs" />

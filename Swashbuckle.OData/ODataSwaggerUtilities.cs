@@ -45,7 +45,7 @@ namespace Swashbuckle.OData
                 .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
                 .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
                 .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean", false))
-                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.Type).DefaultErrorResponse()),
                 post = new Operation()
                 .Summary("Post a new entity to EntitySet " + entitySet.Name)
                 .OperationId(entitySet.Name + "_Post")
