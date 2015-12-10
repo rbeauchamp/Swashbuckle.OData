@@ -26,6 +26,7 @@ namespace Swashbuckle.OData
             // Maybe the parameter is a key parameter, e.g., where Id in the URI path maps to a parameter named 'key'
             if (parameter.description.StartsWith("key:"))
             {
+                var paramerters = actionDescriptor.GetParameters();
                 var parameterDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == "key");
                 if (parameterDescriptor != null)
                 {
@@ -37,6 +38,21 @@ namespace Swashbuckle.OData
                         ParameterBinderAttribute = parameterDescriptor.ParameterBinderAttribute
                     };
                 }
+            }
+            return null;
+        }
+    }
+
+    internal class MapRestierParameter : IParameterMapper
+    {
+        public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
+        {
+            if (actionDescriptor.ControllerDescriptor.ControllerName == "Restier")
+            {
+                return new RestierParameterDescriptor(parameter)
+                {
+                    Configuration = actionDescriptor.ControllerDescriptor.Configuration,
+                };
             }
             return null;
         }
@@ -68,51 +84,11 @@ namespace Swashbuckle.OData
     {
         public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
         {
-            return new ODataParameterDescriptor(parameter.name, GetType(parameter), !parameter.required.Value)
+            return new ODataParameterDescriptor(parameter.name, parameter.GetClrType(), !parameter.required.Value)
             {
                 Configuration = actionDescriptor.ControllerDescriptor.Configuration,
                 ActionDescriptor = actionDescriptor
             };
-        }
-
-        private static Type GetType(PartialSchema queryParameter)
-        {
-            var type = queryParameter.type;
-            var format = queryParameter.format;
-
-            switch (format)
-            {
-                case null:
-                    switch (type)
-                    {
-                        case "string":
-                            return typeof(string);
-                        case "boolean":
-                            return typeof(bool);
-                        default:
-                            throw new Exception($"Could not determine .NET type for parameter type {type} and format 'null'");
-                    }
-                case "int32":
-                    return typeof(int);
-                case "int64":
-                    return typeof(long);
-                case "byte":
-                    return typeof(byte);
-                case "date":
-                    return typeof(DateTime);
-                case "date-time":
-                    return typeof(DateTimeOffset);
-                case "double":
-                    return typeof(double);
-                case "float":
-                    return typeof(float);
-                case "guid":
-                    return typeof(Guid);
-                case "binary":
-                    return typeof(byte[]);
-                default:
-                    throw new Exception($"Could not determine .NET type for parameter type {type} and format {format}");
-            }
         }
     }
 }

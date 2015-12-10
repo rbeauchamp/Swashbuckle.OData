@@ -172,6 +172,8 @@
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
     <Compile Include="Descriptions\IParameterMapper.cs" />
+    <Compile Include="Descriptions\ParameterExtensions.cs" />
+    <Compile Include="Descriptions\SwaggerApiHttpActionDescriptor.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\SwaggerToApiExplorerMapper.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
@@ -181,8 +183,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="SchemaRegistryExtensions.cs" />
-    <Compile Include="SwaggerApiParameterDescription.cs" />
-    <Compile Include="SwaggerApiParameterSource.cs" />
+    <Compile Include="Descriptions\SwaggerApiParameterDescription.cs" />
+    <Compile Include="Descriptions\SwaggerApiParameterSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
