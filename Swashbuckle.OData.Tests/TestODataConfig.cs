@@ -7,24 +7,23 @@ using Microsoft.Restier.EntityFramework;
 using Microsoft.Restier.WebApi;
 using Microsoft.Restier.WebApi.Batch;
 using SwashbuckleODataSample.Models;
-using SwashbuckleODataSample.Repositories;
 using SwashbuckleODataSample.Versioning;
 
 namespace SwashbuckleODataSample
 {
-    public static class ODataConfig
+    public static class TestODataConfig
     {
         public const string ODataRoutePrefix = "odata";
 
-        public static void Register(HttpConfiguration config)
+        public static void Register(HttpConfiguration config, HttpServer server)
         {
             ConfigureWebApiOData(config);
-            ConfigureRestierOData(config);
+            ConfigureRestierOData(config, server);
         }
 
-        private static async void ConfigureRestierOData(HttpConfiguration config)
+        private static async void ConfigureRestierOData(HttpConfiguration config, HttpServer server)
         {
-            await config.MapRestierRoute<DbApi<RestierODataContext>>("RESTierRoute", "restier", new RestierBatchHandler(GlobalConfiguration.DefaultServer));
+            await config.MapRestierRoute<DbApi<TestRestierODataContext>>("RESTierRoute", "restier", new RestierBatchHandler(server));
         }
 
         private static void ConfigureWebApiOData(HttpConfiguration config)

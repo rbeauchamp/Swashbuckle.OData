@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace SwashbuckleODataSample
+namespace SwashbuckleODataSample.Utils
 {
     /// <summary>
     /// Generates <see cref="System.Guid" /> values using strategy from Jeremy Todd.

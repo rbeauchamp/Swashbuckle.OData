@@ -3,7 +3,7 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Tests
 {
-    public class ApplyDocumentVendorExtensions : IDocumentFilter
+    public class ApplyNewHostName : IDocumentFilter
     {
         public void Apply(SwaggerDocument swaggerDoc, SchemaRegistry schemaRegistry, IApiExplorer apiExplorer)
         {

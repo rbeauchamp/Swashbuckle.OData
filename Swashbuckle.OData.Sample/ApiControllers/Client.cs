@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SwashbuckleODataSample.Models
+namespace SwashbuckleODataSample.ApiControllers
 {
     public class Client
     {

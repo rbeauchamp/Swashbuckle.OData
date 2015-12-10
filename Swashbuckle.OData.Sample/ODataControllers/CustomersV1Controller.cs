@@ -2,8 +2,9 @@
 using System.Web.Http;
 using System.Web.OData;
 using SwashbuckleODataSample.Models;
+using SwashbuckleODataSample.Repositories;
 
-namespace SwashbuckleODataSample.Controllers
+namespace SwashbuckleODataSample.ODataControllers
 {
     public class CustomersV1Controller : ODataController
     {
