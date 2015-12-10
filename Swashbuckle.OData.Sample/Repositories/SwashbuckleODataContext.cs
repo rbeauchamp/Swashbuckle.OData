@@ -1,6 +1,9 @@
 ﻿using System.Data.Entity;
+using SwashbuckleODataSample.ApiControllers;
+using SwashbuckleODataSample.Models;
+using SwashbuckleODataSample.Utils;
 
-namespace SwashbuckleODataSample.Models
+namespace SwashbuckleODataSample.Repositories
 {
     public class SwashbuckleODataContext : DbContext
     {

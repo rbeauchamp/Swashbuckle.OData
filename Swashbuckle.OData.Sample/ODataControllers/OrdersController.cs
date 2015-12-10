@@ -7,8 +7,10 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.OData;
 using SwashbuckleODataSample.Models;
+using SwashbuckleODataSample.Repositories;
+using SwashbuckleODataSample.Utils;
 
-namespace SwashbuckleODataSample.Controllers
+namespace SwashbuckleODataSample.ODataControllers
 {
     public class OrdersController : ODataController
     {

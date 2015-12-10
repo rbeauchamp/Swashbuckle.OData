@@ -7,6 +7,7 @@ using Microsoft.Restier.EntityFramework;
 using Microsoft.Restier.WebApi;
 using Microsoft.Restier.WebApi.Batch;
 using SwashbuckleODataSample.Models;
+using SwashbuckleODataSample.Repositories;
 using SwashbuckleODataSample.Versioning;
 
 namespace SwashbuckleODataSample

@@ -1,6 +1,7 @@
 ﻿using System.Data.Entity;
+using SwashbuckleODataSample.Models;
 
-namespace SwashbuckleODataSample.Models
+namespace SwashbuckleODataSample.Repositories
 {
     public class RestierODataContext : DbContext
     {

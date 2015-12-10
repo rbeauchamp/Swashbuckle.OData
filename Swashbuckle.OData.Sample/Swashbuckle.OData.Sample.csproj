@@ -139,20 +139,20 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\ODataConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="ODataControllers\RestierODataContext.cs" />
-    <Compile Include="ODataControllers\User.cs" />
-    <Compile Include="ODataControllers\Customer.cs" />
+    <Compile Include="Repositories\RestierODataContext.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\Customer.cs" />
     <Compile Include="ODataControllers\CustomersV1Controller.cs" />
     <Compile Include="ODataControllers\CustomersController.cs" />
-    <Compile Include="ODataControllers\Order.cs" />
+    <Compile Include="Models\Order.cs" />
     <Compile Include="ODataControllers\OrdersV1Controller.cs" />
     <Compile Include="ODataControllers\OrdersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="ODataControllers\SwashbuckleODataContext.cs" />
+    <Compile Include="Repositories\SwashbuckleODataContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SequentialGuidGenerator.cs" />
+    <Compile Include="Utils\SequentialGuidGenerator.cs" />
     <Compile Include="Versioning\ModelValidationFilterAttribute.cs" />
     <Compile Include="Versioning\ODataHelper.cs" />
     <Compile Include="Versioning\ODataVersionControllerSelector.cs" />

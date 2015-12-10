@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using SwashbuckleODataSample.Models;
+using SwashbuckleODataSample.Repositories;
 
 namespace SwashbuckleODataSample.ApiControllers
 {
