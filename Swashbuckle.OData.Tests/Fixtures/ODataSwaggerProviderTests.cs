@@ -90,6 +90,32 @@ namespace Swashbuckle.OData.Tests
         }
 
         [Test]
+        public async Task It_supports_both_webapi_and_odata_controllers()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem clientsWebApi;
+                swaggerDocument.paths.TryGetValue("/api/Clients", out clientsWebApi);
+                clientsWebApi.Should().NotBeNull();
+                clientsWebApi.get.Should().NotBeNull();
+                clientsWebApi.patch.Should().BeNull();
+
+                PathItem clientWebApi;
+                swaggerDocument.paths.TryGetValue("/api/Clients/{id}", out clientWebApi);
+                clientWebApi.Should().NotBeNull();
+                clientWebApi.put.Should().NotBeNull();
+                clientWebApi.patch.Should().BeNull();
+            }
+        }
+
+        [Test]
         public async Task It_generates_valid_swagger_2_0_json()
         {
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
