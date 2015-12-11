@@ -101,7 +101,7 @@ namespace Swashbuckle.OData
             var rootUri = new Uri(rootUrl);
             var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
 
-            var swaggerDoc = new SwaggerDocument
+            var odataSwaggerDoc = new SwaggerDocument
             {
                 info = info,
                 host = rootUri.Host + port,
@@ -114,12 +114,35 @@ namespace Swashbuckle.OData
 
             foreach (var filter in _options.DocumentFilters)
             {
-                filter.Apply(swaggerDoc, schemaRegistry, _apiExplorer);
+                filter.Apply(odataSwaggerDoc, schemaRegistry, _apiExplorer);
             }
 
-            return swaggerDoc.paths.Any() 
-                ? swaggerDoc 
-                : _defaultProvider.GetSwagger(rootUrl, apiVersion);
+            return MergeODataAndWebApiSwaggerDocs(rootUrl, apiVersion, odataSwaggerDoc);
+        }
+
+        private SwaggerDocument MergeODataAndWebApiSwaggerDocs(string rootUrl, string apiVersion, SwaggerDocument odataSwaggerDoc)
+        {
+            var webApiSwaggerDoc = _defaultProvider.GetSwagger(rootUrl, apiVersion);
+
+            webApiSwaggerDoc.paths = webApiSwaggerDoc.paths.UnionEvenIfNull(odataSwaggerDoc.paths).ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
+            webApiSwaggerDoc.definitions = webApiSwaggerDoc.definitions.UnionEvenIfNull(odataSwaggerDoc.definitions).ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
+            webApiSwaggerDoc.parameters = webApiSwaggerDoc.parameters.UnionEvenIfNull(odataSwaggerDoc.parameters).ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
+            webApiSwaggerDoc.responses = webApiSwaggerDoc.responses.UnionEvenIfNull(odataSwaggerDoc.responses).ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
+            webApiSwaggerDoc.securityDefinitions = webApiSwaggerDoc.securityDefinitions.UnionEvenIfNull(odataSwaggerDoc.securityDefinitions).ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
+            webApiSwaggerDoc.vendorExtensions = webApiSwaggerDoc.vendorExtensions.UnionEvenIfNull(odataSwaggerDoc.vendorExtensions).ToLookup(pair => pair.Key, pair => pair.Value)
+                         .ToDictionary(group => group.Key, group => group.First());
+            webApiSwaggerDoc.tags = webApiSwaggerDoc.tags.UnionEvenIfNull(odataSwaggerDoc.tags).ToList();
+            webApiSwaggerDoc.consumes = webApiSwaggerDoc.consumes.UnionEvenIfNull(odataSwaggerDoc.consumes).ToList();
+            webApiSwaggerDoc.security = webApiSwaggerDoc.security.UnionEvenIfNull(odataSwaggerDoc.security).ToList();
+            webApiSwaggerDoc.produces = webApiSwaggerDoc.produces.UnionEvenIfNull(odataSwaggerDoc.produces).ToList();
+            webApiSwaggerDoc.schemes = webApiSwaggerDoc.schemes.UnionEvenIfNull(odataSwaggerDoc.schemes).ToList();
+
+            return webApiSwaggerDoc;
         }
 
         private SchemaRegistry GetSchemaRegistry()

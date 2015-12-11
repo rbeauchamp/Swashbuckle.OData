@@ -12,19 +12,19 @@ namespace SwashbuckleODataSample.ApiControllers
 {
     public class ProjectsController : ApiController
     {
-        private readonly SwashbuckleODataContext db = new SwashbuckleODataContext();
+        private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
         [Route("Projects/v1")]
         public IQueryable<Project> GetProjects()
         {
-            return db.Projects;
+            return _db.Projects;
         }
 
         [Route("Projects/v1/{id}")]
         [ResponseType(typeof (Project))]
         public async Task<IHttpActionResult> GetProject(int id)
         {
-            var project = await db.Projects.FindAsync(id);
+            var project = await _db.Projects.FindAsync(id);
             if (project == null)
             {
                 return NotFound();
@@ -47,11 +47,11 @@ namespace SwashbuckleODataSample.ApiControllers
                 return BadRequest();
             }
 
-            db.Entry(project).State = EntityState.Modified;
+            _db.Entry(project).State = EntityState.Modified;
 
             try
             {
-                await db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -74,8 +74,8 @@ namespace SwashbuckleODataSample.ApiControllers
                 return BadRequest(ModelState);
             }
 
-            db.Projects.Add(project);
-            await db.SaveChangesAsync();
+            _db.Projects.Add(project);
+            await _db.SaveChangesAsync();
 
             return CreatedAtRoute("DefaultApi", new
             {
@@ -87,14 +87,14 @@ namespace SwashbuckleODataSample.ApiControllers
         [ResponseType(typeof (Project))]
         public async Task<IHttpActionResult> DeleteProject(int id)
         {
-            var project = await db.Projects.FindAsync(id);
+            var project = await _db.Projects.FindAsync(id);
             if (project == null)
             {
                 return NotFound();
             }
 
-            db.Projects.Remove(project);
-            await db.SaveChangesAsync();
+            _db.Projects.Remove(project);
+            await _db.SaveChangesAsync();
 
             return Ok(project);
         }
@@ -103,14 +103,14 @@ namespace SwashbuckleODataSample.ApiControllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }
 
         private bool ProjectExists(int id)
         {
-            return db.Projects.Count(e => e.ProjectId == id) > 0;
+            return _db.Projects.Count(e => e.ProjectId == id) > 0;
         }
     }
 }

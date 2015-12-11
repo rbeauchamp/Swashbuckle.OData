@@ -12,19 +12,19 @@ namespace SwashbuckleODataSample.ApiControllers
 {
     public class ClientsController : ApiController
     {
-        private readonly SwashbuckleODataContext db = new SwashbuckleODataContext();
+        private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
         // GET: api/Clients
         public IQueryable<Client> GetClients()
         {
-            return db.Clients;
+            return _db.Clients;
         }
 
         // GET: api/Clients/5
         [ResponseType(typeof (Client))]
         public async Task<IHttpActionResult> GetClient(int id)
         {
-            var client = await db.Clients.FindAsync(id);
+            var client = await _db.Clients.FindAsync(id);
             if (client == null)
             {
                 return NotFound();
@@ -47,11 +47,11 @@ namespace SwashbuckleODataSample.ApiControllers
                 return BadRequest();
             }
 
-            db.Entry(client).State = EntityState.Modified;
+            _db.Entry(client).State = EntityState.Modified;
 
             try
             {
-                await db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -74,8 +74,8 @@ namespace SwashbuckleODataSample.ApiControllers
                 return BadRequest(ModelState);
             }
 
-            db.Clients.Add(client);
-            await db.SaveChangesAsync();
+            _db.Clients.Add(client);
+            await _db.SaveChangesAsync();
 
             return CreatedAtRoute("DefaultApi", new
             {
@@ -87,14 +87,14 @@ namespace SwashbuckleODataSample.ApiControllers
         [ResponseType(typeof (Client))]
         public async Task<IHttpActionResult> DeleteClient(int id)
         {
-            var client = await db.Clients.FindAsync(id);
+            var client = await _db.Clients.FindAsync(id);
             if (client == null)
             {
                 return NotFound();
             }
 
-            db.Clients.Remove(client);
-            await db.SaveChangesAsync();
+            _db.Clients.Remove(client);
+            await _db.SaveChangesAsync();
 
             return Ok(client);
         }
@@ -103,14 +103,14 @@ namespace SwashbuckleODataSample.ApiControllers
         {
             if (disposing)
             {
-                db.Dispose();
+                _db.Dispose();
             }
             base.Dispose(disposing);
         }
 
         private bool ClientExists(int id)
         {
-            return db.Clients.Count(e => e.Id == id) > 0;
+            return _db.Clients.Count(e => e.Id == id) > 0;
         }
     }
 }
