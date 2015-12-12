@@ -158,7 +158,7 @@ namespace Swashbuckle.OData
                          .ToDictionary(group => group.Key, group => group.First());
             webApiSwaggerDoc.vendorExtensions = webApiSwaggerDoc.vendorExtensions.UnionEvenIfNull(odataSwaggerDoc.vendorExtensions).ToLookup(pair => pair.Key, pair => pair.Value)
                          .ToDictionary(group => group.Key, group => group.First());
-            webApiSwaggerDoc.tags = webApiSwaggerDoc.tags.UnionEvenIfNull(odataSwaggerDoc.tags).ToList();
+            webApiSwaggerDoc.tags = webApiSwaggerDoc.tags.UnionEvenIfNull(odataSwaggerDoc.tags, EqualityComparer<Tag>.Create(tag => tag.name)).ToList();
             webApiSwaggerDoc.consumes = webApiSwaggerDoc.consumes.UnionEvenIfNull(odataSwaggerDoc.consumes).ToList();
             webApiSwaggerDoc.security = webApiSwaggerDoc.security.UnionEvenIfNull(odataSwaggerDoc.security).ToList();
             webApiSwaggerDoc.produces = webApiSwaggerDoc.produces.UnionEvenIfNull(odataSwaggerDoc.produces).ToList();

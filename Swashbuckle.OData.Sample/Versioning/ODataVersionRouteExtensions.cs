@@ -47,7 +47,7 @@ namespace SwashbuckleODataSample.Versioning
         {
             if (routes == null)
             {
-                throw new ArgumentNullException("routes");
+                throw new ArgumentNullException(nameof(routes));
             }
 
             string routeTemplate = string.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.ODataPathTemplate : routePrefix + "/" + ODataRouteConstants.ODataPathTemplate;

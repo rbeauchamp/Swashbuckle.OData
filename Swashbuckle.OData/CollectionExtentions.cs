@@ -43,12 +43,12 @@ namespace Swashbuckle.OData
             }
         }
 
-        public static IEnumerable<T> UnionEvenIfNull<T>(this IEnumerable<T> source, IEnumerable<T> other)
+        public static IEnumerable<T> UnionEvenIfNull<T>(this IEnumerable<T> source, IEnumerable<T> other, IEqualityComparer<T> comparer = null)
         {
             var nonNullSource = source ?? new List<T>();
             var nonNullOther = other ?? new List<T>();
 
-            return nonNullSource.Union(nonNullOther);
+            return nonNullSource.Union(nonNullOther, comparer ?? System.Collections.Generic.EqualityComparer<T>.Default);
         }
     }
 }

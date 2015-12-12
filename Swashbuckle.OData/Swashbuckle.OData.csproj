@@ -184,6 +184,7 @@
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\SwaggerToApiExplorerMapper.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
+    <Compile Include="EqualityComparer.cs" />
     <Compile Include="SwaggerPathGenerator.cs" />
     <Compile Include="ODataSwaggerProvider.cs" />
     <Compile Include="ODataSwaggerUtilities.cs" />

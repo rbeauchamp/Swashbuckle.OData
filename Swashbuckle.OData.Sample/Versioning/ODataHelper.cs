@@ -26,7 +26,7 @@ namespace SwashbuckleODataSample.Versioning
         {
             if (uri == null)
             {
-                throw new ArgumentNullException("uri");
+                throw new ArgumentNullException(nameof(uri));
             }
 
             var newRequest = new HttpRequestMessage(HttpMethod.Get, uri);
@@ -59,7 +59,7 @@ namespace SwashbuckleODataSample.Versioning
         {
             if (uri == null)
             {
-                throw new ArgumentNullException("uri");
+                throw new ArgumentNullException(nameof(uri));
             }
 
             //get the odata path Ex: ~/entityset/key/$links/navigation

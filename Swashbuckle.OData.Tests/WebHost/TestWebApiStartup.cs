@@ -3,6 +3,7 @@ using System.Web.Http;
 using Owin;
 using Swashbuckle.Application;
 using SwashbuckleODataSample;
+using SwashbuckleODataSample.DocumentFilters;
 
 namespace Swashbuckle.OData.Tests.WebHost
 {
@@ -30,6 +31,8 @@ namespace Swashbuckle.OData.Tests.WebHost
             httpConfiguration
                 .EnableSwagger(c =>
                 {
+                    c.DocumentFilter<ApplyResourceDocumentation>();
+
                     // Use "SingleApiVersion" to describe a single version API. Swagger 2.0 includes an "Info" object to
                     // hold additional metadata for an API. Version and title are required but you can also provide
                     // additional fields by chaining methods off SingleApiVersion.
