@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,9 +11,12 @@ namespace Swashbuckle.OData
 {
     public class SwaggerApiHttpActionDescriptor : HttpActionDescriptor
     {
-        public SwaggerApiHttpActionDescriptor(string actionName, Type returnType, Collection<HttpMethod> supportedHttpMethods)
+        public SwaggerApiHttpActionDescriptor(string actionName, Type returnType, Collection<HttpMethod> supportedHttpMethods, string entitySetName)
         {
+            Contract.Requires(!string.IsNullOrWhiteSpace(entitySetName));
+
             SupportedHttpMethods = supportedHttpMethods;
+            EntitySetName = entitySetName;
             ActionName = actionName;
             ReturnType = returnType;
         }
@@ -23,14 +27,16 @@ namespace Swashbuckle.OData
 
         public override Collection<HttpMethod> SupportedHttpMethods { get; }
 
+        public string EntitySetName { get; }
+
         public override Collection<HttpParameterDescriptor> GetParameters()
         {
-            throw new NotImplementedException();
+            return new Collection<HttpParameterDescriptor>();
         }
 
         public override Task<object> ExecuteAsync(HttpControllerContext controllerContext, IDictionary<string, object> dictionary, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new object());
         }
     }
 }

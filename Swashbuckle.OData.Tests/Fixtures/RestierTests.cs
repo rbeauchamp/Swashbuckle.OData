@@ -70,6 +70,24 @@ namespace Swashbuckle.OData.Tests
         }
 
         [Test]
+        public async Task It_groups_paths_by_entity_set()
+        {
+            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/restier/Users({Id})", out pathItem);
+                pathItem.get.tags.First().Should().Be("Users");
+            }
+        }
+
+        [Test]
         public async Task It_has_a_restier_get_users_response_of_type_array()
         {
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))

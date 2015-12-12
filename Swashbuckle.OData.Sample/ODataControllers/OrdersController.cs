@@ -16,18 +16,29 @@ namespace SwashbuckleODataSample.ODataControllers
     {
         private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
+        /// <summary>
+        /// Query orders
+        /// </summary>
         [EnableQuery]
         public IQueryable<Order> GetOrders()
         {
             return _db.Orders;
         }
 
+        /// <summary>
+        /// Query the order by id
+        /// </summary>
+        /// <param name="key">The order id</param>
         [EnableQuery]
         public SingleResult<Order> GetOrder([FromODataUri] Guid key)
         {
             return SingleResult.Create(_db.Orders.Where(order => order.OrderId == key));
         }
 
+        /// <summary>
+        /// Create a new order
+        /// </summary>
+        /// <param name="order">Order details</param>
         [ResponseType(typeof(Order))]
         public async Task<IHttpActionResult> Post(Order order)
         {
@@ -44,6 +55,11 @@ namespace SwashbuckleODataSample.ODataControllers
             return Created(order);
         }
 
+        /// <summary>
+        /// Edit the order with the given id
+        /// </summary>
+        /// <param name="key">Order id</param>
+        /// <param name="patch">Order details</param>
         [ResponseType(typeof(void))]
         [AcceptVerbs("PATCH", "MERGE")]
         public async Task<IHttpActionResult> Patch([FromODataUri] Guid key, Delta<Order> patch)
@@ -79,6 +95,10 @@ namespace SwashbuckleODataSample.ODataControllers
             return Updated(order);
         }
 
+        /// <summary>
+        /// Delete the order with the given id
+        /// </summary>
+        /// <param name="key">Order id</param>
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Delete([FromODataUri] Guid key)
         {

@@ -38,7 +38,8 @@ namespace Swashbuckle.OData
                 .OperationId(entitySet.Name + "_Get")
                 .Description("Returns the EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(new List<Parameter>().Parameter("$expand", "query", "Expands related entities inline.", "string", false)
+                .Parameters(new List<Parameter>()
+                .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
                 .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string", false)
                 .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false)
                 .Parameter("$orderby", "query", "Sorts the results.", "string", false)
@@ -50,7 +51,8 @@ namespace Swashbuckle.OData
                 .Summary("Post a new entity to EntitySet " + entitySet.Name)
                 .OperationId(entitySet.Name + "_Post")
                 .Description("Post a new entity to EntitySet " + entitySet.Name)
-                .Tags(entitySet.Name).Parameters(new List<Parameter>()
+                .Tags(entitySet.Name)
+                .Parameters(new List<Parameter>()
                 .Parameter(entitySet.EntityType().Name, "body", "The entity to post", entitySet.EntityType()))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse())
             };
@@ -83,9 +85,11 @@ namespace Swashbuckle.OData
                 .Summary("Get entity from " + entitySet.Name + " by key.")
                 .OperationId(entitySet.Name + "_GetById")
                 .Description("Returns the entity with the key from " + entitySet.Name)
-                .Tags(entitySet.Name).Parameters(keyParameters.DeepClone()
+                .Tags(entitySet.Name)
+                .Parameters(keyParameters.DeepClone()
                 .Parameter("$expand", "query", "Expands related entities inline.", "string", false))
-                .Parameters(keyParameters.DeepClone().Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
+                .Parameters(keyParameters.DeepClone()
+                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
 
                 patch = new Operation()
@@ -93,7 +97,8 @@ namespace Swashbuckle.OData
                 .OperationId(entitySet.Name + "_PatchById")
                 .Description("Update entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType().Name, "body", "The entity to patch", entitySet.EntityType()))
+                .Parameters(keyParameters.DeepClone()
+                .Parameter(entitySet.EntityType().Name, "body", "The entity to patch", entitySet.EntityType()))
                 .Responses(new Dictionary<string, Response>()
                 .Response("204", "Empty response").DefaultErrorResponse()),
 
@@ -102,14 +107,16 @@ namespace Swashbuckle.OData
                 .OperationId(entitySet.Name + "_PutById")
                 .Description("Replace entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(keyParameters.DeepClone().Parameter(entitySet.EntityType().Name, "body", "The entity to put", entitySet.EntityType()))
+                .Parameters(keyParameters.DeepClone()
+                .Parameter(entitySet.EntityType().Name, "body", "The entity to put", entitySet.EntityType()))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
 
                 delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
                 .OperationId(entitySet.Name + "_DeleteById")
                 .Description("Delete entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(keyParameters.DeepClone().Parameter("If-Match", "header", "If-Match header", "string", false))
+                .Parameters(keyParameters.DeepClone()
+                .Parameter("If-Match", "header", "If-Match header", "string", false))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse())
             };
         }
@@ -143,7 +150,11 @@ namespace Swashbuckle.OData
                 swaggerResponses.Response("200", "Response from " + operationImport.Name, operationImport.Operation.ReturnType.Definition);
             }
 
-            var swaggerOperationImport = new Operation().Summary("Call operation import  " + operationImport.Name).OperationId(operationImport.Name + (isFunctionImport ? "_FunctionImportGet" : "_ActionImportPost")).Description("Call operation import  " + operationImport.Name).Tags(isFunctionImport ? "Function Import" : "Action Import");
+            var swaggerOperationImport = new Operation()
+                .Summary("Call operation import  " + operationImport.Name)
+                .OperationId(operationImport.Name + (isFunctionImport ? "_FunctionImportGet" : "_ActionImportPost"))
+                .Description("Call operation import  " + operationImport.Name)
+                .Tags(isFunctionImport ? "Function Import" : "Action Import");
 
             if (swaggerParameters.Count > 0)
             {
@@ -194,7 +205,12 @@ namespace Swashbuckle.OData
                 swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.Definition);
             }
 
-            var swaggerOperation = new Operation().Summary("Call operation  " + operation.Name).OperationId(operation.Name + (isFunction ? "_FunctionGet" : "_ActionPost")).Description("Call operation  " + operation.Name).OperationId(operation.Name + (isFunction ? "_FunctionGetById" : "_ActionPostById")).Tags(entitySet.Name, isFunction ? "Function" : "Action");
+            var swaggerOperation = new Operation()
+                .Summary("Call operation  " + operation.Name)
+                .OperationId(operation.Name + (isFunction ? "_FunctionGet" : "_ActionPost"))
+                .Description("Call operation  " + operation.Name)
+                .OperationId(operation.Name + (isFunction ? "_FunctionGetById" : "_ActionPostById"))
+                .Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
             if (swaggerParameters.Count > 0)
             {
@@ -250,7 +266,10 @@ namespace Swashbuckle.OData
                 swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.Definition);
             }
 
-            var swaggerOperation = new Operation().Summary("Call operation  " + operation.Name).Description("Call operation  " + operation.Name).Tags(entitySet.Name, isFunction ? "Function" : "Action");
+            var swaggerOperation = new Operation()
+                .Summary("Call operation  " + operation.Name)
+                .Description("Call operation  " + operation.Name)
+                .Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
             if (swaggerParameters.Count > 0)
             {
@@ -325,10 +344,7 @@ namespace Swashbuckle.OData
             var swaggerOperationImportPath = "/" + operationImport.Name + "(";
             if (operationImport.IsFunctionImport())
             {
-                foreach (var parameter in operationImport.Operation.Parameters)
-                {
-                    swaggerOperationImportPath += parameter.Name + "=" + "{" + parameter.Name + "},";
-                }
+                swaggerOperationImportPath = operationImport.Operation.Parameters.Aggregate(swaggerOperationImportPath, (current, parameter) => current + parameter.Name + "=" + "{" + parameter.Name + "},");
             }
             if (swaggerOperationImportPath.EndsWith(",", StringComparison.Ordinal))
             {

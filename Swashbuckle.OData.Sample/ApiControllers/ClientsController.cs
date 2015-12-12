@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Repositories;
 
 namespace SwashbuckleODataSample.ApiControllers
@@ -14,13 +13,18 @@ namespace SwashbuckleODataSample.ApiControllers
     {
         private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
-        // GET: api/Clients
+        /// <summary>
+        /// List clients
+        /// </summary>
         public IQueryable<Client> GetClients()
         {
             return _db.Clients;
         }
 
-        // GET: api/Clients/5
+        /// <summary>
+        /// Get the client by id
+        /// </summary>
+        /// <param name="id">Client id</param>
         [ResponseType(typeof (Client))]
         public async Task<IHttpActionResult> GetClient(int id)
         {
@@ -33,7 +37,11 @@ namespace SwashbuckleODataSample.ApiControllers
             return Ok(client);
         }
 
-        // PUT: api/Clients/5
+        /// <summary>
+        /// Replace all data for the client with the given id
+        /// </summary>
+        /// <param name="id">Client id</param>
+        /// <param name="client">Client details</param>
         [ResponseType(typeof (void))]
         public async Task<IHttpActionResult> PutClient(int id, Client client)
         {
@@ -65,7 +73,10 @@ namespace SwashbuckleODataSample.ApiControllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Clients
+        /// <summary>
+        /// Create a new client
+        /// </summary>
+        /// <param name="client">Client details</param>
         [ResponseType(typeof (Client))]
         public async Task<IHttpActionResult> PostClient(Client client)
         {
@@ -83,7 +94,10 @@ namespace SwashbuckleODataSample.ApiControllers
             }, client);
         }
 
-        // DELETE: api/Clients/5
+        /// <summary>
+        /// Delete the client with the given id
+        /// </summary>
+        /// <param name="id">Client id</param>
         [ResponseType(typeof (Client))]
         public async Task<IHttpActionResult> DeleteClient(int id)
         {

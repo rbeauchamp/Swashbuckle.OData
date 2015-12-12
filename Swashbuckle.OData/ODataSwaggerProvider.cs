@@ -17,6 +17,7 @@ namespace Swashbuckle.OData
 
         private readonly Func<HttpConfiguration> _httpConfigurationProvider;
         private readonly ISwaggerProvider _defaultProvider;
+        private readonly Func<ApiDescription, string> _groupingKeySelector;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
@@ -50,6 +51,27 @@ namespace Swashbuckle.OData
             _defaultProvider = defaultProvider;
             _httpConfigurationProvider = httpConfigurationProvider;
             _options = GetSwaggerGeneratorOptions(defaultProvider);
+            _groupingKeySelector = SetGroupingKeySelector(swaggerDocsConfig, _options);
+        }
+
+        private static Func<ApiDescription, string> SetGroupingKeySelector(SwaggerDocsConfig swaggerDocsConfig, SwaggerGeneratorOptions options)
+        {
+            return TheUserSetAGroupingKeySelector(swaggerDocsConfig) 
+                ? options.GroupingKeySelector 
+                : DefineODataGroupingKeySelectorThatSupportsRestier();
+        }
+
+        private static Func<ApiDescription, string> DefineODataGroupingKeySelectorThatSupportsRestier()
+        {
+            return apiDescription => apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName == "Restier" 
+                ? ((SwaggerApiHttpActionDescriptor) apiDescription.ActionDescriptor).EntitySetName 
+                : apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName;
+        }
+
+        private static bool TheUserSetAGroupingKeySelector(SwaggerDocsConfig swaggerDocsConfig)
+        {
+            var groupingKeySelector = typeof(SwaggerDocsConfig).GetInstanceField(swaggerDocsConfig, "_groupingKeySelector") as Func<ApiDescription, string>;
+            return groupingKeySelector != null;
         }
 
         /// <summary>
@@ -94,7 +116,7 @@ namespace Swashbuckle.OData
 
             var paths = GetApiDescriptionsFor(apiVersion)
                 .Where(apiDesc => !(_options.IgnoreObsoleteActions && apiDesc.IsObsolete()))
-                .OrderBy(_options.GroupingKeySelector, _options.GroupingKeyComparer)
+                .OrderBy(_groupingKeySelector, _options.GroupingKeyComparer)
                 .GroupBy(apiDesc => apiDesc.RelativePathSansQueryString())
                 .ToDictionary(group => "/" + group.Key, group => CreatePathItem(group, schemaRegistry));
 
@@ -225,7 +247,7 @@ namespace Swashbuckle.OData
             var operation = new Operation
             {
                 summary = apiDescription.Documentation,
-                tags = new[] { _options.GroupingKeySelector(apiDescription) },
+                tags = new[] { _groupingKeySelector(apiDescription) },
                 operationId = apiDescription.FriendlyId(),
                 produces = apiDescription.Produces().ToList(),
                 consumes = apiDescription.Consumes().ToList(),

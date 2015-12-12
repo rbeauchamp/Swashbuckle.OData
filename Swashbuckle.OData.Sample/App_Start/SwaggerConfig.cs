@@ -1,7 +1,11 @@
+using System;
+using System.IO;
+using System.Reflection;
 using System.Web.Http;
 using Swashbuckle.Application;
 using Swashbuckle.OData;
 using SwashbuckleODataSample;
+using SwashbuckleODataSample.DocumentFilters;
 using WebActivatorEx;
 
 [assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
@@ -94,7 +98,10 @@ namespace SwashbuckleODataSample
                 // those comments into the generated docs and UI. You can enable this by providing the path to one or
                 // more Xml comment files.
                 //
-                //c.IncludeXmlComments(GetXmlCommentsPath());
+                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".XML";
+                var commentsFile = Path.Combine(baseDirectory, "bin", commentsFileName);
+                c.IncludeXmlComments(commentsFile);
 
                 // Swashbuckle makes a best attempt at generating Swagger compliant JSON schemas for the various types
                 // exposed in your API. However, there may be occasions when more control of the output is needed.
@@ -151,7 +158,7 @@ namespace SwashbuckleODataSample
                 // the Swagger 2.0 spec. - https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md
                 // before using this option.
                 //
-                //c.DocumentFilter<ApplyDocumentVendorExtensions>();
+                c.DocumentFilter<ApplyResourceDocumentation>();
 
                 // In contrast to WebApi, Swagger 2.0 does not include the query string component when mapping a URL
                 // to an action. As a result, Swashbuckle will raise an exception if it encounters multiple actions

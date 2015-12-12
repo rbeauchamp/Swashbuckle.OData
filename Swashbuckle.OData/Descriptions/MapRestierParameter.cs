@@ -11,7 +11,7 @@ namespace Swashbuckle.OData
             {
                 return new RestierParameterDescriptor(parameter)
                 {
-                    Configuration = actionDescriptor.ControllerDescriptor.Configuration,
+                    Configuration = actionDescriptor.ControllerDescriptor.Configuration
                 };
             }
             return null;

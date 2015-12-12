@@ -219,7 +219,7 @@ namespace Swashbuckle.OData
                 operation.responses.TryGetValue("200", out response);
                 if (!string.IsNullOrWhiteSpace(response?.schema?.@ref))
                 {
-                    return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntityType(), actionDescriptor.SupportedHttpMethods)
+                    return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntityType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
                     {
                         Configuration = actionDescriptor.Configuration,
                         ControllerDescriptor = actionDescriptor.ControllerDescriptor
@@ -227,12 +227,17 @@ namespace Swashbuckle.OData
                 }
                 if (response?.schema?.type == "array")
                 {
-                    return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods)
+                    return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
                     {
                         Configuration = actionDescriptor.Configuration,
                         ControllerDescriptor = actionDescriptor.ControllerDescriptor
                     };
                 }
+                return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, null, actionDescriptor.SupportedHttpMethods, operation.tags.First())
+                {
+                    Configuration = actionDescriptor.Configuration,
+                    ControllerDescriptor = actionDescriptor.ControllerDescriptor
+                };
             }
             return actionDescriptor;
         }

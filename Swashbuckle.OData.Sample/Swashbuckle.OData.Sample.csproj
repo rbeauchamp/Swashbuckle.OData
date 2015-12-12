@@ -32,6 +32,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\SwashbuckleODataSample.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -40,6 +42,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\SwashbuckleODataSample.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -134,18 +138,17 @@
     <Compile Include="ApiControllers\Client.cs" />
     <Compile Include="ApiControllers\ClientsController.cs" />
     <Compile Include="ApiControllers\Project.cs" />
-    <Compile Include="ApiControllers\ProjectsController.cs" />
     <Compile Include="App_Start\FormatterConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\ODataConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="DocumentFilters\ApplyResourceDocumentation.cs" />
     <Compile Include="Repositories\RestierODataContext.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Customer.cs" />
     <Compile Include="ODataControllers\CustomersV1Controller.cs" />
     <Compile Include="ODataControllers\CustomersController.cs" />
     <Compile Include="Models\Order.cs" />
-    <Compile Include="ODataControllers\OrdersV1Controller.cs" />
     <Compile Include="ODataControllers\OrdersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

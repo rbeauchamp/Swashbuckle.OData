@@ -10,12 +10,19 @@ namespace SwashbuckleODataSample.ODataControllers
     {
         private readonly SwashbuckleODataContext _db = new SwashbuckleODataContext();
 
+        /// <summary>
+        /// Query customers
+        /// </summary>
         [EnableQuery]
         public IQueryable<Customer> GetCustomers()
         {
             return _db.Customers;
         }
 
+        /// <summary>
+        /// Query the customer by id
+        /// </summary>
+        /// <param name="key">The customer id</param>
         [EnableQuery]
         public SingleResult<Customer> GetCustomer([FromODataUri] int key)
         {
