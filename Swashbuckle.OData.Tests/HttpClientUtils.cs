@@ -2,18 +2,16 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Flurl;
-using Swashbuckle.OData.Tests.WebHost;
-using SwashbuckleODataSample;
 
 namespace Swashbuckle.OData.Tests
 {
     public class HttpClientUtils
     {
-        public static HttpClient GetHttpClient()
+        public static HttpClient GetHttpClient(string baseAddress, string routePrefix = null)
         {
             var client =  new HttpClient
             {
-                BaseAddress = new Uri(TestWebApiStartup.BaseAddress.AppendPathSegment(ODataConfig.ODataRoutePrefix)),
+                BaseAddress = string.IsNullOrWhiteSpace(routePrefix) ? new Uri(baseAddress) : new Uri(baseAddress.AppendPathSegment(routePrefix)),
                 Timeout = TimeSpan.FromMilliseconds(5 * 60 * 1000)
             };
 

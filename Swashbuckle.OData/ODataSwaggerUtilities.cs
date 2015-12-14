@@ -312,20 +312,47 @@ namespace Swashbuckle.OData
             }
 
             var singleEntityPath = GetPathForEntitySet(routePrefix, entitySet) + "(";
-            foreach (var key in entitySet.EntityType().Key())
+            if (entitySet.EntityType().Key().Count() == 1)
             {
-                if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
-                {
-                    singleEntityPath += "'{" + key.Name + "}', ";
-                }
-                else
-                {
-                    singleEntityPath += "{" + key.Name + "}, ";
-                }
+                singleEntityPath = AppendSingleColumnKeyTemplate(entitySet, singleEntityPath);
+            }
+            else
+            {
+                singleEntityPath = AppendMultiColumnKeyTemplate(entitySet, singleEntityPath);
             }
             singleEntityPath = singleEntityPath.Substring(0, singleEntityPath.Length - 2);
             singleEntityPath += ")";
 
+            return singleEntityPath;
+        }
+
+        private static string AppendSingleColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath)
+        {
+            var key = entitySet.EntityType().Key().Single();
+            if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
+            {
+                singleEntityPath += "'{" + key.Name + "}', ";
+            }
+            else
+            {
+                singleEntityPath += "{" + key.Name + "}, ";
+            }
+            return singleEntityPath;
+        }
+
+        private static string AppendMultiColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath)
+        {
+            foreach (var key in entitySet.EntityType().Key())
+            {
+                if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType)key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
+                {
+                    singleEntityPath += key.Name + "='{" + key.Name + "}', ";
+                }
+                else
+                {
+                    singleEntityPath += key.Name + "={" + key.Name + "}, ";
+                }
+            }
             return singleEntityPath;
         }
 

@@ -1,10 +1,16 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Owin.Hosting;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 using NUnit.Framework;
 using Swashbuckle.OData.Tests.WebHost;
 using Swashbuckle.Swagger;
+using SwashbuckleODataSample;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -17,7 +23,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -37,7 +43,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -55,7 +61,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -75,7 +81,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -93,7 +99,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -109,6 +115,51 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
+        [Test]
+        public async Task It_supports_entities_with_multiple_keys()
+        {
+            using (WebApp.Start(NorthwindApiStartup.BaseAddress, appBuilder => new NorthwindApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(NorthwindApiStartup.BaseAddress);
 
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/restier/Order_Details(OrderID={OrderID}, ProductID={ProductID})", out pathItem);
+                var getResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
+                getResponse.Should().NotBeNull();
+            }
+        }
+
+        [Test]
+        public async Task It_generates_valid_swagger_2_0_json_for_the_northwind_model()
+        {
+            using (WebApp.Start(NorthwindApiStartup.BaseAddress, appBuilder => new NorthwindApiStartup().Configuration(appBuilder)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(NorthwindApiStartup.BaseAddress);
+
+                // Act
+                var response = await httpClient.GetAsync("swagger/docs/v1");
+
+                // Assert
+                await response.ValidateSuccessAsync();
+                var swaggerJson = await response.Content.ReadAsStringAsync();
+
+                var resolver = new JSchemaPreloadedResolver();
+                resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText(@"schema-draft-v4.json"));
+
+                var swaggerSchema = File.ReadAllText(@"swagger-2.0-schema.json");
+                var schema = JSchema.Parse(swaggerSchema, resolver);
+
+                var swaggerJObject = JObject.Parse(swaggerJson);
+                IList<string> messages;
+                var isValid = swaggerJObject.IsValid(schema, out messages);
+                isValid.Should().BeTrue();
+            }
+        }
     }
 }

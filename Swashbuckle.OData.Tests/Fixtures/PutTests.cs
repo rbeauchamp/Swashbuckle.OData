@@ -4,6 +4,7 @@ using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Swashbuckle.OData.Tests.WebHost;
 using Swashbuckle.Swagger;
+using SwashbuckleODataSample;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -16,7 +17,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -35,7 +36,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient();
+                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
