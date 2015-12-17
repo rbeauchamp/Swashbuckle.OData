@@ -1,7 +1,7 @@
 using System;
 using System.Web.Http.Controllers;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
     internal class ODataParameterDescriptor : HttpParameterDescriptor
     {

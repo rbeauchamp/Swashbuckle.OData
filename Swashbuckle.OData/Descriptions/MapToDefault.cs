@@ -1,13 +1,13 @@
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
-    internal class MapToDefault : IParameterMapper
+    public class MapToDefault : IParameterMapper
     {
-        public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
+        public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {
-            return new ODataParameterDescriptor(parameter.name, parameter.GetClrType(), !parameter.required.Value)
+            return new ODataParameterDescriptor(swaggerParameter.name, swaggerParameter.GetClrType(), !swaggerParameter.required.Value)
             {
                 Configuration = actionDescriptor.ControllerDescriptor.Configuration,
                 ActionDescriptor = actionDescriptor

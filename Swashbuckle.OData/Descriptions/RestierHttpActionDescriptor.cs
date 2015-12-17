@@ -7,11 +7,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Controllers;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
-    public class SwaggerApiHttpActionDescriptor : HttpActionDescriptor
+    internal class RestierHttpActionDescriptor : HttpActionDescriptor
     {
-        public SwaggerApiHttpActionDescriptor(string actionName, Type returnType, Collection<HttpMethod> supportedHttpMethods, string entitySetName)
+        public RestierHttpActionDescriptor(string actionName, Type returnType, Collection<HttpMethod> supportedHttpMethods, string entitySetName)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(entitySetName));
 

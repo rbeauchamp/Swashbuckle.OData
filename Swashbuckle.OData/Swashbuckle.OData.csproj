@@ -171,23 +171,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
+    <Compile Include="DefaultCompositionRoot.cs" />
+    <Compile Include="Descriptions\HttpActionDescriptorExtensions.cs" />
+    <Compile Include="Descriptions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Descriptions\IParameterMapper.cs" />
+    <Compile Include="Descriptions\IODataRouteGenerator.cs" />
     <Compile Include="Descriptions\MapByDescription.cs" />
     <Compile Include="Descriptions\MapByIndex.cs" />
     <Compile Include="Descriptions\MapByParameterName.cs" />
     <Compile Include="Descriptions\MapRestierParameter.cs" />
     <Compile Include="Descriptions\MapToDefault.cs" />
     <Compile Include="Descriptions\ODataParameterDescriptor.cs" />
+    <Compile Include="Descriptions\ODataRouteExtensions.cs" />
+    <Compile Include="Descriptions\OperationExtensions.cs" />
     <Compile Include="Descriptions\ParameterExtensions.cs" />
     <Compile Include="Descriptions\RestierParameterDescriptor.cs" />
-    <Compile Include="Descriptions\SwaggerApiHttpActionDescriptor.cs" />
+    <Compile Include="Descriptions\RestierHttpActionDescriptor.cs" />
+    <Compile Include="Descriptions\SwaggerRoute.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
-    <Compile Include="Descriptions\SwaggerToApiExplorerMapper.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
     <Compile Include="EqualityComparer.cs" />
-    <Compile Include="SwaggerPathGenerator.cs" />
+    <Compile Include="ODataSwaggerProviderOptions.cs" />
+    <Compile Include="SwaggerDocsConfigExtensions.cs" />
+    <Compile Include="SwaggerProviderOptions.cs" />
+    <Compile Include="Descriptions\SwaggerPathGenerator.cs" />
     <Compile Include="ODataSwaggerProvider.cs" />
-    <Compile Include="ODataSwaggerUtilities.cs" />
+    <Compile Include="Descriptions\ODataSwaggerUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="SchemaRegistryExtensions.cs" />

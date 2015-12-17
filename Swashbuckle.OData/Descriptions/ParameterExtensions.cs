@@ -3,10 +3,29 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
     internal static class ParameterExtensions
     {
+        public static SwaggerApiParameterSource MapSource(this Parameter parameter)
+        {
+            switch (parameter.@in)
+            {
+                case "query":
+                    return SwaggerApiParameterSource.Query;
+                case "header":
+                    return SwaggerApiParameterSource.Header;
+                case "path":
+                    return SwaggerApiParameterSource.Path;
+                case "formData":
+                    return SwaggerApiParameterSource.FormData;
+                case "body":
+                    return SwaggerApiParameterSource.Body;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(parameter), parameter, null);
+            }
+        }
+
         public static Type GetClrType(this Parameter parameter)
         {
             var type = parameter.type;
@@ -18,7 +37,7 @@ namespace Swashbuckle.OData
                     switch (type)
                     {
                         case null:
-                            return GetEntityType(parameter);
+                            return GetEntityTypeForBodyParameter(parameter);
                         case "string":
                             return typeof(string);
                         case "boolean":
@@ -49,7 +68,48 @@ namespace Swashbuckle.OData
             }
         }
 
-        private static Type GetEntityType(Parameter parameter)
+        public static string GenerateSamplePathParameterValue(this Parameter parameter)
+        {
+            Contract.Requires(parameter.@in == "path");
+
+            var type = parameter.type;
+            var format = parameter.format;
+
+            switch (format)
+            {
+                case null:
+                    switch (type)
+                    {
+                        case "string":
+                            return "SampleString";
+                        case "boolean":
+                            return "true";
+                        default:
+                            throw new Exception($"Could not generate sample value for query parameter type {type} and format {"null"}");
+                    }
+                case "int32":
+                case "int64":
+                    return "42";
+                case "byte":
+                    return "1";
+                case "date":
+                    return "2015-12-12T12:00";
+                case "date-time":
+                    return "2015-10-10T17:00:00Z";
+                case "double":
+                    return "2.34d";
+                case "float":
+                    return "2.0f";
+                case "guid":
+                    return Guid.NewGuid().ToString();
+                case "binary":
+                    return Convert.ToBase64String(new byte[] { 130, 200, 234, 23 });
+                default:
+                    throw new Exception($"Could not generate sample value for query parameter type {type} and format {format}");
+            }
+        }
+
+        private static Type GetEntityTypeForBodyParameter(Parameter parameter)
         {
             Contract.Requires(parameter.@in == "body");
 
@@ -70,6 +130,7 @@ namespace Swashbuckle.OData
         public static Type GetEntitySetType(this Schema schema)
         {
             Contract.Requires(schema.type == "array");
+
             var queryableType = typeof(IQueryable<>);
             var fullTypeName = schema.items.@ref.Replace("#/definitions/", string.Empty);
             var entityType = FindType(fullTypeName);

@@ -1,19 +1,19 @@
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
-    internal class MapByIndex : IParameterMapper
+    public class MapByIndex : IParameterMapper
     {
-        public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
+        public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {
-            if (parameter.@in != "query" && index < actionDescriptor.GetParameters().Count)
+            if (swaggerParameter.@in != "query" && parameterIndex < actionDescriptor.GetParameters().Count)
             {
-                var parameterDescriptor = actionDescriptor.GetParameters()[index];
+                var parameterDescriptor = actionDescriptor.GetParameters()[parameterIndex];
                 if (parameterDescriptor != null)
                 {
                     // Need to assign the correct name expected by OData
-                    return new ODataParameterDescriptor(parameter.name, parameterDescriptor.ParameterType, parameterDescriptor.IsOptional)
+                    return new ODataParameterDescriptor(swaggerParameter.name, parameterDescriptor.ParameterType, parameterDescriptor.IsOptional)
                     {
                         Configuration = actionDescriptor.ControllerDescriptor.Configuration,
                         ActionDescriptor = actionDescriptor,

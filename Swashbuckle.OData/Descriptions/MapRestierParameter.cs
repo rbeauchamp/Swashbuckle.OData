@@ -1,15 +1,15 @@
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
-    internal class MapRestierParameter : IParameterMapper
+    public class MapRestierParameter : IParameterMapper
     {
-        public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
+        public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {
             if (actionDescriptor.ControllerDescriptor.ControllerName == "Restier")
             {
-                return new RestierParameterDescriptor(parameter)
+                return new RestierParameterDescriptor(swaggerParameter)
                 {
                     Configuration = actionDescriptor.ControllerDescriptor.Configuration
                 };

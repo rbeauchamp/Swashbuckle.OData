@@ -4,7 +4,7 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
     internal class RestierParameterDescriptor : HttpParameterDescriptor
     {

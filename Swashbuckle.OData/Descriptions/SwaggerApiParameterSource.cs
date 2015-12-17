@@ -1,4 +1,4 @@
-﻿namespace Swashbuckle.OData
+﻿namespace Swashbuckle.OData.Descriptions
 {
     internal enum SwaggerApiParameterSource
     {
