@@ -7,20 +7,20 @@ namespace Swashbuckle.OData.Descriptions
 {
     internal static class ParameterExtensions
     {
-        public static SwaggerApiParameterSource MapSource(this Parameter parameter)
+        public static ParameterSource MapSource(this Parameter parameter)
         {
             switch (parameter.@in)
             {
                 case "query":
-                    return SwaggerApiParameterSource.Query;
+                    return ParameterSource.Query;
                 case "header":
-                    return SwaggerApiParameterSource.Header;
+                    return ParameterSource.Header;
                 case "path":
-                    return SwaggerApiParameterSource.Path;
+                    return ParameterSource.Path;
                 case "formData":
-                    return SwaggerApiParameterSource.FormData;
+                    return ParameterSource.FormData;
                 case "body":
-                    return SwaggerApiParameterSource.Body;
+                    return ParameterSource.Body;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parameter), parameter, null);
             }

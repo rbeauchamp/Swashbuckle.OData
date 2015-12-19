@@ -685,7 +685,7 @@ namespace Swashbuckle.OData.Descriptions
             return parameters;
         }
 
-        private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, IEdmType type)
+        internal static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, IEdmType type)
         {
             var parameter = new Parameter
             {

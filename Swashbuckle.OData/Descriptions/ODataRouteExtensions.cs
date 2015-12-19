@@ -4,7 +4,7 @@ using Microsoft.OData.Edm;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    internal static class ODataRouteExtensions
+    public static class ODataRouteExtensions
     {
         public static IEdmModel GetEdmModel(this ODataRoute oDataRoute)
         {

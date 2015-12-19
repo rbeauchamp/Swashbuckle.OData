@@ -172,6 +172,7 @@
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
     <Compile Include="DefaultCompositionRoot.cs" />
+    <Compile Include="Descriptions\EdmLibHelpers.cs" />
     <Compile Include="Descriptions\HttpActionDescriptorExtensions.cs" />
     <Compile Include="Descriptions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Descriptions\IParameterMapper.cs" />
@@ -183,11 +184,17 @@
     <Compile Include="Descriptions\MapToDefault.cs" />
     <Compile Include="Descriptions\ODataParameterDescriptor.cs" />
     <Compile Include="Descriptions\ODataRouteExtensions.cs" />
+    <Compile Include="Descriptions\OperationBuilder.cs" />
     <Compile Include="Descriptions\OperationExtensions.cs" />
     <Compile Include="Descriptions\ParameterExtensions.cs" />
     <Compile Include="Descriptions\RestierParameterDescriptor.cs" />
     <Compile Include="Descriptions\RestierHttpActionDescriptor.cs" />
+    <Compile Include="Descriptions\SelectExpandWrapper.cs" />
     <Compile Include="Descriptions\SwaggerRoute.cs" />
+    <Compile Include="Descriptions\SwaggerRouteBuilder.cs" />
+    <Compile Include="Descriptions\SwaggerTypeAndFormat.cs" />
+    <Compile Include="Descriptions\TypeExtensions.cs" />
+    <Compile Include="Descriptions\TypeHelper.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
     <Compile Include="EqualityComparer.cs" />
@@ -201,7 +208,7 @@
     <Compile Include="ReflectionExtensions.cs" />
     <Compile Include="SchemaRegistryExtensions.cs" />
     <Compile Include="Descriptions\SwaggerApiParameterDescription.cs" />
-    <Compile Include="Descriptions\SwaggerApiParameterSource.cs" />
+    <Compile Include="Descriptions\ParameterSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -15,7 +15,7 @@ namespace NorthwindAPI.Models
 
         [Key]
         [StringLength(5)]
-        public string CustomerID { get; set; }
+        public string CustomerId { get; set; }
 
         [Required]
         [StringLength(40)]

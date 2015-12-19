@@ -13,7 +13,7 @@ namespace NorthwindAPI.Models
             Products = new HashSet<Product>();
         }
 
-        public int SupplierID { get; set; }
+        public int SupplierId { get; set; }
 
         [Required]
         [StringLength(40)]

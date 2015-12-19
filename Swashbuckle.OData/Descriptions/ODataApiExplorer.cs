@@ -46,14 +46,14 @@ namespace Swashbuckle.OData.Descriptions
 
         private Collection<ApiDescription> GetApiDescriptions()
         {
-            var apiDescriptions = new Collection<ApiDescription>();
+            var apiDescriptions = new List<ApiDescription>();
 
             foreach (var odataRoute in FlattenRoutes(_httpConfig.Routes).OfType<ODataRoute>())
             {
                 apiDescriptions.AddRange(GetApiDescriptions(odataRoute));
             }
 
-            return apiDescriptions;
+            return new Collection<ApiDescription>(apiDescriptions.Distinct(EqualityComparer<ApiDescription>.Create(description => new { description.HttpMethod, description.RelativePath, description.ActionDescriptor })).ToList());
         }
 
         /// <summary>
@@ -65,7 +65,11 @@ namespace Swashbuckle.OData.Descriptions
         {
             var apiDescriptions = new List<ApiDescription>();
 
-            foreach (var potentialRoute in _routeGenerator.Generate(oDataRoute.RoutePrefix, oDataRoute.GetEdmModel()))
+            var standardRoutes = _routeGenerator.Generate(oDataRoute.RoutePrefix, oDataRoute.GetEdmModel());
+
+            var customRoutes = _httpConfig.GetCustomSwaggerRoutes(oDataRoute);
+
+            foreach (var potentialRoute in standardRoutes.Concat(customRoutes))
             {
                 apiDescriptions.AddRange(GetApiDescriptions(oDataRoute, potentialRoute));
             }
@@ -120,6 +124,9 @@ namespace Swashbuckle.OData.Descriptions
             httpRequestMessage.SetRequestContext(requestContext);
             httpRequestMessage.ODataProperties().Model = oDataRoute.GetEdmModel();
             httpRequestMessage.ODataProperties().Path = odataPath;
+            httpRequestMessage.ODataProperties().RouteName = oDataRoute.GetODataPathRouteConstraint().RouteName;
+            httpRequestMessage.ODataProperties().RoutingConventions = oDataRoute.GetODataPathRouteConstraint().RoutingConventions;
+            httpRequestMessage.ODataProperties().PathHandler = oDataRoute.GetODataPathRouteConstraint().PathHandler;
             var routeData = _httpConfig.Routes.GetRouteData(httpRequestMessage);
             httpRequestMessage.SetRouteData(routeData);
             return httpRequestMessage;
@@ -137,7 +144,7 @@ namespace Swashbuckle.OData.Descriptions
             var parameterDescriptions = CreateParameterDescriptions(operation, actionDescriptor);
 
             // request formatters
-            var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == SwaggerApiParameterSource.Body);
+            var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == ParameterSource.Body);
             var supportedRequestBodyFormatters = bodyParameter != null ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) : Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters

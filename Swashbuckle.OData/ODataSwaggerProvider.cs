@@ -255,19 +255,19 @@ namespace Swashbuckle.OData
             return parameter;
         }
 
-        private static string MapToSwaggerParameterLocation(SwaggerApiParameterSource swaggerSource)
+        private static string MapToSwaggerParameterLocation(ParameterSource swaggerSource)
         {
             switch (swaggerSource)
             {
-                case SwaggerApiParameterSource.Query:
+                case ParameterSource.Query:
                     return "query";
-                case SwaggerApiParameterSource.Header:
+                case ParameterSource.Header:
                     return "header";
-                case SwaggerApiParameterSource.Path:
+                case ParameterSource.Path:
                     return "path";
-                case SwaggerApiParameterSource.FormData:
+                case ParameterSource.FormData:
                     return "formData";
-                case SwaggerApiParameterSource.Body:
+                case ParameterSource.Body:
                     return "body";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(swaggerSource), swaggerSource, null);

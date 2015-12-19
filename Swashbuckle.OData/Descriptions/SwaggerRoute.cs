@@ -14,6 +14,12 @@ namespace Swashbuckle.OData.Descriptions
             PathItem = pathItem;
         }
 
+        public SwaggerRoute(string template) :
+            this(template, new PathItem())
+        {
+            Contract.Requires(!string.IsNullOrWhiteSpace(template));
+        }
+
         public string Template { get; }
 
         public PathItem PathItem { get; }

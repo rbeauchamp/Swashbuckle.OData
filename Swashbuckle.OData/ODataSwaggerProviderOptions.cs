@@ -76,10 +76,7 @@ namespace Swashbuckle.OData
         private static ApiDescription DefaultConflictingActionsResolver(IEnumerable<ApiDescription> apiDescriptions)
         {
             var first = apiDescriptions.First();
-            throw new NotSupportedException(String.Format(
-                "Not supported by Swagger 2.0: Multiple operations with path '{0}' and method '{1}'. " +
-                "See the config setting - \"ResolveConflictingActions\" for a potential workaround",
-                first.RelativePathSansQueryString(), first.HttpMethod));
+            throw new NotSupportedException($"Not supported by Swagger 2.0: Multiple operations with path '{first.RelativePathSansQueryString()}' and method '{first.HttpMethod}'. " + "See the config setting - \"ResolveConflictingActions\" for a potential workaround");
         }
     }
 }

@@ -15,7 +15,7 @@ namespace NorthwindAPI.Models
         }
 
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int RegionID { get; set; }
+        public int RegionId { get; set; }
 
         [Required]
         [StringLength(50)]

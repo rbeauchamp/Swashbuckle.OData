@@ -12,7 +12,7 @@ namespace NorthwindAPI.Models
             Orders = new HashSet<NorthwindOrder>();
         }
 
-        public int ShipperID { get; set; }
+        public int ShipperId { get; set; }
 
         [Required]
         [StringLength(40)]

@@ -138,6 +138,7 @@
   <ItemGroup>
     <Compile Include="ApplyNewHostName.cs" />
     <Compile Include="ContentType.cs" />
+    <Compile Include="Fixtures\CustomRouteTests.cs" />
     <Compile Include="Fixtures\ODataSwaggerProviderTests.cs" />
     <Compile Include="Fixtures\PostTests.cs" />
     <Compile Include="Fixtures\PatchTests.cs" />

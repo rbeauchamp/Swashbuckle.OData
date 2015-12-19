@@ -11,16 +11,16 @@ namespace NorthwindAPI.Models
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public NorthwindOrder()
         {
-            Order_Details = new HashSet<Order_Detail>();
+            OrderDetails = new HashSet<OrderDetail>();
         }
 
         [Key]
-        public int OrderID { get; set; }
+        public int OrderId { get; set; }
 
         [StringLength(5)]
-        public string CustomerID { get; set; }
+        public string CustomerId { get; set; }
 
-        public int? EmployeeID { get; set; }
+        public int? EmployeeId { get; set; }
 
         public DateTime? OrderDate { get; set; }
 
@@ -56,7 +56,7 @@ namespace NorthwindAPI.Models
         public virtual Employee Employee { get; set; }
 
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Order_Detail> Order_Details { get; set; }
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 
         public virtual Shipper Shipper { get; set; }
     }
