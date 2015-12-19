@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace Swashbuckle.OData
 {
@@ -7,7 +8,7 @@ namespace Swashbuckle.OData
     ///     Non-generic class to produce instances of the generic class,
     ///     optionally using type inference.
     /// </summary>
-    public static class EqualityComparer
+    internal static class EqualityComparer
     {
         /// <summary>
         ///     Creates an instance of ProjectionEqualityComparer using the specified projection.
@@ -52,7 +53,7 @@ namespace Swashbuckle.OData
     ///     Class generic in the source only to produce instances of the
     ///     doubly generic class, optionally using type inference.
     /// </summary>
-    public static class EqualityComparer<TSource>
+    internal static class EqualityComparer<TSource>
     {
         /// <summary>
         ///     Creates an instance of ProjectionEqualityComparer using the specified projection.
@@ -84,7 +85,7 @@ namespace Swashbuckle.OData
     ///     Type of the key projected
     ///     from the element
     /// </typeparam>
-    public class EqualityComparer<TSource, TKey> : IEqualityComparer<TSource>
+    internal class EqualityComparer<TSource, TKey> : IEqualityComparer<TSource>
     {
         private readonly IEqualityComparer<TKey> _comparer;
         private readonly Func<TSource, TKey> _projection;
@@ -146,6 +147,13 @@ namespace Swashbuckle.OData
                 throw new ArgumentNullException(nameof(obj));
             }
             return _comparer.GetHashCode(_projection(obj));
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariant()
+        {
+            Contract.Invariant(_projection != null);
+            Contract.Invariant(_comparer != null);
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http;
@@ -14,41 +14,30 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using Flurl;
-using Microsoft.OData.Edm;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
     internal class ODataApiExplorer : IApiExplorer
     {
         private const string ServiceRoot = "http://any/";
         private readonly Lazy<Collection<ApiDescription>> _apiDescriptions;
-        private readonly Func<HttpConfiguration> _config;
-        private readonly SwaggerToApiExplorerMapper _swaggerToApiExplorerMapper;
+        private readonly HttpConfiguration _httpConfig;
+        private readonly IODataRouteGenerator _routeGenerator;
+        private readonly IEnumerable<IParameterMapper> _parameterMappers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataApiExplorer" /> class.
         /// </summary>
-        /// <param name="httpConfigurationProvider">The HTTP configuration provider.</param>
-        public ODataApiExplorer(Func<HttpConfiguration> httpConfigurationProvider)
+        /// <param name="httpConfig">The HTTP configuration provider.</param>
+        /// <param name="routeGenerator">The swagger path generator.</param>
+        /// <param name="parameterMappers">The parameter mappers.</param>
+        public ODataApiExplorer(HttpConfiguration httpConfig, IODataRouteGenerator routeGenerator, IEnumerable<IParameterMapper> parameterMappers)
         {
-            _config = httpConfigurationProvider;
+            _httpConfig = httpConfig;
+            _routeGenerator = routeGenerator;
+            _parameterMappers = parameterMappers;
             _apiDescriptions = new Lazy<Collection<ApiDescription>>(GetApiDescriptions);
-            _swaggerToApiExplorerMapper = GetSwaggerToApiExplorerMapper();
-        }
-
-        private static SwaggerToApiExplorerMapper GetSwaggerToApiExplorerMapper()
-        {
-            var parameterMappers = new List<IParameterMapper>
-            {
-                new MapRestierParameter(),
-                new MapByParameterName(),
-                new MapByDescription(),
-                new MapByIndex(),
-                new MapToDefault()
-            };
-
-            return new SwaggerToApiExplorerMapper(parameterMappers);
         }
 
         /// <summary>
@@ -58,14 +47,14 @@ namespace Swashbuckle.OData
 
         private Collection<ApiDescription> GetApiDescriptions()
         {
-            var apiDescriptions = new Collection<ApiDescription>();
+            var apiDescriptions = new List<ApiDescription>();
 
-            foreach (var odataRoute in FlattenRoutes(_config().Routes).OfType<ODataRoute>())
+            foreach (var odataRoute in FlattenRoutes(_httpConfig.Routes).OfType<ODataRoute>())
             {
                 apiDescriptions.AddRange(GetApiDescriptions(odataRoute));
             }
 
-            return apiDescriptions;
+            return new Collection<ApiDescription>(apiDescriptions.Distinct(EqualityComparer<ApiDescription>.Create(description => new { description.HttpMethod, description.RelativePath, description.ActionDescriptor })).ToList());
         }
 
         /// <summary>
@@ -73,132 +62,114 @@ namespace Swashbuckle.OData
         /// </summary>
         /// <param name="oDataRoute">The route.</param>
         /// <returns></returns>
-        private Collection<ApiDescription> GetApiDescriptions(ODataRoute oDataRoute)
+        private List<ApiDescription> GetApiDescriptions(ODataRoute oDataRoute)
         {
-            var apiDescriptions = new Collection<ApiDescription>();
+            Contract.Requires(oDataRoute != null);
 
-            foreach (var potentialPathTemplateAndOperations in GetDefaultEdmSwaggerDocument(oDataRoute))
+            var apiDescriptions = new List<ApiDescription>();
+
+            var standardRoutes = _routeGenerator.Generate(oDataRoute.RoutePrefix, oDataRoute.GetEdmModel());
+
+            var customRoutes = _httpConfig.GetCustomSwaggerRoutes(oDataRoute);
+
+            foreach (var potentialRoute in standardRoutes.Concat(customRoutes))
             {
-                apiDescriptions.AddRange(GetApiDescriptions(oDataRoute, potentialPathTemplateAndOperations.Key, potentialPathTemplateAndOperations.Value));
+                apiDescriptions.AddRange(GetApiDescriptions(oDataRoute, potentialRoute));
             }
 
             return apiDescriptions;
         }
 
-        private Collection<ApiDescription> GetApiDescriptions(ODataRoute oDataRoute, string potentialPathTemplate, PathItem potentialOperations)
+        private List<ApiDescription> GetApiDescriptions(ODataRoute oDataRoute, SwaggerRoute potentialSwaggerRoute)
         {
-            var apiDescriptions = new Collection<ApiDescription>();
+            Contract.Requires(potentialSwaggerRoute != null);
 
-            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("DELETE"), oDataRoute, potentialPathTemplate, potentialOperations.delete));
-            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("GET"), oDataRoute, potentialPathTemplate, potentialOperations.get));
-            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("POST"), oDataRoute, potentialPathTemplate, potentialOperations.post));
-            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("PUT"), oDataRoute, potentialPathTemplate, potentialOperations.put));
-            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("PATCH"), oDataRoute, potentialPathTemplate, potentialOperations.patch));
+            var apiDescriptions = new List<ApiDescription>();
+
+            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("DELETE"), potentialSwaggerRoute.PathItem.delete, potentialSwaggerRoute.Template, oDataRoute));
+            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("GET"), potentialSwaggerRoute.PathItem.get, potentialSwaggerRoute.Template, oDataRoute));
+            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("POST"), potentialSwaggerRoute.PathItem.post, potentialSwaggerRoute.Template, oDataRoute));
+            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("PUT"), potentialSwaggerRoute.PathItem.put, potentialSwaggerRoute.Template, oDataRoute));
+            apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("PATCH"), potentialSwaggerRoute.PathItem.patch, potentialSwaggerRoute.Template, oDataRoute));
 
             return apiDescriptions;
         }
 
-        private ApiDescription GetApiDescription(HttpMethod httpMethod, ODataRoute oDataRoute, string potentialPathTemplate, Operation potentialOperation)
+        private ApiDescription GetApiDescription(HttpMethod httpMethod, Operation potentialOperation, string potentialPathTemplate, ODataRoute oDataRoute)
         {
             if (potentialOperation != null)
             {
-                var sampleODataAbsoluteUri = GenerateSampleODataAbsoluteUri(potentialPathTemplate, potentialOperation);
-                var odataPath = GenerateSampleODataPath(oDataRoute, sampleODataAbsoluteUri);
-                var requestContext = new HttpRequestContext
+                HttpActionDescriptor actionDescriptor;
+                using (var request = CreateHttpRequestMessage(httpMethod, potentialOperation, potentialPathTemplate, oDataRoute))
                 {
-                    Configuration = _config()
-                };
-                var request = GetHttpRequestMessage(httpMethod, oDataRoute, requestContext, odataPath, sampleODataAbsoluteUri);
-
-                var controllerDesciptor = GetControllerDesciptor(request);
-                if (controllerDesciptor != null)
-                {
-                    return GetApiDescription(httpMethod, oDataRoute, potentialPathTemplate, potentialOperation, controllerDesciptor, request, requestContext);
+                    actionDescriptor = request.GetHttpActionDescriptor();
                 }
+
+                actionDescriptor = MapForRestierIfNecessary(actionDescriptor, potentialOperation);
+
+                return GetApiDescription(actionDescriptor, httpMethod, potentialOperation, potentialPathTemplate, oDataRoute);
             }
 
             return null;
         }
 
-        private ApiDescription GetApiDescription(HttpMethod httpMethod, ODataRoute oDataRoute, string potentialPathTemplate, Operation potentialOperation, HttpControllerDescriptor controllerDesciptor, HttpRequestMessage request, HttpRequestContext requestContext)
+        private HttpRequestMessage CreateHttpRequestMessage(HttpMethod httpMethod, Operation potentialOperation, string potentialPathTemplate, ODataRoute oDataRoute)
         {
-            var perControllerConfig = controllerDesciptor.Configuration;
-            request.SetConfiguration(perControllerConfig);
-            requestContext.Configuration = perControllerConfig;
-            requestContext.RouteData = request.GetRouteData();
-            requestContext.Url = new UrlHelper(request);
-            requestContext.VirtualPathRoot = perControllerConfig.VirtualPathRoot;
+            var oDataAbsoluteUri = potentialOperation.GenerateSampleODataAbsoluteUri(ServiceRoot, potentialPathTemplate);
 
-            var controller = controllerDesciptor.CreateController(request);
-            HttpActionDescriptor actionDescriptor;
-            using (controller as IDisposable)
-            {
-                var controllerContext = new HttpControllerContext(requestContext, request, controllerDesciptor, controller);
-                try
-                {
-                    actionDescriptor = perControllerConfig.Services.GetActionSelector().SelectAction(controllerContext);
-                }
-                catch (HttpResponseException ex)
-                {
-                    if (ex.Response.StatusCode == HttpStatusCode.NotFound || ex.Response.StatusCode == HttpStatusCode.MethodNotAllowed)
-                    {
-                        return null;
-                    }
-                    throw;
-                }
-            }
-
-            if (actionDescriptor != null)
-            {
-                return GetApiDescription(actionDescriptor, httpMethod, potentialOperation, oDataRoute, potentialPathTemplate);
-            }
-            return null;
-        }
-
-        private HttpRequestMessage GetHttpRequestMessage(HttpMethod httpMethod, ODataRoute oDataRoute, HttpRequestContext requestContext, ODataPath odataPath, string oDataAbsoluteUri)
-        {
             var httpRequestMessage = new HttpRequestMessage(httpMethod, oDataAbsoluteUri);
-            httpRequestMessage.SetConfiguration(_config());
+
+            var odataPath = GenerateSampleODataPath(oDataRoute, oDataAbsoluteUri);
+
+            var requestContext = new HttpRequestContext
+            {
+                Configuration = _httpConfig
+            };
+            httpRequestMessage.SetConfiguration(_httpConfig);
             httpRequestMessage.SetRequestContext(requestContext);
-            httpRequestMessage.ODataProperties().Model = GetEdmModel(oDataRoute);
+            httpRequestMessage.ODataProperties().Model = oDataRoute.GetEdmModel();
             httpRequestMessage.ODataProperties().Path = odataPath;
-            var routeData = _config().Routes.GetRouteData(httpRequestMessage);
+            httpRequestMessage.ODataProperties().RouteName = oDataRoute.GetODataPathRouteConstraint().RouteName;
+            httpRequestMessage.ODataProperties().RoutingConventions = oDataRoute.GetODataPathRouteConstraint().RoutingConventions;
+            httpRequestMessage.ODataProperties().PathHandler = oDataRoute.GetODataPathRouteConstraint().PathHandler;
+            var routeData = _httpConfig.Routes.GetRouteData(httpRequestMessage);
             httpRequestMessage.SetRouteData(routeData);
             return httpRequestMessage;
         }
 
-        private ApiDescription GetApiDescription(HttpActionDescriptor actionDescriptor, HttpMethod httpMethod, Operation operation, ODataRoute route, string potentialPathTemplate)
+        private ApiDescription GetApiDescription(HttpActionDescriptor actionDescriptor, HttpMethod httpMethod, Operation operation, string potentialPathTemplate, ODataRoute oDataRoute)
         {
-            var localActionDescriptor = GetActionDescriptor(operation, actionDescriptor);
+            Contract.Requires(actionDescriptor == null || operation != null);
 
-            var apiDocumentation = GetApiDocumentation(localActionDescriptor, operation);
+            if (actionDescriptor == null)
+            {
+                return null;
+            }
 
-            var parameterDescriptions = CreateParameterDescriptions(operation, localActionDescriptor);
+            var apiDocumentation = GetApiDocumentation(actionDescriptor, operation);
+
+            var parameterDescriptions = CreateParameterDescriptions(operation, actionDescriptor);
 
             // request formatters
-            var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == SwaggerApiParameterSource.Body);
-            var supportedRequestBodyFormatters = bodyParameter != null 
-                ? localActionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) 
-                : Enumerable.Empty<MediaTypeFormatter>();
+            var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == ParameterSource.Body);
+            var supportedRequestBodyFormatters = bodyParameter != null ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) : Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters
-            var responseDescription = CreateResponseDescription(localActionDescriptor);
+            var responseDescription = actionDescriptor.CreateResponseDescription();
             var returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
-            var supportedResponseFormatters = returnType != null && returnType != typeof (void) 
-                ? localActionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) 
-                : Enumerable.Empty<MediaTypeFormatter>();
+            var supportedResponseFormatters = returnType != null && returnType != typeof (void) ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) : Enumerable.Empty<MediaTypeFormatter>();
 
             // Replacing the formatter tracers with formatters if tracers are present.
             supportedRequestBodyFormatters = GetInnerFormatters(supportedRequestBodyFormatters);
             supportedResponseFormatters = GetInnerFormatters(supportedResponseFormatters);
 
-            var apiDescription =  new ApiDescription
+            var apiDescription = new ApiDescription
             {
                 Documentation = apiDocumentation,
                 HttpMethod = httpMethod,
                 RelativePath = potentialPathTemplate.TrimStart('/'),
-                ActionDescriptor = localActionDescriptor,
-                Route = route
+                ActionDescriptor = actionDescriptor,
+                Route = oDataRoute
             };
 
             apiDescription.SupportedResponseFormatters.AddRange(supportedResponseFormatters);
@@ -211,15 +182,19 @@ namespace Swashbuckle.OData
             return apiDescription;
         }
 
-        private static HttpActionDescriptor GetActionDescriptor(Operation operation, HttpActionDescriptor actionDescriptor)
+        private static HttpActionDescriptor MapForRestierIfNecessary(HttpActionDescriptor actionDescriptor, Operation operation)
         {
+            if (actionDescriptor == null)
+            {
+                return null;
+            }
             if (actionDescriptor.ControllerDescriptor.ControllerName == "Restier")
             {
                 Response response;
                 operation.responses.TryGetValue("200", out response);
                 if (!string.IsNullOrWhiteSpace(response?.schema?.@ref))
                 {
-                    return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntityType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
+                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntityType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
                     {
                         Configuration = actionDescriptor.Configuration,
                         ControllerDescriptor = actionDescriptor.ControllerDescriptor
@@ -227,13 +202,13 @@ namespace Swashbuckle.OData
                 }
                 if (response?.schema?.type == "array")
                 {
-                    return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
+                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
                     {
                         Configuration = actionDescriptor.Configuration,
                         ControllerDescriptor = actionDescriptor.ControllerDescriptor
                     };
                 }
-                return new SwaggerApiHttpActionDescriptor(actionDescriptor.ActionName, null, actionDescriptor.SupportedHttpMethods, operation.tags.First())
+                return new RestierHttpActionDescriptor(actionDescriptor.ActionName, null, actionDescriptor.SupportedHttpMethods, operation.tags.First())
                 {
                     Configuration = actionDescriptor.Configuration,
                     ControllerDescriptor = actionDescriptor.ControllerDescriptor
@@ -244,30 +219,15 @@ namespace Swashbuckle.OData
 
         private static IEnumerable<MediaTypeFormatter> GetInnerFormatters(IEnumerable<MediaTypeFormatter> mediaTypeFormatters)
         {
+            Contract.Requires(mediaTypeFormatters != null);
+
             return mediaTypeFormatters.Select(Decorator.GetInner);
-        }
-
-        private static ResponseDescription CreateResponseDescription(HttpActionDescriptor actionDescriptor)
-        {
-            var responseTypeAttribute = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>();
-            var responseType = responseTypeAttribute.Select(attribute => attribute.ResponseType).FirstOrDefault();
-
-            return new ResponseDescription
-            {
-                DeclaredType = actionDescriptor.ReturnType,
-                ResponseType = responseType,
-                Documentation = GetApiResponseDocumentation(actionDescriptor)
-            };
-        }
-
-        private static string GetApiResponseDocumentation(HttpActionDescriptor actionDescriptor)
-        {
-            var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
-            return documentationProvider?.GetResponseDocumentation(actionDescriptor);
         }
 
         private List<SwaggerApiParameterDescription> CreateParameterDescriptions(Operation operation, HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(operation != null);
+
             return operation.parameters.Select((parameter, index) => GetParameterDescription(parameter, index, actionDescriptor)).ToList();
         }
 
@@ -280,36 +240,21 @@ namespace Swashbuckle.OData
                 ParameterDescriptor = httpParameterDescriptor,
                 Name = httpParameterDescriptor.Prefix ?? httpParameterDescriptor.ParameterName,
                 Documentation = GetApiParameterDocumentation(parameter, httpParameterDescriptor),
-                SwaggerSource = MapSource(parameter)
+                SwaggerSource = parameter.MapSource()
             };
-        }
-
-        private static SwaggerApiParameterSource MapSource(Parameter parameter)
-        {
-            switch (parameter.@in)
-            {
-                case "query":
-                    return SwaggerApiParameterSource.Query;
-                case "header":
-                    return SwaggerApiParameterSource.Header;
-                case "path":
-                    return SwaggerApiParameterSource.Path;
-                case "formData":
-                    return SwaggerApiParameterSource.FormData;
-                case "body":
-                    return SwaggerApiParameterSource.Body;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(parameter), parameter, null);
-            }
         }
 
         private HttpParameterDescriptor GetHttpParameterDescriptor(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
         {
-            return _swaggerToApiExplorerMapper.Map(parameter, index, actionDescriptor);
+            return _parameterMappers
+                .Select(mapper => mapper.Map(parameter, index, actionDescriptor))
+                .FirstOrDefault(httpParameterDescriptor => httpParameterDescriptor != null);
         }
 
         private static string GetApiParameterDocumentation(Parameter parameter, HttpParameterDescriptor parameterDescriptor)
         {
+            Contract.Requires(parameterDescriptor != null);
+
             var documentationProvider = parameterDescriptor.Configuration.Services.GetDocumentationProvider();
 
             return documentationProvider != null 
@@ -319,6 +264,8 @@ namespace Swashbuckle.OData
 
         private static string GetApiDocumentation(HttpActionDescriptor actionDescriptor, Operation operation)
         {
+            Contract.Requires(actionDescriptor != null);
+
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
             return documentationProvider != null 
                 ? documentationProvider.GetDocumentation(actionDescriptor) 
@@ -327,102 +274,11 @@ namespace Swashbuckle.OData
 
         private static ODataPath GenerateSampleODataPath(ODataRoute oDataRoute, string sampleODataAbsoluteUri)
         {
-            var oDataPathRouteConstraint = GetODataPathRouteConstraint(oDataRoute);
+            var oDataPathRouteConstraint = oDataRoute.GetODataPathRouteConstraint();
 
-            var model = GetEdmModel(oDataRoute);
+            var model = oDataRoute.GetEdmModel();
 
             return oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot.AppendPathSegment(oDataRoute.RoutePrefix), sampleODataAbsoluteUri);
-        }
-
-        private static string GenerateSampleODataAbsoluteUri(string pathTemplate, Operation operation)
-        {
-            var uriTemplate = new UriTemplate(pathTemplate);
-
-            var parameters = GenerateSampleQueryParameterValues(operation);
-
-            var prefix = new Uri(ServiceRoot);
-
-            return uriTemplate.BindByName(prefix, parameters).ToString();
-        }
-
-        private static IDictionary<string, string> GenerateSampleQueryParameterValues(Operation operation)
-        {
-            return operation.parameters.Where(parameter => parameter.@in == "path").ToDictionary(queryParameter => queryParameter.name, GenerateSampleQueryParameterValue);
-        }
-
-        private static string GenerateSampleQueryParameterValue(Parameter queryParameter)
-        {
-            var type = queryParameter.type;
-            var format = queryParameter.format;
-
-            switch (format)
-            {
-                case null:
-                    switch (type)
-                    {
-                        case "string":
-                            return "SampleString";
-                        case "boolean":
-                            return "true";
-                        default:
-                            throw new Exception($"Could not generate sample value for query parameter type {type} and format {"null"}");
-                    }
-                case "int32":
-                case "int64":
-                    return "42";
-                case "byte":
-                    return "1";
-                case "date":
-                    return "2015-12-12T12:00";
-                case "date-time":
-                    return "2015-10-10T17:00:00Z";
-                case "double":
-                    return "2.34d";
-                case "float":
-                    return "2.0f";
-                case "guid":
-                    return Guid.NewGuid().ToString();
-                case "binary":
-                    return Convert.ToBase64String(new byte[]{ 130, 200, 234, 23 });
-                default:
-                    throw new Exception($"Could not generate sample value for query parameter type {type} and format {format}");
-            }
-        }
-
-        private HttpControllerDescriptor GetControllerDesciptor(HttpRequestMessage request)
-        {
-            try
-            {
-                return _config().Services.GetHttpControllerSelector().SelectController(request);
-            }
-            catch (HttpResponseException ex)
-            {
-                if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-                {
-                    return null;
-                }
-                throw;
-            }
-        }
-
-        public static string FindMatchingAction(ILookup<string, HttpActionDescriptor> actionMap, params string[] targetActionNames)
-        {
-            return targetActionNames.FirstOrDefault(actionMap.Contains);
-        }
-
-        private static Dictionary<string, PathItem> GetDefaultEdmSwaggerDocument(ODataRoute oDataRoute)
-        {
-            return new SwaggerPathGenerator(oDataRoute.RoutePrefix, GetEdmModel(oDataRoute)).GenerateSwaggerPaths();
-        }
-
-        private static IEdmModel GetEdmModel(ODataRoute oDataRoute)
-        {
-            return GetODataPathRouteConstraint(oDataRoute).EdmModel;
-        }
-
-        private static ODataPathRouteConstraint GetODataPathRouteConstraint(ODataRoute oDataRoute)
-        {
-            return oDataRoute.Constraints.Values.SingleOrDefault(value => value is ODataPathRouteConstraint) as ODataPathRouteConstraint;
         }
 
         private static IEnumerable<IHttpRoute> FlattenRoutes(IEnumerable<IHttpRoute> routes)
@@ -442,6 +298,12 @@ namespace Swashbuckle.OData
                     yield return route;
                 }
             }
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariant()
+        {
+            Contract.Invariant(_apiDescriptions != null);
         }
     }
 }

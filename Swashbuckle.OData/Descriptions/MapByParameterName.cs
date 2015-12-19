@@ -3,14 +3,14 @@ using System.Linq;
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
-    internal class MapByParameterName : IParameterMapper
+    public class MapByParameterName : IParameterMapper
     {
-        public HttpParameterDescriptor Map(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
+        public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {
             return actionDescriptor.GetParameters()
-                .SingleOrDefault(descriptor => string.Equals(descriptor.ParameterName, parameter.name, StringComparison.CurrentCultureIgnoreCase));
+                .SingleOrDefault(descriptor => string.Equals(descriptor.ParameterName, swaggerParameter.name, StringComparison.CurrentCultureIgnoreCase));
         }
     }
 }

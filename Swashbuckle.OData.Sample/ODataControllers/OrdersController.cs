@@ -26,6 +26,28 @@ namespace SwashbuckleODataSample.ODataControllers
         }
 
         /// <summary>
+        /// An example of a custom route. Create a new order for the customer with the given id
+        /// </summary>
+        /// <param name="customerId">The customer id</param>
+        /// <param name="order">Order details</param>
+        [ResponseType(typeof(Order))]
+        public async Task<IHttpActionResult> Post([FromODataUri] int customerId, Order order)
+        {
+            order.OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd);
+            order.CustomerId = customerId;
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _db.Orders.Add(order);
+            await _db.SaveChangesAsync();
+
+            return Created(order);
+        }
+
+        /// <summary>
         /// Query the order by id
         /// </summary>
         /// <param name="key">The order id</param>

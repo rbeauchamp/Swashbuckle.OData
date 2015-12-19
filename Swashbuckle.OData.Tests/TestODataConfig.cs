@@ -1,11 +1,15 @@
-﻿using System.Web.Http;
+﻿using System.Net.Http;
+using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Restier.EntityFramework;
 using Microsoft.Restier.WebApi;
 using Microsoft.Restier.WebApi.Batch;
+using Swashbuckle.OData;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Versioning;
 
@@ -39,7 +43,16 @@ namespace SwashbuckleODataSample
             config.MapODataServiceRoute("odata/v2", "odata/v2", GetFakeModel());
             controllerSelector.RouteVersionSuffixMapping.Add("odata/v2", "V2");
 
-            // Define a default non-versioned route
+            // Define a custom route with custom routing conventions
+            var conventions = ODataRoutingConventions.CreateDefault();
+            conventions.Insert(0, new CustomNavigationPropertyRoutingConvention());
+            var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: conventions);
+            config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders")
+                .Operation(HttpMethod.Post)
+                .PathParameter<int>("Id")
+                .BodyParameter<Order>("order");
+
+            // Define a default non-versioned route (default route should be at the end as a last catch-all)
             config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetModel());
         }
 

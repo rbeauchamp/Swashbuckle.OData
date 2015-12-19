@@ -33,7 +33,7 @@ namespace Swashbuckle.OData
         /// <typeparam name="T"></typeparam>
         /// <param name="source">The source.</param>
         /// <param name="item">The item.</param>
-        public static void AddIfNotNull<T>(this Collection<T> source, T item)
+        public static void AddIfNotNull<T>(this List<T> source, T item)
         {
             Contract.Requires(source != null);
 

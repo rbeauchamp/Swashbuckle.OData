@@ -16,7 +16,7 @@ namespace NorthwindAPI.Models
             Territories = new HashSet<Territory>();
         }
 
-        public int EmployeeID { get; set; }
+        public int EmployeeId { get; set; }
 
         [Required]
         [StringLength(20)]

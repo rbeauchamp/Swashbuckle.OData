@@ -25,12 +25,12 @@
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support!</Summary>
     <Description>Extends Swashbuckle with OData v4 support!</Description>
-    <ReleaseNotes>Supports both WebApi and OData endpoints. Groups RESTier endpoints by EntitySet name. Bug fixes. </ReleaseNotes>
+    <ReleaseNotes>Supports custom OData routes, Refactored to support DI per http://blog.ploeh.dk/2014/05/19/di-friendly-library/</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright 2015</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUi OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
-    <Version>2.5.2</Version>
+    <Version>2.6.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />

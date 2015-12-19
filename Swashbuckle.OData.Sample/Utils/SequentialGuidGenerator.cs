@@ -5,7 +5,7 @@ namespace SwashbuckleODataSample.Utils
 {
     /// <summary>
     /// Generates <see cref="System.Guid" /> values using strategy from Jeremy Todd.
-    /// <see cref="http://www.codeproject.com/Articles/388157/GUIDs-as-fast-primary-keys-under-multiple-database" />
+    /// See <a href="http://www.codeproject.com/Articles/388157/GUIDs-as-fast-primary-keys-under-multiple-database">GUIDs as fast primary keys under multiple databases</a>.
     /// </summary>
     public static class SequentialGuidGenerator
     {

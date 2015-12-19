@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.Swagger;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
     /// <summary>
     ///     Utility methods used to convert the Swagger model.
@@ -294,6 +294,8 @@ namespace Swashbuckle.OData
         /// <returns></returns>
         public static Url GetPathForEntitySet(string routePrefix, IEdmEntitySet entitySet)
         {
+            Contract.Requires(entitySet != null);
+
             return routePrefix.AppendPathSegment(entitySet.Name);
         }
 
@@ -312,14 +314,9 @@ namespace Swashbuckle.OData
             }
 
             var singleEntityPath = GetPathForEntitySet(routePrefix, entitySet) + "(";
-            if (entitySet.EntityType().Key().Count() == 1)
-            {
-                singleEntityPath = AppendSingleColumnKeyTemplate(entitySet, singleEntityPath);
-            }
-            else
-            {
-                singleEntityPath = AppendMultiColumnKeyTemplate(entitySet, singleEntityPath);
-            }
+            singleEntityPath = entitySet.EntityType().Key().Count() == 1 
+                ? AppendSingleColumnKeyTemplate(entitySet, singleEntityPath) 
+                : AppendMultiColumnKeyTemplate(entitySet, singleEntityPath);
             singleEntityPath = singleEntityPath.Substring(0, singleEntityPath.Length - 2);
             singleEntityPath += ")";
 
@@ -357,18 +354,21 @@ namespace Swashbuckle.OData
         }
 
         /// <summary>
-        ///     Get the Uri Swagger path for Edm operation import.
+        /// Get the Uri Swagger path for Edm operation import.
         /// </summary>
+        /// <param name="routePrefix">The route prefix.</param>
         /// <param name="operationImport">The Edm operation import.</param>
-        /// <returns>The <see cref="System.String" /> path represents the related Edm operation import.</returns>
-        public static string GetPathForOperationImport(IEdmOperationImport operationImport)
+        /// <returns>
+        /// The <see cref="string" /> path represents the related Edm operation import.
+        /// </returns>
+        public static string GetPathForOperationImport(string routePrefix, IEdmOperationImport operationImport)
         {
             if (operationImport == null)
             {
                 return string.Empty;
             }
 
-            var swaggerOperationImportPath = "/" + operationImport.Name + "(";
+            var swaggerOperationImportPath = routePrefix.AppendPathSegment(operationImport.Name) + "(";
             if (operationImport.IsFunctionImport())
             {
                 swaggerOperationImportPath = operationImport.Operation.Parameters.Aggregate(swaggerOperationImportPath, (current, parameter) => current + parameter.Name + "=" + "{" + parameter.Name + "},");
@@ -619,12 +619,17 @@ namespace Swashbuckle.OData
 
         private static Operation Responses(this Operation obj, IDictionary<string, Response> responses)
         {
+            Contract.Requires(obj != null);
+
             obj.responses = responses;
             return obj;
         }
 
         private static IDictionary<string, Response> ResponseRef(this IDictionary<string, Response> responses, string name, string description, string refType)
         {
+            Contract.Requires(responses != null);
+            Contract.Requires(name != null);
+
             responses.Add(name, new Response
             {
                 description = description,
@@ -639,6 +644,9 @@ namespace Swashbuckle.OData
 
         private static IDictionary<string, Response> Response(this IDictionary<string, Response> responses, string name, string description, IEdmType type)
         {
+            Contract.Requires(responses != null);
+            Contract.Requires(name != null);
+
             var schema = new Schema();
             SetSwaggerType(schema, type);
 
@@ -653,11 +661,16 @@ namespace Swashbuckle.OData
 
         private static IDictionary<string, Response> DefaultErrorResponse(this IDictionary<string, Response> responses)
         {
+            Contract.Requires(responses != null);
+
             return responses.ResponseRef("default", "Unexpected error", "#/definitions/_Error");
         }
 
         private static IDictionary<string, Response> Response(this IDictionary<string, Response> responses, string name, string description)
         {
+            Contract.Requires(responses != null);
+            Contract.Requires(name != null);
+
             responses.Add(name, new Response
             {
                 description = description
@@ -668,12 +681,16 @@ namespace Swashbuckle.OData
 
         private static Operation Parameters(this Operation obj, IList<Parameter> parameters)
         {
+            Contract.Requires(obj != null);
+
             obj.parameters = parameters;
             return obj;
         }
 
         private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, string type, bool required, string format = null)
         {
+            Contract.Requires(parameters != null);
+
             parameters.Add(new Parameter
             {
                 name = name,
@@ -684,16 +701,14 @@ namespace Swashbuckle.OData
                 required = required
             });
 
-            //if (!string.IsNullOrEmpty(format))
-            //{
-            //    parameters.First().format = format;
-            //}
-
             return parameters;
         }
 
-        private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, IEdmType type)
+        internal static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, IEdmType type)
         {
+            Contract.Requires(parameters != null);
+            Contract.Requires(type != null);
+
             var parameter = new Parameter
             {
                 name = name,
@@ -718,30 +733,40 @@ namespace Swashbuckle.OData
 
         private static Operation Tags(this Operation obj, params string[] tags)
         {
+            Contract.Requires(obj != null);
+
             obj.tags = tags;
             return obj;
         }
 
         private static Operation Summary(this Operation obj, string summary)
         {
+            Contract.Requires(obj != null);
+
             obj.summary = summary;
             return obj;
         }
 
         private static Operation Description(this Operation obj, string description)
         {
+            Contract.Requires(obj != null);
+
             obj.description = description;
             return obj;
         }
 
         private static Schema Description(this Schema obj, string description)
         {
+            Contract.Requires(obj != null);
+
             obj.description = description;
             return obj;
         }
 
         private static Operation OperationId(this Operation obj, string operationId)
         {
+            Contract.Requires(obj != null);
+
             obj.operationId = operationId;
             return obj;
         }

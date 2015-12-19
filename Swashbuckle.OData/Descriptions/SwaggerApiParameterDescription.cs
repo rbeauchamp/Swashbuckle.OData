@@ -1,9 +1,9 @@
 ﻿using System.Web.Http.Description;
 
-namespace Swashbuckle.OData
+namespace Swashbuckle.OData.Descriptions
 {
     internal class SwaggerApiParameterDescription : ApiParameterDescription
     {
-        public SwaggerApiParameterSource SwaggerSource { get; set; }
+        public ParameterSource SwaggerSource { get; set; }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Diagnostics.Contracts;
 using System.Reflection;
 
 namespace Swashbuckle.OData
@@ -11,63 +8,32 @@ namespace Swashbuckle.OData
         /// <summary>
         ///     Uses reflection to get the field value from an object.
         /// </summary>
-        /// <param name="type">The instance type.</param>
         /// <param name="instance">The instance object.</param>
         /// <param name="fieldName">The field's name which is to be fetched.</param>
         /// <returns>The field value from the object.</returns>
-        internal static object GetInstanceField(this Type type, object instance, string fieldName)
+        internal static T GetInstanceField<T>(this object instance, string fieldName)
         {
+            Contract.Requires(instance != null);
+
             const BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-            var field = type.GetField(fieldName, bindFlags);
-            return field.GetValue(instance);
+            var field = instance.GetType().GetField(fieldName, bindFlags);
+            return (T)field.GetValue(instance);
         }
 
-        //public static T MergeFields<T>(this T mergeTo, T mergeFrom)
-        //{
-        //    var fields = mergeTo.GetType().GetFields();
+        /// <summary>
+        /// Invokes the function.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instance">The instance.</param>
+        /// <param name="methodName">Name of the method.</param>
+        /// <returns></returns>
+        internal static T InvokeFunction<T>(this object instance, string methodName)
+        {
+            Contract.Requires(instance != null);
+            Contract.Requires(methodName != null);
 
-        //    foreach (var fieldInfo in fields)
-        //    {
-        //        var fromValue = fieldInfo.GetValue(mergeFrom);
-
-        //        if (fromValue != null)
-        //        {
-        //            Merge(mergeTo, fieldInfo, fromValue);
-        //        }
-        //    }
-
-        //    return mergeTo;
-        //}
-
-        //private static void Merge<T>(T mergeTo, FieldInfo fieldInfo, object fromValue)
-        //{
-        //    var fromListValue = fromValue as IList;
-        //    if (fromListValue != null)
-        //    {
-        //        var toListValue = fieldInfo.GetValue(mergeTo) as IList;
-
-        //        foreach (var fromItem in fromListValue)
-        //        {
-        //            toListValue.Add(fromItem);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        var fromDictionaryValue = fromValue as IDictionary;
-        //        if (fromDictionaryValue != null)
-        //        {
-        //            var toDictionaryValue = fieldInfo.GetValue(mergeTo) as IDictionary;
-
-        //            if (toDictionaryValue != null)
-        //            {
-        //                var mergedDictionary = new Dictionary<object, object>();
-        //                foreach (DictionaryEntry keyValuePair in toDictionaryValue)
-        //                {
-                            
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
+            var methodInfo = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            return (T)methodInfo.Invoke(instance, null);
+        }
     }
 }

@@ -10,18 +10,18 @@ namespace NorthwindAPI.Models
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Product()
         {
-            Order_Details = new HashSet<Order_Detail>();
+            OrderDetails = new HashSet<OrderDetail>();
         }
 
-        public int ProductID { get; set; }
+        public int ProductId { get; set; }
 
         [Required]
         [StringLength(40)]
         public string ProductName { get; set; }
 
-        public int? SupplierID { get; set; }
+        public int? SupplierId { get; set; }
 
-        public int? CategoryID { get; set; }
+        public int? CategoryId { get; set; }
 
         [StringLength(20)]
         public string QuantityPerUnit { get; set; }
@@ -40,7 +40,7 @@ namespace NorthwindAPI.Models
         public virtual Category Category { get; set; }
 
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Order_Detail> Order_Details { get; set; }
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 
         public virtual Supplier Supplier { get; set; }
     }

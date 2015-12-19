@@ -15,7 +15,7 @@ namespace NorthwindAPI.Models
 
         [Key]
         [StringLength(10)]
-        public string CustomerTypeID { get; set; }
+        public string CustomerTypeId { get; set; }
 
         [Column(TypeName = "ntext")]
         public string CustomerDesc { get; set; }
