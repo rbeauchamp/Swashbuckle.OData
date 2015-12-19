@@ -26,7 +26,7 @@ namespace SwashbuckleODataSample.ODataControllers
         }
 
         /// <summary>
-        /// Create a new order for the customer with the given id
+        /// An example of a custom route. Create a new order for the customer with the given id
         /// </summary>
         /// <param name="customerId">The customer id</param>
         /// <param name="order">Order details</param>

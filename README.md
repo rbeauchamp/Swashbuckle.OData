@@ -22,6 +22,30 @@ In `SwaggerConfig` configure the custom provider:
 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
 ```
 
+### Custom Routes  ###
+
+The following snippet demonstrates how to configure a custom OData route such that it will appear in the Swagger UI:
+```csharp
+// Let's say you map a custom OData route that doesn't follow the typical conventions
+var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: myCustomConventions);
+
+// Then describe your route to Swashbuckle.OData so that it will appear in the Swagger UI
+config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders")
+    .Operation(HttpMethod.Post)
+    // The name of the parameter as it appears in the path
+    .PathParameter<int>("Id")
+    // The name of the parameter as it appears in the controller action
+    .BodyParameter<Order>("order");
+```
+The above route resolves to an `OrderController` action of:
+```csharp
+[ResponseType(typeof(Order))]
+public async Task<IHttpActionResult> Post([FromODataUri] int customerId, Order order)
+{
+  ...
+}
+```
+
 ### OWIN  ###
 
 If your service is hosted using OWIN middleware, configure the custom provider as follows:
@@ -41,34 +65,4 @@ httpConfiguration
         c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, () => httpConfiguration));
     })
     .EnableSwaggerUi();
-```
-
-### Upgrading to Swashbuckle.OData v2 ###
-
-To simplify configuration, this version of Swashbuckle.OData leverages .NET 4.5.2. Previous versions were compiled against .NET 4.0.
-
-Also, if upgrading from v1.0, revert the previously recommended `SwaggerConfig` changes:
-
-Revert `SwaggerConfig` to the original `Swashbuckle`-supplied version:
-```csharp
-[assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
-
-namespace Swashbuckle.OData
-{
-    public class SwaggerConfig
-    {
-        public static void Register()
-        {
-```
-
-Remove the call to `SwaggerConfig.Register(edmModel);`:
-```csharp
-public static void Register(HttpConfiguration config)
-{
-    var builder = new ODataConventionModelBuilder();
-    var edmModel = builder.GetEdmModel();
-    config.MapODataServiceRoute("odata", "odata", edmModel);
-
-    //SwaggerConfig.Register(edmModel);
-}
 ```
