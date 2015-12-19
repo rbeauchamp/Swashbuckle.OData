@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.Contracts;
+using System.Reflection;
 
 namespace Swashbuckle.OData
 {
@@ -12,6 +13,8 @@ namespace Swashbuckle.OData
         /// <returns>The field value from the object.</returns>
         internal static T GetInstanceField<T>(this object instance, string fieldName)
         {
+            Contract.Requires(instance != null);
+
             const BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             var field = instance.GetType().GetField(fieldName, bindFlags);
             return (T)field.GetValue(instance);
@@ -26,6 +29,9 @@ namespace Swashbuckle.OData
         /// <returns></returns>
         internal static T InvokeFunction<T>(this object instance, string methodName)
         {
+            Contract.Requires(instance != null);
+            Contract.Requires(methodName != null);
+
             var methodInfo = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
             return (T)methodInfo.Invoke(instance, null);
         }

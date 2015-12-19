@@ -10,6 +10,7 @@ namespace Swashbuckle.OData
     {
         public static Schema GetOrRegisterODataType(this SchemaRegistry registry, Type type)
         {
+            Contract.Requires(registry != null);
             Contract.Requires(type != null);
 
             var isAGenericODataType = IsAGenericODataType(type);
@@ -20,6 +21,8 @@ namespace Swashbuckle.OData
 
         private static bool IsAGenericODataType(Type type)
         {
+            Contract.Requires(type != null);
+
             var isDelta = type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Delta<>);
             var isSingleResult = type.IsGenericType && type.GetGenericTypeDefinition() == typeof (SingleResult<>);
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.OData.Edm;
 
@@ -23,6 +24,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static IEnumerable<SwaggerRoute> GenerateEntitySetRoutes(string routePrefix, IEdmModel model)
         {
+            Contract.Requires(model != null);
+
             return model.EntityContainer
                 .EntitySets()
                 .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntitySet(routePrefix, entitySet), ODataSwaggerUtilities.CreateSwaggerPathForEntitySet(entitySet)));
@@ -30,6 +33,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static IEnumerable<SwaggerRoute> GenerateEntityRoutes(string routePrefix, IEdmModel model)
         {
+            Contract.Requires(model != null);
+
             return model.EntityContainer
                 .EntitySets()
                 .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntity(routePrefix, entitySet), ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet)));
@@ -37,6 +42,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static IEnumerable<SwaggerRoute> GenerateOperationImportRoutes(string routePrefix, IEdmModel model)
         {
+            Contract.Requires(model != null);
+
             return model.EntityContainer
                 .OperationImports()
                 .Select(operationImport => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationImport(routePrefix, operationImport), ODataSwaggerUtilities.CreateSwaggerPathForOperationImport(operationImport)));
@@ -50,6 +57,8 @@ namespace Swashbuckle.OData.Descriptions
         /// <returns></returns>
         private static IEnumerable<SwaggerRoute> GenerateOperationRoutes(string routePrefix, IEdmModel model)
         {
+            Contract.Requires(model != null);
+
             var routes = new List<SwaggerRoute>();
 
             foreach (var operation in model.SchemaElements.OfType<IEdmOperation>())

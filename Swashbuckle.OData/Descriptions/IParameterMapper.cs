@@ -18,7 +18,7 @@ namespace Swashbuckle.OData.Descriptions
     }
 
     [ContractClassFor(typeof(IParameterMapper))]
-    public sealed class ParameterMapperContract : IParameterMapper
+    public abstract class ParameterMapperContract : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {

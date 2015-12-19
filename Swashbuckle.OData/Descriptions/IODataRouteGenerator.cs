@@ -16,7 +16,7 @@ namespace Swashbuckle.OData.Descriptions
     }
 
     [ContractClassFor(typeof(IODataRouteGenerator))]
-    public sealed class ODataRouteGeneratorContract : IODataRouteGenerator
+    public abstract class ODataRouteGeneratorContract : IODataRouteGenerator
     {
         public List<SwaggerRoute> Generate(string routePrefix, IEdmModel model)
         {

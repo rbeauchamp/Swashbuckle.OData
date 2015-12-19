@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
@@ -10,6 +11,8 @@ namespace Swashbuckle.OData.Descriptions
     {
         public RestierParameterDescriptor(Parameter parameter)
         {
+            Contract.Requires(parameter != null);
+
             Parameter = parameter;
             DefaultValue = null;
             Prefix = null;

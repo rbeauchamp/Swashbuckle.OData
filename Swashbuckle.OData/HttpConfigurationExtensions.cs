@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Web;
 using System.Web.Http;
 using System.Web.OData.Routing;
@@ -12,6 +13,8 @@ namespace Swashbuckle.OData
     {
         internal static JsonSerializerSettings SerializerSettingsOrDefault(this HttpConfiguration httpConfig)
         {
+            Contract.Requires(httpConfig != null);
+
             var formatter = httpConfig.Formatters.JsonFormatter;
             return formatter != null 
                 ? formatter.SerializerSettings 
@@ -20,6 +23,10 @@ namespace Swashbuckle.OData
 
         public static SwaggerRouteBuilder AddCustomSwaggerRoute(this HttpConfiguration httpConfig, ODataRoute oDataRoute, string routeTemplate)
         {
+            Contract.Requires(httpConfig != null);
+            Contract.Requires(oDataRoute != null);
+            Contract.Ensures(Contract.Result<SwaggerRouteBuilder>() != null);
+
             var fullRouteTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(routeTemplate));
 
             var swaggerRoute = new SwaggerRoute(fullRouteTemplate);
@@ -40,6 +47,10 @@ namespace Swashbuckle.OData
 
         public static List<SwaggerRoute> GetCustomSwaggerRoutes(this HttpConfiguration httpConfig, ODataRoute oDataRoute)
         {
+            Contract.Requires(httpConfig != null);
+            Contract.Requires(oDataRoute != null);
+            Contract.Ensures(Contract.Result<List<SwaggerRoute>>() != null);
+
             object swaggerRoutes;
             httpConfig.Properties.TryGetValue(oDataRoute, out swaggerRoutes);
 

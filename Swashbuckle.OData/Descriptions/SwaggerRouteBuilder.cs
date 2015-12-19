@@ -22,6 +22,7 @@ namespace Swashbuckle.OData.Descriptions
         public OperationBuilder Operation(HttpMethod httpMethod)
         {
             Contract.Requires(GetOperation(httpMethod) == null);
+            Contract.Ensures(Contract.Result<OperationBuilder>() != null);
 
             var operation = new Operation();
 
@@ -49,8 +50,11 @@ namespace Swashbuckle.OData.Descriptions
             return new OperationBuilder(operation, this);
         }
 
+        [Pure]
         public Operation GetOperation(HttpMethod httpMethod)
         {
+            Contract.Requires(httpMethod != null);
+
             switch (httpMethod.Method.ToUpper())
             {
                 case "GET":
@@ -66,6 +70,12 @@ namespace Swashbuckle.OData.Descriptions
                 default:
                     throw new ArgumentOutOfRangeException(nameof(httpMethod));
             }
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariant()
+        {
+            Contract.Invariant(_swaggerRoute != null);
         }
     }
 }

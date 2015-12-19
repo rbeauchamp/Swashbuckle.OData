@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
@@ -9,6 +10,8 @@ namespace Swashbuckle.OData.Descriptions
     {
         public static ResponseDescription CreateResponseDescription(this HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(actionDescriptor != null);
+
             var responseTypeAttribute = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>();
             var responseType = responseTypeAttribute.Select(attribute => attribute.ResponseType).FirstOrDefault();
 
@@ -22,6 +25,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static string GetApiResponseDocumentation(this HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(actionDescriptor != null);
+
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
             return documentationProvider?.GetResponseDocumentation(actionDescriptor);
         }

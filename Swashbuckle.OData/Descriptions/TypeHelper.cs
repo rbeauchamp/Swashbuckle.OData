@@ -16,6 +16,8 @@ namespace System.Web.OData
     {
         public static Type ToNullable(this Type t)
         {
+            Contract.Requires(t != null);
+
             if (t.IsNullable())
             {
                 return t;
@@ -26,6 +28,8 @@ namespace System.Web.OData
         // Gets the collection element type.
         public static Type GetInnerElementType(this Type type)
         {
+            Contract.Requires(type != null);
+
             Type elementType;
             type.IsCollection(out elementType);
             Contract.Assert(elementType != null);
@@ -35,6 +39,8 @@ namespace System.Web.OData
 
         public static bool IsCollection(this Type type)
         {
+            Contract.Requires(type != null);
+
             Type elementType;
             return type.IsCollection(out elementType);
         }
@@ -42,6 +48,7 @@ namespace System.Web.OData
         public static bool IsCollection(this Type type, out Type elementType)
         {
             Contract.Requires(type != null);
+            Contract.Ensures(Contract.ValueAtReturn(out elementType) != null);
 
             elementType = type;
 
@@ -67,11 +74,15 @@ namespace System.Web.OData
 
         public static Type GetUnderlyingTypeOrSelf(Type type)
         {
+            Contract.Requires(type != null);
+
             return Nullable.GetUnderlyingType(type) ?? type;
         }
 
         public static bool IsEnum(Type type)
         {
+            Contract.Requires(type != null);
+
             var underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
             return underlyingTypeOrSelf.IsEnum;
         }
@@ -85,7 +96,7 @@ namespace System.Web.OData
         /// <returns><c>true</c> if the type is a primitive type.</returns>
         internal static bool IsQueryPrimitiveType(Type type)
         {
-            Contract.Assert(type != null);
+            Contract.Requires(type != null);
 
             type = GetInnerMostElementType(type);
 
@@ -100,7 +111,7 @@ namespace System.Web.OData
         /// <returns>The innermost element type</returns>
         internal static Type GetInnerMostElementType(Type type)
         {
-            Contract.Assert(type != null);
+            Contract.Requires(type != null);
 
             while (true)
             {
@@ -127,6 +138,8 @@ namespace System.Web.OData
         /// <returns></returns>
         internal static Type GetImplementedIEnumerableType(Type type)
         {
+            Contract.Requires(type != null);
+
             // get inner type from Task<T>
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Task<>))
             {
@@ -149,6 +162,8 @@ namespace System.Web.OData
         // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
         internal static IEnumerable<Type> GetLoadedTypes(IAssembliesResolver assembliesResolver)
         {
+            Contract.Requires(assembliesResolver != null);
+
             var result = new List<Type>();
 
             // Go through all assemblies referenced by the application and search for types matching a predicate
@@ -186,6 +201,8 @@ namespace System.Web.OData
 
         private static Type GetInnerGenericType(Type interfaceType)
         {
+            Contract.Requires(interfaceType != null);
+
             // Getting the type T definition if the returning type implements IEnumerable<T>
             var parameterTypes = interfaceType.GetGenericArguments();
 

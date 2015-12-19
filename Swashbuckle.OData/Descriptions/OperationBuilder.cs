@@ -25,6 +25,7 @@ namespace Swashbuckle.OData.Descriptions
         public OperationBuilder PathParameter<T>(string parameterName)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(parameterName));
+            Contract.Ensures(Contract.Result<OperationBuilder>() != null);
 
             _operation.Parameters().Parameter(parameterName, ParameterSource.Path.ToString().ToLower(), null, GetEdmModel().GetEdmType(typeof (T)));
 
@@ -39,6 +40,7 @@ namespace Swashbuckle.OData.Descriptions
         public OperationBuilder BodyParameter<T>(string parameterName)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(parameterName));
+            Contract.Ensures(Contract.Result<OperationBuilder>() != null);
 
             _operation.Parameters().Parameter(parameterName, ParameterSource.Body.ToString().ToLower(), null, GetEdmModel().GetEdmType(typeof (T)));
 
@@ -48,6 +50,12 @@ namespace Swashbuckle.OData.Descriptions
         private IEdmModel GetEdmModel()
         {
             return _swaggerRouteBuilder.ODataRoute.GetEdmModel();
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariant()
+        {
+            Contract.Invariant(_swaggerRouteBuilder != null);
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Swashbuckle.OData.Descriptions
     {
         public static ParameterSource MapSource(this Parameter parameter)
         {
+            Contract.Requires(parameter != null);
+
             switch (parameter.@in)
             {
                 case "query":
@@ -28,6 +30,8 @@ namespace Swashbuckle.OData.Descriptions
 
         public static Type GetClrType(this Parameter parameter)
         {
+            Contract.Requires(parameter != null);
+
             var type = parameter.type;
             var format = parameter.format;
 
@@ -70,6 +74,7 @@ namespace Swashbuckle.OData.Descriptions
 
         public static string GenerateSamplePathParameterValue(this Parameter parameter)
         {
+            Contract.Requires(parameter != null);
             Contract.Requires(parameter.@in == "path");
 
             var type = parameter.type;
@@ -111,6 +116,7 @@ namespace Swashbuckle.OData.Descriptions
 
         private static Type GetEntityTypeForBodyParameter(Parameter parameter)
         {
+            Contract.Requires(parameter != null);
             Contract.Requires(parameter.@in == "body");
 
             var fullTypeName = parameter.schema.@ref.Replace("#/definitions/", string.Empty);
@@ -120,6 +126,7 @@ namespace Swashbuckle.OData.Descriptions
 
         public static Type GetEntityType(this Schema schema)
         {
+            Contract.Requires(schema != null);
             Contract.Requires(!string.IsNullOrWhiteSpace(schema.@ref));
 
             var fullTypeName = schema.@ref.Replace("#/definitions/", string.Empty);
@@ -129,6 +136,7 @@ namespace Swashbuckle.OData.Descriptions
 
         public static Type GetEntitySetType(this Schema schema)
         {
+            Contract.Requires(schema != null);
             Contract.Requires(schema.type == "array");
 
             var queryableType = typeof(IQueryable<>);

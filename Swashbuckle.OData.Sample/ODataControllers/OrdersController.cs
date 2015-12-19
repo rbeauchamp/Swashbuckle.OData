@@ -26,7 +26,7 @@ namespace SwashbuckleODataSample.ODataControllers
         }
 
         /// <summary>
-        /// Create a new order for the customer with the given <paramref name="customerId"/>
+        /// Create a new order for the customer with the given id
         /// </summary>
         /// <param name="customerId">The customer id</param>
         /// <param name="order">Order details</param>
@@ -34,6 +34,7 @@ namespace SwashbuckleODataSample.ODataControllers
         public async Task<IHttpActionResult> Post([FromODataUri] int customerId, Order order)
         {
             order.OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd);
+            order.CustomerId = customerId;
 
             if (!ModelState.IsValid)
             {

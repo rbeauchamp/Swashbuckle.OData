@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Description;
 using Swashbuckle.OData.Descriptions;
@@ -11,6 +12,8 @@ namespace Swashbuckle.OData
     {
         public ODataSwaggerProviderOptions(SwaggerProviderOptions swaggerProviderOptions)
         {
+            Contract.Requires(swaggerProviderOptions != null);
+
             VersionSupportResolver = swaggerProviderOptions.VersionSupportResolver;
             Schemes = swaggerProviderOptions.Schemes;
             SecurityDefinitions = swaggerProviderOptions.SecurityDefinitions;
@@ -63,6 +66,8 @@ namespace Swashbuckle.OData
 
         private static string DefaultGroupingKeySelector(ApiDescription apiDescription)
         {
+            Contract.Requires(apiDescription != null);
+
             return apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName == "Restier"
                 ? ((RestierHttpActionDescriptor)apiDescription.ActionDescriptor).EntitySetName
                 : apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName;
@@ -75,6 +80,8 @@ namespace Swashbuckle.OData
 
         private static ApiDescription DefaultConflictingActionsResolver(IEnumerable<ApiDescription> apiDescriptions)
         {
+            Contract.Requires(apiDescriptions != null);
+
             var first = apiDescriptions.First();
             throw new NotSupportedException($"Not supported by Swagger 2.0: Multiple operations with path '{first.RelativePathSansQueryString()}' and method '{first.HttpMethod}'. " + "See the config setting - \"ResolveConflictingActions\" for a potential workaround");
         }

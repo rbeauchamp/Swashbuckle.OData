@@ -103,8 +103,8 @@ namespace System.Web.OData.Formatter
 
         private static IEdmType GetEdmType(IEdmModel edmModel, Type clrType, bool testCollections)
         {
-            Contract.Assert(edmModel != null);
-            Contract.Assert(clrType != null);
+            Contract.Requires(edmModel != null);
+            Contract.Requires(clrType != null);
 
             var primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
             if (primitiveType != null)
@@ -160,6 +160,8 @@ namespace System.Web.OData.Formatter
 
         public static IEdmTypeReference GetEdmTypeReference(this IEdmModel edmModel, Type clrType)
         {
+            Contract.Requires(clrType != null);
+
             var edmType = edmModel.GetEdmType(clrType);
             if (edmType != null)
             {
@@ -172,7 +174,7 @@ namespace System.Web.OData.Formatter
 
         public static IEdmTypeReference ToEdmTypeReference(this IEdmType edmType, bool isNullable)
         {
-            Contract.Assert(edmType != null);
+            Contract.Requires(edmType != null);
 
             switch (edmType.TypeKind)
             {
@@ -229,9 +231,9 @@ namespace System.Web.OData.Formatter
 
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
         {
-            var edmSchemaType = edmType as IEdmSchemaType;
+            Contract.Requires(edmType is IEdmSchemaType);
 
-            Contract.Assert(edmSchemaType != null);
+            var edmSchemaType = (IEdmSchemaType) edmType;
 
             var annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmSchemaType);
             if (annotation != null)
@@ -291,8 +293,8 @@ namespace System.Web.OData.Formatter
 
         private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty, IEdmModel edmModel)
         {
-            Contract.Assert(edmProperty != null);
-            Contract.Assert(edmModel != null);
+            Contract.Requires(edmProperty != null);
+            Contract.Requires(edmModel != null);
 
             return edmModel.GetAnnotationValue<QueryableRestrictionsAnnotation>(edmProperty);
         }
@@ -332,12 +334,16 @@ namespace System.Web.OData.Formatter
 
         public static IEdmPrimitiveType GetEdmPrimitiveTypeOrNull(Type clrType)
         {
+            Contract.Requires(clrType != null);
+
             IEdmPrimitiveType primitiveType;
             return BuiltInTypesMapping.TryGetValue(clrType, out primitiveType) ? primitiveType : null;
         }
 
         public static IEdmPrimitiveTypeReference GetEdmPrimitiveTypeReferenceOrNull(Type clrType)
         {
+            Contract.Requires(clrType != null);
+
             var primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
             return primitiveType != null ? CoreModel.GetPrimitive(primitiveType.PrimitiveKind, IsNullable(clrType)) : null;
         }
@@ -346,6 +352,8 @@ namespace System.Web.OData.Formatter
         // and returns the corresponding clr type to which we map like uint => long.
         public static Type IsNonstandardEdmPrimitive(Type type, out bool isNonstandardEdmPrimitive)
         {
+            Contract.Requires(type != null);
+
             var edmType = GetEdmPrimitiveTypeReferenceOrNull(type);
             if (edmType == null)
             {
@@ -363,19 +371,23 @@ namespace System.Web.OData.Formatter
         // to a valid EDM literal (the C# type name IEnumerable<int>).
         public static string EdmName(this Type clrType)
         {
+            Contract.Requires(clrType != null);
+
             // We cannot use just Type.Name here as it doesn't work for generic types.
             return MangleClrTypeName(clrType);
         }
 
         public static string EdmFullName(this Type clrType)
         {
+            Contract.Requires(clrType != null);
+
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", clrType.Namespace, clrType.EdmName());
         }
 
         public static IEnumerable<IEdmStructuralProperty> GetConcurrencyProperties(this IEdmModel model, IEdmEntitySet entitySet)
         {
-            Contract.Assert(model != null);
-            Contract.Assert(entitySet != null);
+            Contract.Requires(model != null);
+            Contract.Requires(entitySet != null);
 
             IEnumerable<IEdmStructuralProperty> cachedProperties;
             if (_concurrencyProperties != null && _concurrencyProperties.TryGetValue(entitySet, out cachedProperties))
@@ -427,6 +439,8 @@ namespace System.Web.OData.Formatter
 
         public static bool IsNullable(Type type)
         {
+            Contract.Requires(type != null);
+
             return !type.IsValueType || Nullable.GetUnderlyingType(type) != null;
         }
 
@@ -438,13 +452,15 @@ namespace System.Web.OData.Formatter
 
         private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IAssembliesResolver assembliesResolver)
         {
+            Contract.Requires(assembliesResolver != null);
+
             return TypeHelper.GetLoadedTypes(assembliesResolver).Where(t => t.IsPublic && t.EdmFullName() == edmFullName);
         }
 
         // TODO (workitem 336): Support nested types and anonymous types.
         private static string MangleClrTypeName(Type type)
         {
-            Contract.Assert(type != null);
+            Contract.Requires(type != null);
 
             return !type.IsGenericType 
                 ? type.Name 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -63,6 +64,8 @@ namespace Swashbuckle.OData.Descriptions
         /// <returns></returns>
         private List<ApiDescription> GetApiDescriptions(ODataRoute oDataRoute)
         {
+            Contract.Requires(oDataRoute != null);
+
             var apiDescriptions = new List<ApiDescription>();
 
             var standardRoutes = _routeGenerator.Generate(oDataRoute.RoutePrefix, oDataRoute.GetEdmModel());
@@ -79,6 +82,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private List<ApiDescription> GetApiDescriptions(ODataRoute oDataRoute, SwaggerRoute potentialSwaggerRoute)
         {
+            Contract.Requires(potentialSwaggerRoute != null);
+
             var apiDescriptions = new List<ApiDescription>();
 
             apiDescriptions.AddIfNotNull(GetApiDescription(new HttpMethod("DELETE"), potentialSwaggerRoute.PathItem.delete, potentialSwaggerRoute.Template, oDataRoute));
@@ -134,6 +139,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private ApiDescription GetApiDescription(HttpActionDescriptor actionDescriptor, HttpMethod httpMethod, Operation operation, string potentialPathTemplate, ODataRoute oDataRoute)
         {
+            Contract.Requires(actionDescriptor == null || operation != null);
+
             if (actionDescriptor == null)
             {
                 return null;
@@ -212,11 +219,15 @@ namespace Swashbuckle.OData.Descriptions
 
         private static IEnumerable<MediaTypeFormatter> GetInnerFormatters(IEnumerable<MediaTypeFormatter> mediaTypeFormatters)
         {
+            Contract.Requires(mediaTypeFormatters != null);
+
             return mediaTypeFormatters.Select(Decorator.GetInner);
         }
 
         private List<SwaggerApiParameterDescription> CreateParameterDescriptions(Operation operation, HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(operation != null);
+
             return operation.parameters.Select((parameter, index) => GetParameterDescription(parameter, index, actionDescriptor)).ToList();
         }
 
@@ -242,6 +253,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static string GetApiParameterDocumentation(Parameter parameter, HttpParameterDescriptor parameterDescriptor)
         {
+            Contract.Requires(parameterDescriptor != null);
+
             var documentationProvider = parameterDescriptor.Configuration.Services.GetDocumentationProvider();
 
             return documentationProvider != null 
@@ -251,6 +264,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static string GetApiDocumentation(HttpActionDescriptor actionDescriptor, Operation operation)
         {
+            Contract.Requires(actionDescriptor != null);
+
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
             return documentationProvider != null 
                 ? documentationProvider.GetDocumentation(actionDescriptor) 
@@ -283,6 +298,12 @@ namespace Swashbuckle.OData.Descriptions
                     yield return route;
                 }
             }
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariant()
+        {
+            Contract.Invariant(_apiDescriptions != null);
         }
     }
 }

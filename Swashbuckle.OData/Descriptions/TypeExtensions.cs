@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 
 namespace System
 {
@@ -13,6 +14,8 @@ namespace System
     {
         public static bool IsNullable(this Type type)
         {
+            Contract.Requires(type != null);
+
             if (type.IsValueType)
             {
                 // value types are only nullable if they are Nullable<T>

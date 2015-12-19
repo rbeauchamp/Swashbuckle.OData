@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace Swashbuckle.OData
 {
@@ -146,6 +147,13 @@ namespace Swashbuckle.OData
                 throw new ArgumentNullException(nameof(obj));
             }
             return _comparer.GetHashCode(_projection(obj));
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariant()
+        {
+            Contract.Invariant(_projection != null);
+            Contract.Invariant(_comparer != null);
         }
     }
 }

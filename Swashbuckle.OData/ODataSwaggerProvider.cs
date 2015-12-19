@@ -115,6 +115,8 @@ namespace Swashbuckle.OData
 
         private SwaggerDocument MergeODataAndWebApiSwaggerDocs(string rootUrl, string apiVersion, SwaggerDocument odataSwaggerDoc)
         {
+            Contract.Requires(odataSwaggerDoc != null);
+
             var webApiSwaggerDoc = _defaultProvider.GetSwagger(rootUrl, apiVersion);
 
             webApiSwaggerDoc.paths = webApiSwaggerDoc.paths.UnionEvenIfNull(odataSwaggerDoc.paths).ToLookup(pair => pair.Key, pair => pair.Value)
@@ -140,6 +142,8 @@ namespace Swashbuckle.OData
 
         private PathItem CreatePathItem(IEnumerable<ApiDescription> apiDescriptions, SchemaRegistry schemaRegistry)
         {
+            Contract.Requires(apiDescriptions != null);
+
             var pathItem = new PathItem();
 
             // Group further by http method
@@ -225,6 +229,8 @@ namespace Swashbuckle.OData
 
         private static Parameter CreateParameter(SwaggerApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
         {
+            Contract.Requires(paramDesc != null);
+
             var @in = inPath
                 ? "path"
                 : MapToSwaggerParameterLocation(paramDesc.SwaggerSource);
@@ -279,6 +285,15 @@ namespace Swashbuckle.OData
             return _options.VersionSupportResolver == null 
                 ? _odataApiExplorer.ApiDescriptions 
                 : _odataApiExplorer.ApiDescriptions.Where(apiDesc => _options.VersionSupportResolver(apiDesc, apiVersion));
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariant()
+        {
+            Contract.Invariant(_options != null);
+            Contract.Invariant(_apiVersions != null);
+            Contract.Invariant(_httpConfig != null);
+            Contract.Invariant(_odataApiExplorer != null);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Swashbuckle.OData.Descriptions
         public static string GenerateSampleODataAbsoluteUri(this Operation operation, string serviceRoot, string pathTemplate)
         {
             Contract.Requires(operation != null);
+            Contract.Requires(serviceRoot != null);
 
             var uriTemplate = new UriTemplate(pathTemplate);
 
