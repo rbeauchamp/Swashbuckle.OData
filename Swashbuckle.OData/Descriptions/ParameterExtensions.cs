@@ -86,7 +86,7 @@ namespace Swashbuckle.OData.Descriptions
                     switch (type)
                     {
                         case "string":
-                            return "SampleString";
+                            return "\'SampleString\'";
                         case "boolean":
                             return "true";
                         default:

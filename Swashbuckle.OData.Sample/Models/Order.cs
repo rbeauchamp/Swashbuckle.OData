@@ -13,6 +13,8 @@ namespace SwashbuckleODataSample.Models
 
         public string OrderName { get; set; }
 
+        public double UnitPrice { get; set; }
+
         public int CustomerId { get; set; }
 
         [ForeignKey("CustomerId")]
