@@ -55,12 +55,12 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.OData.Core, Version=6.13.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.OData.Core.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Core.dll</HintPath>
+    <Reference Include="Microsoft.OData.Core, Version=6.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.OData.Core.6.14.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.OData.Edm, Version=6.13.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.OData.Edm.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Edm.dll</HintPath>
+    <Reference Include="Microsoft.OData.Edm, Version=6.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.OData.Edm.6.14.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.OData.Edm.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Restier.Core, Version=0.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -75,8 +75,8 @@
       <HintPath>..\packages\Microsoft.Restier.WebApi.0.4.0-rc2\lib\net45\Microsoft.Restier.WebApi.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Spatial, Version=6.13.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Spatial.6.13.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
+    <Reference Include="Microsoft.Spatial, Version=6.14.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Spatial.6.14.0\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -127,7 +127,7 @@
     <Reference Include="System.Net.Http.WebRequest">
     </Reference>
     <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
-      <HintPath>..\packages\WebActivatorEx.2.0.6\lib\net40\WebActivatorEx.dll</HintPath>
+      <HintPath>..\packages\WebActivatorEx.2.1.0\lib\net40\WebActivatorEx.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -144,6 +144,8 @@
     <Compile Include="App_Start\ODataConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="DocumentFilters\ApplyResourceDocumentation.cs" />
+    <Compile Include="Models\Product.cs" />
+    <Compile Include="ODataControllers\ProductsController.cs" />
     <Compile Include="Repositories\RestierODataContext.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Customer.cs" />
@@ -203,7 +205,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>4073</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:4073/</IISUrl>
+          <IISUrl>http://localhost:4074/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

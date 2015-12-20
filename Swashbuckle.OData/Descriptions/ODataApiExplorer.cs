@@ -151,7 +151,12 @@ namespace Swashbuckle.OData.Descriptions
             var parameterDescriptions = CreateParameterDescriptions(operation, actionDescriptor);
 
             // request formatters
-            var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == ParameterSource.Body);
+            var bodyParameter = default(SwaggerApiParameterDescription);
+            if (parameterDescriptions != null)
+            {
+                bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == ParameterSource.Body);
+            }
+
             var supportedRequestBodyFormatters = bodyParameter != null ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) : Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters
@@ -174,7 +179,10 @@ namespace Swashbuckle.OData.Descriptions
 
             apiDescription.SupportedResponseFormatters.AddRange(supportedResponseFormatters);
             apiDescription.SupportedRequestBodyFormatters.AddRange(supportedRequestBodyFormatters.ToList());
-            apiDescription.ParameterDescriptions.AddRange(parameterDescriptions);
+            if (parameterDescriptions != null)
+            {
+                apiDescription.ParameterDescriptions.AddRange(parameterDescriptions);
+            }
 
             // Have to set ResponseDescription because it's internal!??
             apiDescription.GetType().GetProperty("ResponseDescription").SetValue(apiDescription, responseDescription);
@@ -228,7 +236,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(operation != null);
 
-            return operation.parameters.Select((parameter, index) => GetParameterDescription(parameter, index, actionDescriptor)).ToList();
+            return operation.parameters?.Select((parameter, index) => GetParameterDescription(parameter, index, actionDescriptor)).ToList();
         }
 
         private SwaggerApiParameterDescription GetParameterDescription(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)

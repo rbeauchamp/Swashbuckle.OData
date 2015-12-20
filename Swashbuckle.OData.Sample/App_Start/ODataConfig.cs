@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Web.Http;
-using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -12,7 +10,6 @@ using Microsoft.Restier.EntityFramework;
 using Microsoft.Restier.WebApi;
 using Microsoft.Restier.WebApi.Batch;
 using Swashbuckle.OData;
-using Swashbuckle.OData.Descriptions;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Repositories;
 using SwashbuckleODataSample.Versioning;
@@ -37,7 +34,7 @@ namespace SwashbuckleODataSample
         private static void ConfigureWebApiOData(HttpConfiguration config)
         {
             var controllerSelector = new ODataVersionControllerSelector(config);
-            config.Services.Replace(typeof (IHttpControllerSelector), controllerSelector);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
             // Define a versioned route
             config.MapODataServiceRoute("V1RouteVersioning", "odata/v1", GetVersionedModel());
@@ -50,23 +47,35 @@ namespace SwashbuckleODataSample
             // Define a custom route with custom routing conventions
             var conventions = ODataRoutingConventions.CreateDefault();
             conventions.Insert(0, new CustomNavigationPropertyRoutingConvention());
-            var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: conventions);
+            var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetCustomRouteModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: conventions);
             config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders")
                 .Operation(HttpMethod.Post)
                 .PathParameter<int>("Id")
                 .BodyParameter<Order>("order");
 
-            // Define a default non-versioned route (default route should be at the end as a last catch-all)
-            config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetModel());
+            // Define a route to a controller class that contains functions
+            config.MapODataServiceRoute("FunctionsODataRoute", ODataRoutePrefix, GetFunctionsEdmModel());
+
+            // Define a default non- versioned route(default route should be at the end as a last catch-all)
+            config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetDefaultModel());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetDefaultModel()
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
             return builder.GetEdmModel();
         }
+
+        private static IEdmModel GetCustomRouteModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            builder.EntitySet<Order>("Orders");
+            return builder.GetEdmModel();
+        }
+
         private static IEdmModel GetVersionedModel()
         {
             var builder = new ODataConventionModelBuilder();
@@ -78,6 +87,51 @@ namespace SwashbuckleODataSample
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Customer>("FakeCustomers");
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetFunctionsEdmModel()
+        {
+            ODataModelBuilder builder = new ODataConventionModelBuilder();
+
+            builder.EntitySet<Product>("Products");
+
+            var productType = builder.EntityType<Product>();
+
+            // Function bound to a collection
+            // Returns the most expensive product, a single entity
+            productType.Collection
+                .Function("MostExpensive")
+                .Returns<double>();
+
+            // Function bound to a collection
+            // Returns the top 10 product, a collection
+            productType.Collection
+                .Function("Top10")
+                .ReturnsCollectionFromEntitySet<Product>("Products");
+
+            // Function bound to a single entity
+            // Returns the instance's price rank among all products
+            productType
+                .Function("GetPriceRank")
+                .Returns<int>();
+
+            // Function bound to a single entity
+            // Accept a string as parameter and return a double
+            // This function calculate the general sales tax base on the 
+            // state
+            productType
+                .Function("CalculateGeneralSalesTax")
+                .Returns<double>()
+                .Parameter<string>("state");
+
+            // Commented out because unbound functions don't
+            // play well in a config with mulitple OData routes
+            // Unbound Function
+            //builder.Function("GetSalesTaxRate")
+            //    .Returns<double>()
+            //    .Parameter<string>("state");
+
             return builder.GetEdmModel();
         }
     }

@@ -41,8 +41,8 @@ namespace SwashbuckleODataSample.Repositories
             context.Customers.Add(customerOne);
             context.Customers.Add(new Customer { Name = "CustomerTwo" });
 
-            context.Orders.Add(new Order { OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd), OrderName = "OrderOne", Customer = customerOne });
-            context.Orders.Add(new Order { OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd), OrderName = "OrderTwo", Customer = customerOne });
+            context.Orders.Add(new Order { OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd), OrderName = "OrderOne", Customer = customerOne, UnitPrice = 4.0 });
+            context.Orders.Add(new Order { OrderId = SequentialGuidGenerator.Generate(SequentialGuidType.SequentialAtEnd), OrderName = "OrderTwo", Customer = customerOne, UnitPrice = 3.5 });
 
             base.Seed(context);
         }

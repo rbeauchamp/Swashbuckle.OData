@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.OData;
+using System.Web.OData.Routing;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Repositories;
 
@@ -154,6 +155,17 @@ namespace SwashbuckleODataSample.ODataControllers
         {
             return _db.Customers.Where(m => m.Id == key)
                 .SelectMany(m => m.Orders);
+        }
+
+        /// <summary>
+        /// An OData function example. Gets the total count of customers.
+        /// </summary>
+        [HttpGet]
+        [ResponseType(typeof(int))]
+        public IHttpActionResult TotalCount()
+        {
+            var customerCount = _db.Customers.Count();
+            return Ok(customerCount);
         }
 
         protected override void Dispose(bool disposing)

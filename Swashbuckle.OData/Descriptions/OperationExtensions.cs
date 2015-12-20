@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Flurl;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
     internal static class OperationExtensions
     {
-        public static IDictionary<string, string> GenerateSampleQueryParameterValues(this Operation operation)
+        public static IDictionary<string, string> GenerateSamplePathParameterValues(this Operation operation)
         {
             Contract.Requires(operation != null);
 
-            return operation.parameters.Where(parameter => parameter.@in == "path")
+            return operation.parameters?.Where(parameter => parameter.@in == "path")
                 .ToDictionary(queryParameter => queryParameter.name, queryParameter => queryParameter.GenerateSamplePathParameterValue());
         }
 
@@ -21,13 +22,15 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(operation != null);
             Contract.Requires(serviceRoot != null);
 
-            var uriTemplate = new UriTemplate(pathTemplate);
+            var parameters = operation.GenerateSamplePathParameterValues();
 
-            var parameters = operation.GenerateSampleQueryParameterValues();
+            if (parameters != null && parameters.Any())
+            {
+                var prefix = new Uri(serviceRoot);
 
-            var prefix = new Uri(serviceRoot);
-
-            return uriTemplate.BindByName(prefix, parameters).ToString();
+                return new UriTemplate(pathTemplate).BindByName(prefix, parameters).ToString();
+            }
+            return serviceRoot.AppendPathSegment(pathTemplate);
         }
 
         public static IList<Parameter> Parameters(this Operation operation)

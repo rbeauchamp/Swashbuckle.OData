@@ -326,14 +326,15 @@ namespace Swashbuckle.OData.Descriptions
         private static string AppendSingleColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath)
         {
             var key = entitySet.EntityType().Key().Single();
-            if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
-            {
-                singleEntityPath += "'{" + key.Name + "}', ";
-            }
-            else
-            {
-                singleEntityPath += "{" + key.Name + "}, ";
-            }
+            //if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
+            //{
+            //    singleEntityPath += "'{" + key.Name + "}', ";
+            //}
+            //else
+            //{
+
+            singleEntityPath += "{" + key.Name + "}, ";
+            //}
             return singleEntityPath;
         }
 
@@ -341,14 +342,14 @@ namespace Swashbuckle.OData.Descriptions
         {
             foreach (var key in entitySet.EntityType().Key())
             {
-                if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType)key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
-                {
-                    singleEntityPath += key.Name + "='{" + key.Name + "}', ";
-                }
-                else
-                {
+                //if (key.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType)key.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
+                //{
+                //    singleEntityPath += key.Name + "='{" + key.Name + "}', ";
+                //}
+                //else
+                //{
                     singleEntityPath += key.Name + "={" + key.Name + "}, ";
-                }
+                //}
             }
             return singleEntityPath;
         }
@@ -402,14 +403,14 @@ namespace Swashbuckle.OData.Descriptions
             {
                 foreach (var parameter in operation.Parameters.Skip(1))
                 {
-                    if (parameter.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) parameter.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
-                    {
-                        swaggerOperationPath += parameter.Name + "=" + "'{" + parameter.Name + "}',";
-                    }
-                    else
-                    {
+                    //if (parameter.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) parameter.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
+                    //{
+                    //    swaggerOperationPath += parameter.Name + "=" + "'{" + parameter.Name + "}',";
+                    //}
+                    //else
+                    //{
                         swaggerOperationPath += parameter.Name + "=" + "{" + parameter.Name + "},";
-                    }
+                    //}
                 }
             }
             if (swaggerOperationPath.EndsWith(",", StringComparison.Ordinal))
@@ -443,14 +444,14 @@ namespace Swashbuckle.OData.Descriptions
             {
                 foreach (var parameter in operation.Parameters.Skip(1))
                 {
-                    if (parameter.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) parameter.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
-                    {
-                        swaggerOperationPath += parameter.Name + "=" + "'{" + parameter.Name + "}',";
-                    }
-                    else
-                    {
+                    //if (parameter.Type.Definition.TypeKind == EdmTypeKind.Primitive && ((IEdmPrimitiveType) parameter.Type.Definition).PrimitiveKind == EdmPrimitiveTypeKind.String)
+                    //{
+                    //    swaggerOperationPath += parameter.Name + "=" + "{" + parameter.Name + "},";
+                    //}
+                    //else
+                    //{
                         swaggerOperationPath += parameter.Name + "=" + "{" + parameter.Name + "},";
-                    }
+                    //}
                 }
             }
             if (swaggerOperationPath.EndsWith(",", StringComparison.Ordinal))
