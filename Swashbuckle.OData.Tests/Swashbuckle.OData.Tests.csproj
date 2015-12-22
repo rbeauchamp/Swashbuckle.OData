@@ -137,6 +137,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplyNewHostName.cs" />
+    <Compile Include="Containment\AccountsController.cs" />
+    <Compile Include="Containment\ContainmentTests.cs" />
+    <Compile Include="Containment\DataModels.cs" />
+    <Compile Include="Containment\ODataModels.cs" />
+    <Compile Include="Containment\Program.cs" />
     <Compile Include="ContentType.cs" />
     <Compile Include="Fixtures\CustomRouteTests.cs" />
     <Compile Include="Fixtures\FunctionTests.cs" />
@@ -159,13 +164,13 @@
     <Compile Include="NorthwindAPI\Shipper.cs" />
     <Compile Include="NorthwindAPI\Supplier.cs" />
     <Compile Include="NorthwindAPI\Territory.cs" />
-    <Compile Include="NorthwindAPI\NorthwindODataConfig.cs" />
-    <Compile Include="NorthwindAPI\NorthwindApiStartup.cs" />
-    <Compile Include="TestODataConfig.cs" />
+    <Compile Include="ODataVersionControllerSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpExtensions.cs" />
     <Compile Include="TestRestierODataContext.cs" />
-    <Compile Include="WebHost\TestWebApiStartup.cs" />
+    <Compile Include="AppBuilderExtensions.cs" />
+    <Compile Include="UnitTestControllerSelector.cs" />
+    <Compile Include="ValidationUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -187,6 +192,7 @@
       <Name>Swashbuckle.OData</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

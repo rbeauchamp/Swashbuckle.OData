@@ -1,26 +1,22 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using FluentAssertions;
-using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
 using Swashbuckle.Swagger;
 using SwashbuckleODataSample;
-using SwashbuckleODataSample.Models;
-using SwashbuckleODataSample.ODataControllers;
 
-namespace Swashbuckle.OData.Tests
+namespace Swashbuckle.OData.Tests.Containment
 {
     [TestFixture]
-    public class PostTests
+    public class ContainmentTests
     {
         [Test]
-        public async Task It_has_a_summary()
+        public async Task It_supports_models_that_use_containment()
         {
-            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(CustomersController))))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(AccountsController))))
             {
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
@@ -30,10 +26,8 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/odata/Customers", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Accounts", out pathItem);
                 pathItem.Should().NotBeNull();
-                pathItem.post.Should().NotBeNull();
-                pathItem.post.summary.Should().NotBeNullOrWhiteSpace();
 
                 await ValidationUtils.ValidateSwaggerJson();
             }
@@ -43,17 +37,9 @@ namespace Swashbuckle.OData.Tests
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
 
-            config.MapODataServiceRoute("DefaultODataRoute", "odata", GetDefaultModel());
+            config.MapODataServiceRoute("odata", "odata", ODataModels.GetModel());
 
             config.EnsureInitialized();
-        }
-
-        private static IEdmModel GetDefaultModel()
-        {
-            var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Customer>("Customers");
-            builder.EntitySet<Order>("Orders");
-            return builder.GetEdmModel();
         }
     }
 }

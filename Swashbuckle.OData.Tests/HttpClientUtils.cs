@@ -7,6 +7,8 @@ namespace Swashbuckle.OData.Tests
 {
     public class HttpClientUtils
     {
+        public const string BaseAddress = "http://localhost:8347/";
+
         public static HttpClient GetHttpClient(string baseAddress, string routePrefix = null)
         {
             var client =  new HttpClient
