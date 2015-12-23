@@ -172,11 +172,15 @@
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
     <Compile Include="DefaultCompositionRoot.cs" />
+    <Compile Include="Descriptions\ApiDescriptionMapper.cs" />
+    <Compile Include="Descriptions\HttpParameterBindingExtensions.cs" />
+    <Compile Include="Descriptions\SwaggerOperationMapper.cs" />
     <Compile Include="Descriptions\EdmLibHelpers.cs" />
     <Compile Include="Descriptions\HttpActionDescriptorExtensions.cs" />
     <Compile Include="Descriptions\HttpRequestMessageExtensions.cs" />
+    <Compile Include="Descriptions\IApiDescriptionMapper.cs" />
     <Compile Include="Descriptions\IParameterMapper.cs" />
-    <Compile Include="Descriptions\IODataRouteGenerator.cs" />
+    <Compile Include="Descriptions\ISwaggerRouteGenerator.cs" />
     <Compile Include="Descriptions\MapByDescription.cs" />
     <Compile Include="Descriptions\MapByIndex.cs" />
     <Compile Include="Descriptions\MapByParameterName.cs" />
@@ -190,6 +194,7 @@
     <Compile Include="Descriptions\RestierParameterDescriptor.cs" />
     <Compile Include="Descriptions\RestierHttpActionDescriptor.cs" />
     <Compile Include="Descriptions\SelectExpandWrapper.cs" />
+    <Compile Include="Descriptions\CustomSwaggerRouteGenerator.cs" />
     <Compile Include="Descriptions\SwaggerRoute.cs" />
     <Compile Include="Descriptions\SwaggerRouteBuilder.cs" />
     <Compile Include="Descriptions\SwaggerTypeAndFormat.cs" />
@@ -201,7 +206,7 @@
     <Compile Include="ODataSwaggerProviderOptions.cs" />
     <Compile Include="SwaggerDocsConfigExtensions.cs" />
     <Compile Include="SwaggerProviderOptions.cs" />
-    <Compile Include="Descriptions\SwaggerPathGenerator.cs" />
+    <Compile Include="Descriptions\StandardSwaggerRouteGenerator.cs" />
     <Compile Include="ODataSwaggerProvider.cs" />
     <Compile Include="Descriptions\ODataSwaggerUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -49,7 +49,7 @@ namespace Swashbuckle.OData.Descriptions
 
         private IEdmModel GetEdmModel()
         {
-            return _swaggerRouteBuilder.ODataRoute.GetEdmModel();
+            return _swaggerRouteBuilder.SwaggerRoute.ODataRoute.GetEdmModel();
         }
 
         [ContractInvariantMethod]

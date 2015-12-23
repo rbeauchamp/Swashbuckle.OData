@@ -17,7 +17,25 @@ namespace Swashbuckle.OData
     {
         public static IApiExplorer GetApiExplorer(HttpConfiguration httpConfiguration)
         {
-            return new ODataApiExplorer(httpConfiguration, new ODataRouteGenerator(),  GetParameterMappers());
+            return new ODataApiExplorer(httpConfiguration, GetSwaggerRouteGenerators(), GetApiDescriptionMappers());
+        }
+
+        private static List<ISwaggerRouteGenerator> GetSwaggerRouteGenerators()
+        {
+            return new List<ISwaggerRouteGenerator>
+            {
+                new StandardSwaggerRouteGenerator(),
+                new CustomSwaggerRouteGenerator()
+            };
+        }
+
+        private static List<IApiDescriptionMapper> GetApiDescriptionMappers()
+        {
+            return new List<IApiDescriptionMapper>
+            {
+                new SwaggerOperationMapper(GetParameterMappers()),
+                new ApiDescriptionMapper()
+            };
         }
 
         private static List<IParameterMapper> GetParameterMappers()

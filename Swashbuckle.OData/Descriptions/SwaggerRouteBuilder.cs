@@ -1,23 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
-using System.Web.OData.Routing;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
     public class SwaggerRouteBuilder
     {
-        private readonly SwaggerRoute _swaggerRoute;
-
-        public SwaggerRouteBuilder(SwaggerRoute swaggerRoute, ODataRoute oDataRoute)
+        public SwaggerRouteBuilder(SwaggerRoute swaggerRoute)
         {
-            _swaggerRoute = swaggerRoute;
-            ODataRoute = oDataRoute;
+            SwaggerRoute = swaggerRoute;
         }
 
-        internal ODataRoute ODataRoute { get; }
+        public SwaggerRoute SwaggerRoute { get; }
 
         public OperationBuilder Operation(HttpMethod httpMethod)
         {
@@ -29,19 +24,19 @@ namespace Swashbuckle.OData.Descriptions
             switch (httpMethod.Method.ToUpper())
             {
                 case "GET":
-                    _swaggerRoute.PathItem.get = operation;
+                    SwaggerRoute.PathItem.get = operation;
                     break;
                 case "PUT":
-                    _swaggerRoute.PathItem.put = operation;
+                    SwaggerRoute.PathItem.put = operation;
                     break;
                 case "POST":
-                    _swaggerRoute.PathItem.post = operation;
+                    SwaggerRoute.PathItem.post = operation;
                     break;
                 case "DELETE":
-                    _swaggerRoute.PathItem.delete = operation;
+                    SwaggerRoute.PathItem.delete = operation;
                     break;
                 case "PATCH":
-                    _swaggerRoute.PathItem.patch = operation;
+                    SwaggerRoute.PathItem.patch = operation;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(httpMethod));
@@ -58,15 +53,15 @@ namespace Swashbuckle.OData.Descriptions
             switch (httpMethod.Method.ToUpper())
             {
                 case "GET":
-                    return _swaggerRoute.PathItem.get;
+                    return SwaggerRoute.PathItem.get;
                 case "PUT":
-                    return _swaggerRoute.PathItem.put;
+                    return SwaggerRoute.PathItem.put;
                 case "POST":
-                    return _swaggerRoute.PathItem.post;
+                    return SwaggerRoute.PathItem.post;
                 case "DELETE":
-                    return _swaggerRoute.PathItem.delete;
+                    return SwaggerRoute.PathItem.delete;
                 case "PATCH":
-                    return _swaggerRoute.PathItem.patch;
+                    return SwaggerRoute.PathItem.patch;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(httpMethod));
             }
@@ -75,7 +70,7 @@ namespace Swashbuckle.OData.Descriptions
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant(_swaggerRoute != null);
+            Contract.Invariant(SwaggerRoute != null);
         }
     }
 }

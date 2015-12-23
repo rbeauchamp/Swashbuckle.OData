@@ -33,6 +33,26 @@ namespace Swashbuckle.OData.Tests.Containment
             }
         }
 
+        [Test]
+        public async Task It_supports_odata_attribute_routing()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(AccountsController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/Accounts({accountId})/PayinPIs({paymentInstrumentId})", out pathItem);
+                pathItem.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         private static void Configuration(IAppBuilder appBuilder, Type targetController)
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);

@@ -43,6 +43,20 @@ namespace Swashbuckle.OData
             }
         }
 
+        /// <summary>
+        /// Creates a <see cref="Collection{T}" /> from an <see cref="T:System.Collections.Generic.IEnumerable`1" />.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source">The <see cref="T:System.Collections.Generic.IEnumerable`1" /> to create a <see cref="T:System.Collections.Generic.List`1" /> from.</param>
+        /// <returns>
+        /// A <see cref="Collection{T}" /> that contains elements from the input sequence.
+        /// </returns>
+        /// <exception cref="T:System.ArgumentNullException"><paramref name="source" /> is null.</exception>
+        public static Collection<T> ToCollection<T>(this IEnumerable<T> source)
+        {
+            return new Collection<T>(source.ToList());
+        }
+
         public static IEnumerable<T> UnionEvenIfNull<T>(this IEnumerable<T> source, IEnumerable<T> other, IEqualityComparer<T> comparer = null)
         {
             var nonNullSource = source ?? new List<T>();

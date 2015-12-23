@@ -196,7 +196,10 @@ namespace Swashbuckle.OData
                 .Select(paramDesc =>
                 {
                     var inPath = apiDescription.RelativePathSansQueryString().Contains("{" + paramDesc.Name + "}");
-                    return CreateParameter(paramDesc as SwaggerApiParameterDescription, inPath, schemaRegistry);
+                    var swaggerApiParameterDescription = paramDesc as SwaggerApiParameterDescription;
+                    return swaggerApiParameterDescription != null 
+                    ? CreateParameter(swaggerApiParameterDescription, inPath, schemaRegistry) 
+                    : CreateParameter(paramDesc, inPath, schemaRegistry);
                 })
                  .ToList();
 
@@ -225,6 +228,37 @@ namespace Swashbuckle.OData
             }
 
             return operation;
+        }
+
+        private Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
+        {
+            var @in = (inPath)
+                ? "path"
+                : (paramDesc.Source == ApiParameterSource.FromUri) ? "query" : "body";
+
+            var parameter = new Parameter
+            {
+                name = paramDesc.Name,
+                @in = @in
+            };
+
+            if (paramDesc.ParameterDescriptor == null)
+            {
+                parameter.type = "string";
+                parameter.required = true;
+                return parameter;
+            }
+
+            parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
+            parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
+
+            var schema = schemaRegistry.GetOrRegister(paramDesc.ParameterDescriptor.ParameterType);
+            if (parameter.@in == "body")
+                parameter.schema = schema;
+            else
+                parameter.PopulateFrom(schema);
+
+            return parameter;
         }
 
         private static Parameter CreateParameter(SwaggerApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
