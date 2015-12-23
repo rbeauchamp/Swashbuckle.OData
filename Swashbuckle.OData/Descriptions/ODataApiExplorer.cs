@@ -50,12 +50,7 @@ namespace Swashbuckle.OData.Descriptions
             apiDescriptions.AddRange(GetApiDescriptionsFromSwaggerRouteGenerators());
             apiDescriptions.AddRange(GetApiDescriptionsFromAttributeRoutes());
 
-            return apiDescriptions.Distinct(EqualityComparer<ApiDescription>.Create(description => new
-            {
-                description.HttpMethod,
-                description.RelativePath,
-                description.ActionDescriptor
-            })).ToCollection();
+            return apiDescriptions.Distinct(new ApiDescriptionEqualityComparer()).ToCollection();
         }
 
         private IEnumerable<ApiDescription> GetApiDescriptionsFromAttributeRoutes()

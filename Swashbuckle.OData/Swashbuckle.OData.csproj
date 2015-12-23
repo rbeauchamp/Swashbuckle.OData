@@ -172,6 +172,7 @@
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
     <Compile Include="DefaultCompositionRoot.cs" />
+    <Compile Include="Descriptions\ApiDescriptionEqualityComparer.cs" />
     <Compile Include="Descriptions\ApiDescriptionMapper.cs" />
     <Compile Include="Descriptions\HttpParameterBindingExtensions.cs" />
     <Compile Include="Descriptions\SwaggerOperationMapper.cs" />
