@@ -28,6 +28,15 @@ namespace SwashbuckleODataSample.ODataControllers
         }
 
         /// <summary>
+        /// Query products
+        /// </summary>
+        [EnableQuery]
+        public IQueryable<Product> GetProducts()
+        {
+            return Data.Values.AsQueryable();
+        }
+
+        /// <summary>
         /// Get the most expensive product. This is a function bound to a collection.
         /// </summary>
         [HttpGet]
