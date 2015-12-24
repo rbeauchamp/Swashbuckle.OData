@@ -7,12 +7,11 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Services;
 using System.Web.OData.Formatter;
-using System.Web.OData.Routing;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    internal class SwaggerOperationMapper : IApiDescriptionMapper
+    internal class SwaggerOperationMapper : IODataActionDescriptorMapper
     {
         private readonly IEnumerable<IParameterMapper> _parameterMappers;
 
@@ -21,15 +20,15 @@ namespace Swashbuckle.OData.Descriptions
             _parameterMappers = parameterMappers;
         }
 
-        public IEnumerable<ApiDescription> Map(HttpActionDescriptor actionDescriptor, ODataRoute route, string relativePathTemplate, Operation operation = null)
+        public IEnumerable<ApiDescription> Map(ODataActionDescriptor oDataActionDescriptor)
         {
             var apiDescriptions = new List<ApiDescription>();
 
-            if (operation != null)
+            if (oDataActionDescriptor.Operation != null)
             {
-                var apiDocumentation = GetApiDocumentation(actionDescriptor, operation);
+                var apiDocumentation = GetApiDocumentation(oDataActionDescriptor.ActionDescriptor, oDataActionDescriptor.Operation);
 
-                var parameterDescriptions = CreateParameterDescriptions(operation, actionDescriptor);
+                var parameterDescriptions = CreateParameterDescriptions(oDataActionDescriptor.Operation, oDataActionDescriptor.ActionDescriptor);
 
                 // request formatters
                 var bodyParameter = default(SwaggerApiParameterDescription);
@@ -38,12 +37,12 @@ namespace Swashbuckle.OData.Descriptions
                     bodyParameter = parameterDescriptions.FirstOrDefault(description => description.SwaggerSource == ParameterSource.Body);
                 }
 
-                var supportedRequestBodyFormatters = bodyParameter != null ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) : Enumerable.Empty<MediaTypeFormatter>();
+                var supportedRequestBodyFormatters = bodyParameter != null ? oDataActionDescriptor.ActionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) : Enumerable.Empty<MediaTypeFormatter>();
 
                 // response formatters
-                var responseDescription = actionDescriptor.CreateResponseDescription();
+                var responseDescription = oDataActionDescriptor.ActionDescriptor.CreateResponseDescription();
                 var returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
-                var supportedResponseFormatters = returnType != null && returnType != typeof (void) ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) : Enumerable.Empty<MediaTypeFormatter>();
+                var supportedResponseFormatters = returnType != null && returnType != typeof (void) ? oDataActionDescriptor.ActionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) : Enumerable.Empty<MediaTypeFormatter>();
 
                 // Replacing the formatter tracers with formatters if tracers are present.
                 supportedRequestBodyFormatters = GetInnerFormatters(supportedRequestBodyFormatters);
@@ -52,10 +51,10 @@ namespace Swashbuckle.OData.Descriptions
                 var apiDescription = new ApiDescription
                 {
                     Documentation = apiDocumentation,
-                    HttpMethod = actionDescriptor.SupportedHttpMethods.First(),
-                    RelativePath = relativePathTemplate.TrimStart('/'),
-                    ActionDescriptor = actionDescriptor,
-                    Route = route
+                    HttpMethod = oDataActionDescriptor.ActionDescriptor.SupportedHttpMethods.First(),
+                    RelativePath = oDataActionDescriptor.RelativePathTemplate.TrimStart('/'),
+                    ActionDescriptor = oDataActionDescriptor.ActionDescriptor,
+                    Route = oDataActionDescriptor.Route
                 };
 
                 apiDescription.SupportedResponseFormatters.AddRange(supportedResponseFormatters);

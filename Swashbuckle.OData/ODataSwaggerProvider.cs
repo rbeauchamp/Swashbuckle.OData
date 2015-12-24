@@ -54,7 +54,7 @@ namespace Swashbuckle.OData
         /// <param name="apiVersions">The version information.</param>
         /// <param name="odataApiExplorer">The API explorer.</param>
         /// <param name="httpConfig">The HttpConfiguration that contains the OData Edm Model.</param>
-        public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerProviderOptions options, IDictionary<string, Info> apiVersions, IApiExplorer odataApiExplorer, HttpConfiguration httpConfig)
+        internal ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerProviderOptions options, IDictionary<string, Info> apiVersions, IApiExplorer odataApiExplorer, HttpConfiguration httpConfig)
         {
             Contract.Requires(defaultProvider != null);
             Contract.Requires(odataApiExplorer != null);
@@ -230,11 +230,13 @@ namespace Swashbuckle.OData
             return operation;
         }
 
-        private Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
+        private static Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
         {
-            var @in = (inPath)
+            Contract.Requires(paramDesc != null);
+
+            var @in = inPath
                 ? "path"
-                : (paramDesc.Source == ApiParameterSource.FromUri) ? "query" : "body";
+                : paramDesc.Source == ApiParameterSource.FromUri ? "query" : "body";
 
             var parameter = new Parameter
             {

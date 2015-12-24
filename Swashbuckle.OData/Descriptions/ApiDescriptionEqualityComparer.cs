@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Web.Http.Description;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    public class ApiDescriptionEqualityComparer : IEqualityComparer<ApiDescription>
+    internal class ApiDescriptionEqualityComparer : IEqualityComparer<ApiDescription>
     {
         public bool Equals(ApiDescription x, ApiDescription y)
         {
@@ -25,8 +26,10 @@ namespace Swashbuckle.OData.Descriptions
             return hashCode;
         }
 
-        private string NormalizeRelativePath(string path)
+        private static string NormalizeRelativePath(string path)
         {
+            Contract.Requires(path != null);
+
             return path.Replace("()", string.Empty);
         }
     }

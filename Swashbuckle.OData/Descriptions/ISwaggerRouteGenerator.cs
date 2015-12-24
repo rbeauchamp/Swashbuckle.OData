@@ -5,7 +5,7 @@ using System.Web.Http;
 namespace Swashbuckle.OData.Descriptions
 {
     [ContractClass(typeof(SwaggerRouteGeneratorContract))]
-    public interface ISwaggerRouteGenerator
+    internal interface ISwaggerRouteGenerator
     {
         /// <summary>
         /// Generate a set of potential routes that will be verified against an OData API and used to generate ApiDescriptions.
@@ -15,7 +15,7 @@ namespace Swashbuckle.OData.Descriptions
     }
 
     [ContractClassFor(typeof(ISwaggerRouteGenerator))]
-    public abstract class SwaggerRouteGeneratorContract : ISwaggerRouteGenerator
+    internal abstract class SwaggerRouteGeneratorContract : ISwaggerRouteGenerator
     {
         public IEnumerable<SwaggerRoute> Generate(HttpConfiguration httpConfig)
         {

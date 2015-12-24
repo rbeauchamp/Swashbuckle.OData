@@ -9,6 +9,8 @@ namespace Swashbuckle.OData.Descriptions
     {
         public SwaggerRouteBuilder(SwaggerRoute swaggerRoute)
         {
+            Contract.Requires(swaggerRoute != null);
+
             SwaggerRoute = swaggerRoute;
         }
 
@@ -65,12 +67,6 @@ namespace Swashbuckle.OData.Descriptions
                 default:
                     throw new ArgumentOutOfRangeException(nameof(httpMethod));
             }
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(SwaggerRoute != null);
         }
     }
 }

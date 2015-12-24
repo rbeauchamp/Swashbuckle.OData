@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
@@ -10,32 +9,30 @@ using System.Web.Http.Description;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
 using System.Web.OData.Formatter;
-using System.Web.OData.Routing;
-using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    internal class ApiDescriptionMapper : IApiDescriptionMapper
+    internal class ODataActionDescriptorMapper : IODataActionDescriptorMapper
     {
-        public IEnumerable<ApiDescription> Map(HttpActionDescriptor actionDescriptor, ODataRoute route, string relativePathTemplate, Operation operation = null)
+        public IEnumerable<ApiDescription> Map(ODataActionDescriptor oDataActionDescriptor)
         {
-            var apiDocumentation = GetApiDocumentation(actionDescriptor);
+            var apiDocumentation = GetApiDocumentation(oDataActionDescriptor.ActionDescriptor);
 
             // parameters
-            var parameterDescriptions = CreateParameterDescriptions(actionDescriptor);
+            var parameterDescriptions = CreateParameterDescriptions(oDataActionDescriptor.ActionDescriptor);
 
             // request formatters
             var bodyParameter = parameterDescriptions.FirstOrDefault(description => description.Source == ApiParameterSource.FromBody);
 
             var supportedRequestBodyFormatters = bodyParameter != null 
-                ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) 
+                ? oDataActionDescriptor.ActionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) 
                 : Enumerable.Empty<MediaTypeFormatter>();
 
             // response formatters
-            var responseDescription = CreateResponseDescription(actionDescriptor);
+            var responseDescription = CreateResponseDescription(oDataActionDescriptor.ActionDescriptor);
             var returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
             var supportedResponseFormatters = returnType != null && returnType != typeof(void) 
-                ? actionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) 
+                ? oDataActionDescriptor.ActionDescriptor.Configuration.Formatters.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) 
                 : Enumerable.Empty<MediaTypeFormatter>();
 
             // Replacing the formatter tracers with formatters if tracers are present.
@@ -43,7 +40,7 @@ namespace Swashbuckle.OData.Descriptions
             supportedResponseFormatters = GetInnerFormatters(supportedResponseFormatters);
 
             // get HttpMethods supported by an action. Usually there is one HttpMethod per action but we allow multiple of them per action as well.
-            IList<HttpMethod> supportedMethods = GetHttpMethodsSupportedByAction(route, actionDescriptor);
+            var supportedMethods = GetHttpMethodsSupportedByAction(oDataActionDescriptor.Route, oDataActionDescriptor.ActionDescriptor);
 
             var apiDescriptions = new List<ApiDescription>();
             foreach (var method in supportedMethods)
@@ -52,9 +49,9 @@ namespace Swashbuckle.OData.Descriptions
                 {
                     Documentation = apiDocumentation,
                     HttpMethod = method,
-                    RelativePath = relativePathTemplate.TrimStart('/'),
-                    ActionDescriptor = actionDescriptor,
-                    Route = route
+                    RelativePath = oDataActionDescriptor.RelativePathTemplate.TrimStart('/'),
+                    ActionDescriptor = oDataActionDescriptor.ActionDescriptor,
+                    Route = oDataActionDescriptor.Route
                 };
                 apiDescription.SupportedResponseFormatters.AddRange(supportedResponseFormatters);
                 apiDescription.SupportedRequestBodyFormatters.AddRange(supportedRequestBodyFormatters.ToList());
@@ -73,6 +70,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static ResponseDescription CreateResponseDescription(HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(actionDescriptor != null);
+
             var responseTypeAttribute = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>();
             var responseType = responseTypeAttribute.Select(attribute => attribute.ResponseType).FirstOrDefault();
 
@@ -86,12 +85,16 @@ namespace Swashbuckle.OData.Descriptions
 
         private static string GetApiResponseDocumentation(HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(actionDescriptor != null);
+
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
             return documentationProvider?.GetResponseDocumentation(actionDescriptor);
         }
 
         private static IEnumerable<MediaTypeFormatter> GetInnerFormatters(IEnumerable<MediaTypeFormatter> mediaTypeFormatters)
         {
+            Contract.Requires(mediaTypeFormatters != null);
+
             return mediaTypeFormatters.Select(Decorator.GetInner);
         }
 
@@ -102,7 +105,7 @@ namespace Swashbuckle.OData.Descriptions
         /// <param name="route">The route.</param>
         /// <param name="actionDescriptor">The action descriptor.</param>
         /// <returns>A collection of HttpMethods supported by the action.</returns>
-        public virtual Collection<HttpMethod> GetHttpMethodsSupportedByAction(IHttpRoute route, HttpActionDescriptor actionDescriptor)
+        private static IEnumerable<HttpMethod> GetHttpMethodsSupportedByAction(IHttpRoute route, HttpActionDescriptor actionDescriptor)
         {
             Contract.Requires(route != null);
             Contract.Requires(actionDescriptor != null);
@@ -110,9 +113,7 @@ namespace Swashbuckle.OData.Descriptions
             IList<HttpMethod> actionHttpMethods = actionDescriptor.SupportedHttpMethods;
             var httpMethodConstraint = route.Constraints.Values.FirstOrDefault(c => c is HttpMethodConstraint) as HttpMethodConstraint;
 
-            var supportedMethods = httpMethodConstraint?.AllowedMethods.Intersect(actionHttpMethods).ToList() ?? actionHttpMethods;
-
-            return new Collection<HttpMethod>(supportedMethods);
+            return httpMethodConstraint?.AllowedMethods.Intersect(actionHttpMethods).ToList() ?? actionHttpMethods;
         }
 
         private static IList<ApiParameterDescription> CreateParameterDescriptions(HttpActionDescriptor actionDescriptor)
@@ -149,6 +150,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static HttpActionBinding GetActionBinding(HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(actionDescriptor != null);
+
             var controllerDescriptor = actionDescriptor.ControllerDescriptor;
             if (controllerDescriptor == null)
             {
@@ -163,6 +166,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static ApiParameterDescription CreateParameterDescriptionFromBinding(HttpParameterBinding parameterBinding)
         {
+            Contract.Requires(parameterBinding != null);
+
             var parameterDescription = CreateParameterDescriptionFromDescriptor(parameterBinding.Descriptor);
             if (parameterBinding.WillReadBody)
             {
@@ -178,7 +183,8 @@ namespace Swashbuckle.OData.Descriptions
 
         private static ApiParameterDescription CreateParameterDescriptionFromDescriptor(HttpParameterDescriptor parameter)
         {
-            Contract.Assert(parameter != null);
+            Contract.Requires(parameter != null);
+
             return new ApiParameterDescription
             {
                 ParameterDescriptor = parameter,

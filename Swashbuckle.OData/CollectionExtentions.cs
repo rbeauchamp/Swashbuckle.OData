@@ -54,6 +54,8 @@ namespace Swashbuckle.OData
         /// <exception cref="T:System.ArgumentNullException"><paramref name="source" /> is null.</exception>
         public static Collection<T> ToCollection<T>(this IEnumerable<T> source)
         {
+            Contract.Requires(source != null);
+
             return new Collection<T>(source.ToList());
         }
 

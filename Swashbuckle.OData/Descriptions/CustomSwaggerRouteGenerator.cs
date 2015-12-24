@@ -6,7 +6,7 @@ using System.Web.OData.Routing;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    public class CustomSwaggerRouteGenerator : ISwaggerRouteGenerator
+    internal class CustomSwaggerRouteGenerator : ISwaggerRouteGenerator
     {
         public IEnumerable<SwaggerRoute> Generate(HttpConfiguration httpConfig)
         {

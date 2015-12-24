@@ -5,7 +5,7 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    public class MapByParameterName : IParameterMapper
+    internal class MapByParameterName : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {

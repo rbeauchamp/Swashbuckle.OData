@@ -1,6 +1,6 @@
 ﻿namespace Swashbuckle.OData.Descriptions
 {
-    public class SwaggerTypeAndFormat
+    internal class SwaggerTypeAndFormat
     {
         public string Type { get; set; }
 

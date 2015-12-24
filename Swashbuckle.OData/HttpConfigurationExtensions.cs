@@ -13,8 +13,10 @@ namespace Swashbuckle.OData
 {
     public static class HttpConfigurationExtensions
     {
-        public static IEnumerable<ODataRoute> GetODataRoutes(this HttpConfiguration httpConfig)
+        internal static IEnumerable<ODataRoute> GetODataRoutes(this HttpConfiguration httpConfig)
         {
+            Contract.Requires(httpConfig != null);
+
             return FlattenRoutes(httpConfig.Routes).OfType<ODataRoute>();
         }
 

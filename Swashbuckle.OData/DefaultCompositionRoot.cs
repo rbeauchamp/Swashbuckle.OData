@@ -17,10 +17,19 @@ namespace Swashbuckle.OData
     {
         public static IApiExplorer GetApiExplorer(HttpConfiguration httpConfiguration)
         {
-            return new ODataApiExplorer(httpConfiguration, GetSwaggerRouteGenerators(), GetApiDescriptionMappers());
+            return new ODataApiExplorer(httpConfiguration, GetODataActionDescriptorExplorers(), GetApiDescriptionMappers());
         }
 
-        private static List<ISwaggerRouteGenerator> GetSwaggerRouteGenerators()
+        private static IEnumerable<IODataActionDescriptorExplorer> GetODataActionDescriptorExplorers()
+        {
+            return new List<IODataActionDescriptorExplorer>
+            {
+                new SwaggerRouteStrategy(GetSwaggerRouteGenerators()),
+                new AttributeRouteStrategy()
+            };
+        }
+
+        private static IEnumerable<ISwaggerRouteGenerator> GetSwaggerRouteGenerators()
         {
             return new List<ISwaggerRouteGenerator>
             {
@@ -29,16 +38,16 @@ namespace Swashbuckle.OData
             };
         }
 
-        private static List<IApiDescriptionMapper> GetApiDescriptionMappers()
+        private static IEnumerable<IODataActionDescriptorMapper> GetApiDescriptionMappers()
         {
-            return new List<IApiDescriptionMapper>
+            return new List<IODataActionDescriptorMapper>
             {
                 new SwaggerOperationMapper(GetParameterMappers()),
-                new ApiDescriptionMapper()
+                new ODataActionDescriptorMapper()
             };
         }
 
-        private static List<IParameterMapper> GetParameterMappers()
+        private static IEnumerable<IParameterMapper> GetParameterMappers()
         {
             return new List<IParameterMapper>
             {
