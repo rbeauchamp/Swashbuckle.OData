@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Routing;
 using System.Web.OData.Routing;
 using Flurl;
 using Newtonsoft.Json;
@@ -11,6 +13,32 @@ namespace Swashbuckle.OData
 {
     public static class HttpConfigurationExtensions
     {
+        internal static IEnumerable<ODataRoute> GetODataRoutes(this HttpConfiguration httpConfig)
+        {
+            Contract.Requires(httpConfig != null);
+
+            return FlattenRoutes(httpConfig.Routes).OfType<ODataRoute>();
+        }
+
+        private static IEnumerable<IHttpRoute> FlattenRoutes(IEnumerable<IHttpRoute> routes)
+        {
+            foreach (var route in routes)
+            {
+                var nested = route as IEnumerable<IHttpRoute>;
+                if (nested != null)
+                {
+                    foreach (var subRoute in FlattenRoutes(nested))
+                    {
+                        yield return subRoute;
+                    }
+                }
+                else
+                {
+                    yield return route;
+                }
+            }
+        }
+
         internal static JsonSerializerSettings SerializerSettingsOrDefault(this HttpConfiguration httpConfig)
         {
             Contract.Requires(httpConfig != null);
@@ -29,9 +57,9 @@ namespace Swashbuckle.OData
 
             var fullRouteTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(routeTemplate));
 
-            var swaggerRoute = new SwaggerRoute(fullRouteTemplate);
+            var swaggerRoute = new SwaggerRoute(fullRouteTemplate, oDataRoute);
 
-            var swaggerRouteBuilder = new SwaggerRouteBuilder(swaggerRoute, oDataRoute);
+            var swaggerRouteBuilder = new SwaggerRouteBuilder(swaggerRoute);
 
             httpConfig.Properties.AddOrUpdate(oDataRoute, 
                 key => new List<SwaggerRoute> { swaggerRoute }, 
@@ -43,18 +71,6 @@ namespace Swashbuckle.OData
                 });
 
             return swaggerRouteBuilder;
-        }
-
-        public static List<SwaggerRoute> GetCustomSwaggerRoutes(this HttpConfiguration httpConfig, ODataRoute oDataRoute)
-        {
-            Contract.Requires(httpConfig != null);
-            Contract.Requires(oDataRoute != null);
-            Contract.Ensures(Contract.Result<List<SwaggerRoute>>() != null);
-
-            object swaggerRoutes;
-            httpConfig.Properties.TryGetValue(oDataRoute, out swaggerRoutes);
-
-            return swaggerRoutes as List<SwaggerRoute> ?? new List<SwaggerRoute>();
         }
     }
 }

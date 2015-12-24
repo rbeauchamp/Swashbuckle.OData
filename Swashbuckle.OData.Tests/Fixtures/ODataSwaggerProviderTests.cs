@@ -1,16 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
+using System.Web.Http.Dispatcher;
+using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
 using FluentAssertions;
+using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
 using NUnit.Framework;
+using Owin;
 using Swashbuckle.Application;
-using Swashbuckle.OData.Tests.WebHost;
 using Swashbuckle.Swagger;
 using SwashbuckleODataSample;
+using SwashbuckleODataSample.ApiControllers;
+using SwashbuckleODataSample.Models;
+using SwashbuckleODataSample.ODataControllers;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -22,57 +25,84 @@ namespace Swashbuckle.OData.Tests
         {
             // Arrange
             Action<SwaggerDocsConfig> config = c => c.DocumentFilter<ApplyNewHostName>();
-            var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
+            var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
 
-            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder, config)))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, unitTestConfigs: config)))
             {
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
 
                 // Assert
                 swaggerDocument.host.Should().Be("foo");
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
         [Test]
         public async Task It_supports_multiple_odata_routes()
         {
-            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
 
                 // Assert
                 swaggerDocument.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
         [Test]
         public async Task It_supports_odata_routes_that_dont_map_to_a_controller()
         {
-            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder)))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
 
                 // Assert
                 swaggerDocument.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
         [Test]
         public async Task It_explores_the_correct_controller()
         {
-            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, typeof(CustomersController))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem defaultCustomerController;
+                swaggerDocument.paths.TryGetValue("/odata/Customers({Id})", out defaultCustomerController);
+                defaultCustomerController.Should().NotBeNull();
+                defaultCustomerController.put.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
+        public async Task It_explores_the_correct_versioned_controller()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, typeof(CustomersV1Controller))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -83,20 +113,17 @@ namespace Swashbuckle.OData.Tests
                 versionedCustomerController.Should().NotBeNull();
                 versionedCustomerController.put.Should().BeNull();
 
-                PathItem defaultCustomerController;
-                swaggerDocument.paths.TryGetValue("/odata/Customers({Id})", out defaultCustomerController);
-                defaultCustomerController.Should().NotBeNull();
-                defaultCustomerController.put.Should().NotBeNull();
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
         [Test]
         public async Task It_supports_both_webapi_and_odata_controllers()
         {
-            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, typeof(ClientsController))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -113,35 +140,54 @@ namespace Swashbuckle.OData.Tests
                 clientWebApi.Should().NotBeNull();
                 clientWebApi.put.Should().NotBeNull();
                 clientWebApi.patch.Should().BeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
-        [Test]
-        public async Task It_generates_valid_swagger_2_0_json()
+        private static void Configuration(IAppBuilder appBuilder, Type targetController = null, Action<SwaggerDocsConfig> unitTestConfigs = null)
         {
-            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
-            {
-                // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
+            var config = appBuilder.GetStandardHttpConfig(targetController, unitTestConfigs);
 
-                // Act
-                var response = await httpClient.GetAsync("swagger/docs/v1");
+            var controllerSelector = new UnitTestODataVersionControllerSelector(config, targetController);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
-                // Assert
-                await response.ValidateSuccessAsync();
-                var swaggerJson = await response.Content.ReadAsStringAsync();
+            WebApiConfig.Register(config);
 
-                var resolver = new JSchemaPreloadedResolver();
-                resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText(@"schema-draft-v4.json"));
+            // Define a versioned route
+            config.MapODataServiceRoute("V1RouteVersioning", "odata/v1", GetVersionedModel());
+            controllerSelector.RouteVersionSuffixMapping.Add("V1RouteVersioning", "V1");
 
-                var swaggerSchema = File.ReadAllText(@"swagger-2.0-schema.json");
-                var schema = JSchema.Parse(swaggerSchema, resolver);
+            // Define a versioned route that doesn't map to any controller
+            config.MapODataServiceRoute("odata/v2", "odata/v2", GetFakeModel());
+            controllerSelector.RouteVersionSuffixMapping.Add("odata/v2", "V2");
 
-                var swaggerJObject = JObject.Parse(swaggerJson);
-                IList<string> messages;
-                var isValid = swaggerJObject.IsValid(schema, out messages);
-                isValid.Should().BeTrue();
-            }
+            // Define a default non- versioned route(default route should be at the end as a last catch-all)
+            config.MapODataServiceRoute("DefaultODataRoute", "odata", GetDefaultModel());
+
+            config.EnsureInitialized();
+        }
+
+        private static IEdmModel GetDefaultModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            builder.EntitySet<Order>("Orders");
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetVersionedModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetFakeModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("FakeCustomers");
+            return builder.GetEdmModel();
         }
     }
 }

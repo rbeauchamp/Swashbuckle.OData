@@ -1,10 +1,19 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.OData.Builder;
+using System.Web.OData.Extensions;
+using System.Web.OData.Routing;
+using System.Web.OData.Routing.Conventions;
 using FluentAssertions;
+using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
-using Swashbuckle.OData.Tests.WebHost;
+using Owin;
 using Swashbuckle.Swagger;
 using SwashbuckleODataSample;
+using SwashbuckleODataSample.Models;
+using SwashbuckleODataSample.ODataControllers;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -14,10 +23,10 @@ namespace Swashbuckle.OData.Tests
         [Test]
         public async Task It_allows_definition_of_custom_routes()
         {
-            using (WebApp.Start(TestWebApiStartup.BaseAddress, appBuilder => new TestWebApiStartup().Configuration(appBuilder)))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, typeof(OrdersController))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(TestWebApiStartup.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -27,7 +36,33 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/odata/Customers({Id})/Orders", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.post.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
+        }
+
+        private static void Configuration(IAppBuilder appBuilder, Type targetController)
+        {
+            var config = appBuilder.GetStandardHttpConfig(targetController);
+
+            // Define a custom route with custom routing conventions
+            var conventions = ODataRoutingConventions.CreateDefault();
+            conventions.Insert(0, new CustomNavigationPropertyRoutingConvention());
+            var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", "odata", GetCustomRouteModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: conventions);
+            config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders")
+                .Operation(HttpMethod.Post)
+                .PathParameter<int>("Id")
+                .BodyParameter<Order>("order");
+
+            config.EnsureInitialized();
+        }
+
+        private static IEdmModel GetCustomRouteModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Customer>("Customers");
+            builder.EntitySet<Order>("Orders");
+            return builder.GetEdmModel();
         }
     }
 }

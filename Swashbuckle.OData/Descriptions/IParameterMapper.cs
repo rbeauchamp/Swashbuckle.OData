@@ -5,7 +5,7 @@ using Swashbuckle.Swagger;
 namespace Swashbuckle.OData.Descriptions
 {
     [ContractClass(typeof(ParameterMapperContract))]
-    public interface IParameterMapper
+    internal interface IParameterMapper
     {
         /// <summary>
         /// Map a Swagger parameter to a controller's HttpParameterDescriptor.
@@ -18,7 +18,7 @@ namespace Swashbuckle.OData.Descriptions
     }
 
     [ContractClassFor(typeof(IParameterMapper))]
-    public abstract class ParameterMapperContract : IParameterMapper
+    internal abstract class ParameterMapperContract : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {

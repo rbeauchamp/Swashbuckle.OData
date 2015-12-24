@@ -1,26 +1,22 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using FluentAssertions;
-using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
 using Swashbuckle.Swagger;
 using SwashbuckleODataSample;
-using SwashbuckleODataSample.Models;
-using SwashbuckleODataSample.ODataControllers;
 
-namespace Swashbuckle.OData.Tests
+namespace Swashbuckle.OData.Tests.Containment
 {
     [TestFixture]
-    public class PutTests
+    public class ContainmentTests
     {
         [Test]
-        public async Task It_includes_a_put_operation()
+        public async Task It_supports_models_that_use_containment()
         {
-            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(CustomersController))))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(AccountsController))))
             {
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
@@ -30,18 +26,17 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/odata/Customers({Id})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Accounts", out pathItem);
                 pathItem.Should().NotBeNull();
-                pathItem.put.Should().NotBeNull();
 
                 await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
         [Test]
-        public async Task It_does_not_exist_if_not_in_the_controller()
+        public async Task It_supports_odata_attribute_routing()
         {
-            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(OrdersController))))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(AccountsController))))
             {
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
@@ -51,9 +46,8 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/odata/Orders({OrderId})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/Accounts({accountId})/PayinPIs({paymentInstrumentId})", out pathItem);
                 pathItem.Should().NotBeNull();
-                pathItem.put.Should().BeNull();
 
                 await ValidationUtils.ValidateSwaggerJson();
             }
@@ -63,18 +57,9 @@ namespace Swashbuckle.OData.Tests
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
 
-            // Define a default non- versioned route(default route should be at the end as a last catch-all)
-            config.MapODataServiceRoute("DefaultODataRoute", "odata", GetDefaultModel());
+            config.MapODataServiceRoute("odata", "odata", ODataModels.GetModel());
 
             config.EnsureInitialized();
-        }
-
-        private static IEdmModel GetDefaultModel()
-        {
-            var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<Customer>("Customers");
-            builder.EntitySet<Order>("Orders");
-            return builder.GetEdmModel();
         }
     }
 }

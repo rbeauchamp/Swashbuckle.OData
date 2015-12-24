@@ -54,7 +54,7 @@ namespace Swashbuckle.OData
         /// <param name="apiVersions">The version information.</param>
         /// <param name="odataApiExplorer">The API explorer.</param>
         /// <param name="httpConfig">The HttpConfiguration that contains the OData Edm Model.</param>
-        public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerProviderOptions options, IDictionary<string, Info> apiVersions, IApiExplorer odataApiExplorer, HttpConfiguration httpConfig)
+        internal ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerProviderOptions options, IDictionary<string, Info> apiVersions, IApiExplorer odataApiExplorer, HttpConfiguration httpConfig)
         {
             Contract.Requires(defaultProvider != null);
             Contract.Requires(odataApiExplorer != null);
@@ -196,7 +196,10 @@ namespace Swashbuckle.OData
                 .Select(paramDesc =>
                 {
                     var inPath = apiDescription.RelativePathSansQueryString().Contains("{" + paramDesc.Name + "}");
-                    return CreateParameter(paramDesc as SwaggerApiParameterDescription, inPath, schemaRegistry);
+                    var swaggerApiParameterDescription = paramDesc as SwaggerApiParameterDescription;
+                    return swaggerApiParameterDescription != null 
+                    ? CreateParameter(swaggerApiParameterDescription, inPath, schemaRegistry) 
+                    : CreateParameter(paramDesc, inPath, schemaRegistry);
                 })
                  .ToList();
 
@@ -225,6 +228,39 @@ namespace Swashbuckle.OData
             }
 
             return operation;
+        }
+
+        private static Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
+        {
+            Contract.Requires(paramDesc != null);
+
+            var @in = inPath
+                ? "path"
+                : paramDesc.Source == ApiParameterSource.FromUri ? "query" : "body";
+
+            var parameter = new Parameter
+            {
+                name = paramDesc.Name,
+                @in = @in
+            };
+
+            if (paramDesc.ParameterDescriptor == null)
+            {
+                parameter.type = "string";
+                parameter.required = true;
+                return parameter;
+            }
+
+            parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
+            parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
+
+            var schema = schemaRegistry.GetOrRegister(paramDesc.ParameterDescriptor.ParameterType);
+            if (parameter.@in == "body")
+                parameter.schema = schema;
+            else
+                parameter.PopulateFrom(schema);
+
+            return parameter;
         }
 
         private static Parameter CreateParameter(SwaggerApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)

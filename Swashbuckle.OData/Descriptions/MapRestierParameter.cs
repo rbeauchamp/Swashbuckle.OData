@@ -3,7 +3,7 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    public class MapRestierParameter : IParameterMapper
+    internal class MapRestierParameter : IParameterMapper
     {
         public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {

@@ -5,7 +5,7 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
 {
-    public class SwaggerProviderOptions
+    internal class SwaggerProviderOptions
     {
         public SwaggerProviderOptions(
             Func<ApiDescription, string, bool> versionSupportResolver,
