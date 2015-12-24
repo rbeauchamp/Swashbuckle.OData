@@ -94,7 +94,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/odata/v1/Products({Id})/Default.CalculateGeneralSalesTax(state={state})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/v1/Products({Id})/Default.CalculateGeneralSalesTax(state='{state}')", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
             }
@@ -113,7 +113,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/odata/v1/GetSalesTaxRate(state={state})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/odata/v1/GetSalesTaxRate(state='{state}')", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
             }

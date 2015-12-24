@@ -172,6 +172,7 @@
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
     <Compile Include="DefaultCompositionRoot.cs" />
+    <Compile Include="Descriptions\ApiDescriptionExtensions.cs" />
     <Compile Include="Descriptions\AttributeRouteStrategy.cs" />
     <Compile Include="Descriptions\IODataActionDescriptorMapper.cs" />
     <Compile Include="Descriptions\IODataActionDescriptorExplorer.cs" />
