@@ -146,6 +146,7 @@
     <Compile Include="Fixtures\FromUriArrayTests.cs" />
     <Compile Include="Fixtures\CustomRouteTests.cs" />
     <Compile Include="Fixtures\FunctionTests.cs" />
+    <Compile Include="Fixtures\GetHttpMethodNameTests.cs" />
     <Compile Include="Fixtures\ODataSwaggerProviderTests.cs" />
     <Compile Include="Fixtures\PostTests.cs" />
     <Compile Include="Fixtures\PatchTests.cs" />

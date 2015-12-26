@@ -1,4 +1,5 @@
-﻿using System.Data.Entity.Infrastructure;
+﻿using System;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -23,15 +24,21 @@ namespace SwashbuckleODataSample.ODataControllers
             return _db.Customers;
         }
 
-        /// <summary>
-        /// Query the customer by id
-        /// </summary>
-        /// <param name="key">The customer id</param>
         [EnableQuery]
-        public SingleResult<Customer> GetCustomer([FromODataUri] int key)
+        public Task<IHttpActionResult> Get(int key)
         {
-            return SingleResult.Create(_db.Customers.Where(customer => customer.Id == key));
+            throw new NotImplementedException();
         }
+
+        ///// <summary>
+        ///// Query the customer by id
+        ///// </summary>
+        ///// <param name="key">The customer id</param>
+        //[EnableQuery]
+        //public SingleResult<Customer> GetCustomer([FromODataUri] int key)
+        //{
+        //    return SingleResult.Create(_db.Customers.Where(customer => customer.Id == key));
+        //}
 
         /// <summary>
         /// Replace all data for the customer with the given id
