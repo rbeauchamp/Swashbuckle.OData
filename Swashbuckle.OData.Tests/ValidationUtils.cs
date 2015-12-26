@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
-using SwashbuckleODataSample;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -14,7 +13,7 @@ namespace Swashbuckle.OData.Tests
         public static async Task ValidateSwaggerJson()
         {
             // Arrange
-            var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+            var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
             // Act
             var response = await httpClient.GetAsync("swagger/docs/v1");

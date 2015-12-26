@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Flurl;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -9,11 +8,11 @@ namespace Swashbuckle.OData.Tests
     {
         public const string BaseAddress = "http://localhost:8347/";
 
-        public static HttpClient GetHttpClient(string baseAddress, string routePrefix = null)
+        public static HttpClient GetHttpClient(string baseAddress)
         {
             var client =  new HttpClient
             {
-                BaseAddress = string.IsNullOrWhiteSpace(routePrefix) ? new Uri(baseAddress) : new Uri(baseAddress.AppendPathSegment(routePrefix)),
+                BaseAddress = new Uri(baseAddress),
                 Timeout = TimeSpan.FromMilliseconds(5 * 60 * 1000)
             };
 

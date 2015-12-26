@@ -67,7 +67,7 @@ namespace Swashbuckle.OData.Descriptions
                 // Have to set ResponseDescription because it's internal!??
                 apiDescription.GetType().GetProperty("ResponseDescription").SetValue(apiDescription, responseDescription);
 
-                apiDescription.RelativePath = apiDescription.GetRelativePathWithQuotedStringParams();
+                apiDescription.RelativePath = apiDescription.GetRelativePathForSwagger();
 
                 apiDescriptions.Add(apiDescription);
             }
