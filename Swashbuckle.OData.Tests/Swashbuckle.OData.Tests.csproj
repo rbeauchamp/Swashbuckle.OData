@@ -151,6 +151,7 @@
     <Compile Include="Fixtures\PatchTests.cs" />
     <Compile Include="Fixtures\PutTests.cs" />
     <Compile Include="Fixtures\RestierTests.cs" />
+    <Compile Include="Fixtures\SchemaTests.cs" />
     <Compile Include="Fixtures\StringTypeUrlParamTests.cs" />
     <Compile Include="HttpClientUtils.cs" />
     <Compile Include="Fixtures\GetTests.cs" />

@@ -63,6 +63,8 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(swaggerDocsConfig != null);
 
+            AddInternalDocumentFilters(swaggerDocsConfig);
+
             return new SwaggerProviderOptions(
                 swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string, bool>>("_versionSupportResolver"),
                 swaggerDocsConfig.GetFieldValue<IEnumerable<string>>("_schemes"),
@@ -81,6 +83,13 @@ namespace Swashbuckle.OData
                 swaggerDocsConfig.GetFieldValue<IList<Func<IDocumentFilter>>>("_documentFilters").Select(factory => factory()),
                 swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver")
             );
+        }
+
+        private static void AddInternalDocumentFilters(SwaggerDocsConfig swaggerDocsConfig)
+        {
+            Contract.Requires(swaggerDocsConfig != null);
+
+            swaggerDocsConfig.DocumentFilter(() => new LimitSchemaGraphToTopLevelEntity());
         }
 
         /// <summary>
