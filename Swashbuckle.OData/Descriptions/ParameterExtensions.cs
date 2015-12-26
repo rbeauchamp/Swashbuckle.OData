@@ -89,6 +89,8 @@ namespace Swashbuckle.OData.Descriptions
                             return "\'SampleString\'";
                         case "boolean":
                             return "true";
+                        case "array":
+                            return "[]";
                         default:
                             throw new Exception($"Could not generate sample value for query parameter type {type} and format {"null"}");
                     }

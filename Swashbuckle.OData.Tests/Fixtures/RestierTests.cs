@@ -32,7 +32,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, Configuration))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -54,7 +54,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, Configuration))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -74,7 +74,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, Configuration))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -96,7 +96,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, Configuration))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -116,7 +116,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, Configuration))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");

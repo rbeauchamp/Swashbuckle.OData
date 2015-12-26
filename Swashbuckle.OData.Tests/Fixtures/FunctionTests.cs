@@ -16,7 +16,6 @@ using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
 using Swashbuckle.Swagger;
-using SwashbuckleODataSample;
 using SwashbuckleODataSample.Models;
 
 namespace Swashbuckle.OData.Tests
@@ -30,7 +29,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -40,6 +39,8 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/odata/v1/Products/Default.MostExpensive()", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
@@ -49,7 +50,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -59,6 +60,8 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/odata/v1/Products/Default.Top10()", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
@@ -68,7 +71,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -78,6 +81,8 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/odata/v1/Products({Id})/Default.GetPriceRank()", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
@@ -87,7 +92,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -97,6 +102,8 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/odata/v1/Products({Id})/Default.CalculateGeneralSalesTax(state='{state}')", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 
@@ -106,7 +113,7 @@ namespace Swashbuckle.OData.Tests
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
             {
                 // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress, ODataConfig.ODataRoutePrefix);
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -116,6 +123,8 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/odata/v1/GetSalesTaxRate(state='{state}')", out pathItem);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 

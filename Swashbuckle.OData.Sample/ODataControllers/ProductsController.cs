@@ -80,7 +80,7 @@ namespace SwashbuckleODataSample.ODataControllers
         }
 
         /// <summary>
-        /// Get the sales tax for a product in a given state. This is a function which accepts a parameter.
+        /// Get the sales tax for a product in a given state. This function accepts a parameter.
         /// </summary>
         /// <param name="key">The product id</param>
         /// <param name="state">The state</param>
@@ -99,17 +99,16 @@ namespace SwashbuckleODataSample.ODataControllers
             return NotFound();
         }
 
-        ///// <summary>
-        ///// Get the sales tax rate for a state. This is an unbound function.
-        ///// </summary>
-        ///// <param name="state">The state</param>
-        //[HttpGet]
-        //[ResponseType(typeof(double))]
-        //[ODataRoute("GetSalesTaxRate(state={state})")]
-        //public IHttpActionResult GetSalesTaxRate([FromODataUri] string state)
-        //{
-        //    return Ok(GetRate(state));
-        //}
+        /// <summary>
+        /// Get products with the given Ids. This function accepts a parameter of type 'array'.
+        /// </summary>
+        /// <param name="Ids">The ids.</param>
+        /// <returns></returns>
+        [HttpGet]
+        public IQueryable<Product> ProductsWithIds([FromODataUri]int[] Ids)
+        {
+            return Data.Values.Where(p => Ids.Contains(p.Id)).AsQueryable();
+        }
 
         private static double GetRate(string state)
         {

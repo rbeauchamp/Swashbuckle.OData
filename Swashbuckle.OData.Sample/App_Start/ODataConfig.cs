@@ -98,13 +98,13 @@ namespace SwashbuckleODataSample
 
             var productType = builder.EntityType<Product>();
 
-            // Function bound to a collection
+            // Function bound to an entity set
             // Returns the most expensive product, a single entity
             productType.Collection
                 .Function("MostExpensive")
                 .Returns<double>();
 
-            // Function bound to a collection
+            // Function bound to an entity set
             // Returns the top 10 product, a collection
             productType.Collection
                 .Function("Top10")
@@ -125,12 +125,12 @@ namespace SwashbuckleODataSample
                 .Returns<double>()
                 .Parameter<string>("state");
 
-            // Commented out because unbound functions don't
-            // play well in a config with mulitple OData routes
-            // Unbound Function
-            //builder.Function("GetSalesTaxRate")
-            //    .Returns<double>()
-            //    .Parameter<string>("state");
+            // Function bound to an entity set
+            // Accepts an array as a parameter
+            productType.Collection
+                .Function("ProductsWithIds")
+                .ReturnsCollectionFromEntitySet<Product>("Products")
+                .CollectionParameter<int>("Ids");
 
             return builder.GetEdmModel();
         }
