@@ -685,7 +685,8 @@ namespace Swashbuckle.OData.Descriptions
             {
                 name = name,
                 @in = kind,
-                description = description
+                description = description,
+                required = true
             };
 
             if (kind != "body")

@@ -41,6 +41,27 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
+        [Test]
+        public async Task It_allows_definition_of_custom_delete_routes()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, typeof(OrdersController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/Customers({Id})/Orders({orderID})", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.delete.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         private static void Configuration(IAppBuilder appBuilder, Type targetController)
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
@@ -53,6 +74,11 @@ namespace Swashbuckle.OData.Tests
                 .Operation(HttpMethod.Post)
                 .PathParameter<int>("Id")
                 .BodyParameter<Order>("order");
+
+            config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders({orderID})")
+                .Operation(HttpMethod.Delete)
+                .PathParameter<int>("Id")
+                .PathParameter<Guid>("orderID");
 
             config.EnsureInitialized();
         }

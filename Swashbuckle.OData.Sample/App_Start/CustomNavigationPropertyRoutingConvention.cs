@@ -13,10 +13,15 @@ namespace SwashbuckleODataSample
         {
             var controllerType = controllerContext.Controller.GetType();
 
-            if (typeof (CustomersController) == controllerType)
+            if (typeof(CustomersController) == controllerType)
             {
+                if (odataPath.PathTemplate.Equals("~/entityset/key/navigation")) //POST OR GET
+                {
+                    controllerContext.RouteData.Values["orderID"] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
+                    return controllerContext.Request.Method.ToString();
+                }
             }
-            else if (typeof (OrdersController) == controllerType)
+            else if (typeof(OrdersController) == controllerType)
             {
                 if (odataPath.PathTemplate.Equals("~/entityset/key/navigation")) //POST OR GET
                 {
@@ -41,8 +46,8 @@ namespace SwashbuckleODataSample
             if (odataPath.PathTemplate.Contains("~/entityset/key/navigation"))
             {
                 // Find controller.  Controller should be last navigation property
-                return ODataSegmentKinds.Navigation == odataPath.Segments[odataPath.Segments.Count - 1].SegmentKind 
-                    ? odataPath.Segments[odataPath.Segments.Count - 1].ToString() 
+                return ODataSegmentKinds.Navigation == odataPath.Segments[odataPath.Segments.Count - 1].SegmentKind
+                    ? odataPath.Segments[odataPath.Segments.Count - 1].ToString()
                     : odataPath.Segments[odataPath.Segments.Count - 2].ToString();
             }
             return base.SelectController(odataPath, request);
