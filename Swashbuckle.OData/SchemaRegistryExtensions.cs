@@ -14,9 +14,13 @@ namespace Swashbuckle.OData
             Contract.Requires(type != null);
 
             var isAGenericODataType = IsAGenericODataType(type);
-            return isAGenericODataType
-                ? registry.GetOrRegister(type.GetGenericArguments()[0]) 
-                : registry.GetOrRegister(type);
+            if (isAGenericODataType)
+            {
+                var genericArguments = type.GetGenericArguments();
+                Contract.Assume(genericArguments != null);
+                return registry.GetOrRegister(genericArguments[0]);
+            }
+            return registry.GetOrRegister(type);
         }
 
         private static bool IsAGenericODataType(Type type)

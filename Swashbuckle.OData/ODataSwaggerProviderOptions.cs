@@ -67,6 +67,8 @@ namespace Swashbuckle.OData
         private static string DefaultGroupingKeySelector(ApiDescription apiDescription)
         {
             Contract.Requires(apiDescription != null);
+            Contract.Requires(apiDescription.ActionDescriptor != null);
+            Contract.Requires(apiDescription.ActionDescriptor.ControllerDescriptor != null);
 
             return apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName == "Restier"
                 ? ((RestierHttpActionDescriptor)apiDescription.ActionDescriptor).EntitySetName
@@ -81,6 +83,7 @@ namespace Swashbuckle.OData
         private static ApiDescription DefaultConflictingActionsResolver(IEnumerable<ApiDescription> apiDescriptions)
         {
             Contract.Requires(apiDescriptions != null);
+            Contract.Requires(apiDescriptions.Any());
 
             var first = apiDescriptions.First();
             throw new NotSupportedException($"Not supported by Swagger 2.0: Multiple operations with path '{first.RelativePathSansQueryString()}' and method '{first.HttpMethod}'. " + "See the config setting - \"ResolveConflictingActions\" for a potential workaround");

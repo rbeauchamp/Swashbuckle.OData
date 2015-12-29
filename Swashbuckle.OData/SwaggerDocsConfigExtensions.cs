@@ -8,21 +8,21 @@ namespace Swashbuckle.OData
 {
     internal static class SwaggerDocsConfigExtensions
     {
-        public static T GetFieldValue<T>(this SwaggerDocsConfig swaggerDocsConfig, string fieldName)
+        public static T GetFieldValue<T>(this SwaggerDocsConfig swaggerDocsConfig, string fieldName, bool ensureNonNull = false)
         {
             Contract.Requires(swaggerDocsConfig != null);
             Contract.Requires(!string.IsNullOrWhiteSpace(fieldName));
+            Contract.Ensures(Contract.Result<T>() != null || !ensureNonNull);
 
-            return swaggerDocsConfig.GetInstanceField<T>(fieldName);
+            return swaggerDocsConfig.GetInstanceField<T>(fieldName, ensureNonNull);
         }
 
         public static Dictionary<string, SecurityScheme> GetSecurityDefinitions(this SwaggerDocsConfig swaggerDocsConfig)
         {
             var securitySchemeBuilders = swaggerDocsConfig.GetFieldValue<IDictionary<string, SecuritySchemeBuilder>>("_securitySchemeBuilders");
-
-            return securitySchemeBuilders.Any()
+            return securitySchemeBuilders != null && securitySchemeBuilders.Any()
                 ? securitySchemeBuilders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.InvokeFunction<SecurityScheme>("Build"))
-                : null;
+                : new Dictionary<string, SecurityScheme>();
         }
     }
 }

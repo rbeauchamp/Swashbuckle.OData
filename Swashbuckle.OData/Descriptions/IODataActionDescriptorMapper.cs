@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Web.Http.Description;
 
@@ -22,7 +23,7 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(actionDescriptor != null);
             Contract.Ensures(Contract.Result<IEnumerable<ApiDescription>>() != null);
 
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

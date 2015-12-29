@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Web.Http.Description;
 using Swashbuckle.Swagger;
 
@@ -10,18 +10,29 @@ namespace Swashbuckle.OData.Descriptions
     {
         public static string GetRelativePathForSwagger(this ApiDescription apiDescription)
         {
+            Contract.Requires(apiDescription != null);
+            Contract.Requires(apiDescription.ParameterDescriptions != null);
+            Contract.Ensures(Contract.Result<string>() != null);
+
             var parameters = apiDescription.ParameterDescriptions;
 
             var newRelativePathSansQueryString = apiDescription.RelativePathSansQueryString();
-
+            Contract.Assume(newRelativePathSansQueryString != null);
             newRelativePathSansQueryString = AdjustRelativePathForStringParams(parameters, newRelativePathSansQueryString);
             newRelativePathSansQueryString = AdjustRelativePathForArrayParams(parameters, newRelativePathSansQueryString);
 
-            return apiDescription.RelativePath.Replace(apiDescription.RelativePathSansQueryString(), newRelativePathSansQueryString);
+            var relativePath = apiDescription.RelativePath;
+            var oldRelativePathSansQueryString = apiDescription.RelativePathSansQueryString();
+            Contract.Assume(relativePath != null);
+            Contract.Assume(oldRelativePathSansQueryString != null);
+            return relativePath.Replace(oldRelativePathSansQueryString, newRelativePathSansQueryString);
         }
 
         private static string AdjustRelativePathForStringParams(IEnumerable<ApiParameterDescription> parameters, string newRelativePathSansQueryString)
         {
+            Contract.Requires(parameters != null);
+            Contract.Requires(newRelativePathSansQueryString != null);
+
             foreach (var parameter in parameters)
             {
                 if (newRelativePathSansQueryString.Contains("{" + parameter.Name + "}") && parameter.ParameterDescriptor.ParameterType == typeof (string))
@@ -34,6 +45,9 @@ namespace Swashbuckle.OData.Descriptions
 
         private static string AdjustRelativePathForArrayParams(IEnumerable<ApiParameterDescription> parameters, string newRelativePathSansQueryString)
         {
+            Contract.Requires(parameters != null);
+            Contract.Requires(newRelativePathSansQueryString != null);
+
             foreach (var parameter in parameters)
             {
                 if (newRelativePathSansQueryString.Contains("{" + parameter.Name + "}")

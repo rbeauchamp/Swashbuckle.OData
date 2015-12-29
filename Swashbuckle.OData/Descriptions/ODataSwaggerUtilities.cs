@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Web.OData.Formatter;
 using Flurl;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
@@ -53,8 +54,8 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Post a new entity to EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(new List<Parameter>()
-                .Parameter(entitySet.EntityType().Name, "body", "The entity to post", entitySet.EntityType()))
-                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse())
+                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to post", entitySet.GetEntityType()))
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse())
             };
         }
 
@@ -72,10 +73,13 @@ namespace Swashbuckle.OData.Descriptions
             }
 
             var keyParameters = new List<Parameter>();
-            foreach (var key in entitySet.EntityType().Key())
+            foreach (var key in entitySet.GetEntityType().GetKey())
             {
+                Contract.Assume(key != null);
                 string format;
-                var type = GetPrimitiveTypeAndFormat(key.Type.Definition as IEdmPrimitiveType, out format);
+                var keyDefinition = key.GetPropertyType().GetDefinition() as IEdmPrimitiveType;
+                Contract.Assume(keyDefinition != null);
+                var type = GetPrimitiveTypeAndFormat(keyDefinition, out format);
                 keyParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
             }
 
@@ -90,7 +94,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameter("$expand", "query", "Expands related entities inline.", "string", false))
                 .Parameters(keyParameters.DeepClone()
                 .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
-                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.EntityType()).DefaultErrorResponse()),
+                .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse()),
 
                 patch = new Operation()
                 .Summary("Update entity in EntitySet " + entitySet.Name)
@@ -98,7 +102,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Update entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
-                .Parameter(entitySet.EntityType().Name, "body", "The entity to patch", entitySet.EntityType()))
+                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to patch", entitySet.GetEntityType()))
                 .Responses(new Dictionary<string, Response>()
                 .Response("204", "Empty response").DefaultErrorResponse()),
 
@@ -108,7 +112,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Replace entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
-                .Parameter(entitySet.EntityType().Name, "body", "The entity to put", entitySet.EntityType()))
+                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to put", entitySet.GetEntityType()))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
 
                 delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
@@ -128,6 +132,9 @@ namespace Swashbuckle.OData.Descriptions
         /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject" /> represents the related Edm operation import.</returns>
         public static PathItem CreateSwaggerPathForOperationImport(IEdmOperationImport operationImport)
         {
+            Contract.Requires(operationImport == null || operationImport.Operation != null);
+            Contract.Requires(operationImport == null || operationImport.Operation.Parameters != null);
+
             if (operationImport == null)
             {
                 return new PathItem();
@@ -137,7 +144,8 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerParameters = new List<Parameter>();
             foreach (var parameter in operationImport.Operation.Parameters)
             {
-                swaggerParameters.Parameter(parameter.Name, isFunctionImport ? "path" : "body", "parameter: " + parameter.Name, parameter.Type.Definition);
+                var edmType = parameter.GetOperationType().GetDefinition();
+                swaggerParameters.Parameter(parameter.Name, isFunctionImport ? "path" : "body", "parameter: " + parameter.Name, edmType);
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
@@ -147,7 +155,7 @@ namespace Swashbuckle.OData.Descriptions
             }
             else
             {
-                swaggerResponses.Response("200", "Response from " + operationImport.Name, operationImport.Operation.ReturnType.Definition);
+                swaggerResponses.Response("200", "Response from " + operationImport.Name, operationImport.Operation.ReturnType.GetDefinition());
             }
 
             var swaggerOperationImport = new Operation()
@@ -182,6 +190,8 @@ namespace Swashbuckle.OData.Descriptions
         /// </returns>
         public static PathItem CreateSwaggerPathForOperationOfEntitySet(IEdmOperation operation, IEdmNavigationSource navigationSource)
         {
+            Contract.Requires(operation == null || !(navigationSource is IEdmEntitySet) || operation.Parameters != null);
+
             var entitySet = navigationSource as IEdmEntitySet;
             if (operation == null || entitySet == null)
             {
@@ -192,7 +202,8 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerParameters = new List<Parameter>();
             foreach (var parameter in operation.Parameters.Skip(1))
             {
-                swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, parameter.Type.Definition);
+                var edmType = parameter.GetOperationType().GetDefinition();
+                swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, edmType);
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
@@ -202,7 +213,7 @@ namespace Swashbuckle.OData.Descriptions
             }
             else
             {
-                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.Definition);
+                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
             }
 
             var swaggerOperation = new Operation()
@@ -244,16 +255,19 @@ namespace Swashbuckle.OData.Descriptions
             var isFunction = operation is IEdmFunction;
             var swaggerParameters = new List<Parameter>();
 
-            foreach (var key in entitySet.EntityType().Key())
+            foreach (var key in entitySet.GetEntityType().GetKey())
             {
+                Contract.Assume(key != null);
                 string format;
-                var type = GetPrimitiveTypeAndFormat(key.Type.Definition as IEdmPrimitiveType, out format);
+                var edmPrimitiveType = key.GetPropertyType().GetDefinition() as IEdmPrimitiveType;
+                Contract.Assume(edmPrimitiveType != null);
+                var type = GetPrimitiveTypeAndFormat(edmPrimitiveType, out format);
                 swaggerParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
             }
 
             foreach (var parameter in operation.Parameters.Skip(1))
             {
-                swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, parameter.Type.Definition);
+                swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, parameter.GetOperationType().GetDefinition());
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
@@ -263,7 +277,7 @@ namespace Swashbuckle.OData.Descriptions
             }
             else
             {
-                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.Definition);
+                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
             }
 
             var swaggerOperation = new Operation()
@@ -314,9 +328,10 @@ namespace Swashbuckle.OData.Descriptions
             }
 
             var singleEntityPath = GetPathForEntitySet(routePrefix, entitySet) + "(";
-            singleEntityPath = entitySet.EntityType().Key().Count() == 1 
+            singleEntityPath = entitySet.GetEntityType().GetKey().Count() == 1 
                 ? AppendSingleColumnKeyTemplate(entitySet, singleEntityPath) 
                 : AppendMultiColumnKeyTemplate(entitySet, singleEntityPath);
+            Contract.Assume(singleEntityPath.Length - 2 >= 0);
             singleEntityPath = singleEntityPath.Substring(0, singleEntityPath.Length - 2);
             singleEntityPath += ")";
 
@@ -325,17 +340,24 @@ namespace Swashbuckle.OData.Descriptions
 
         private static string AppendSingleColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath)
         {
-            var key = entitySet.EntityType().Key().Single();
+            Contract.Requires(entitySet.GetEntityType().GetKey().Count() == 1);
+            Contract.Ensures(Contract.Result<string>() != null);
+
+            var key = entitySet.GetEntityType().GetKey().Single();
             singleEntityPath += "{" + key.Name + "}, ";
             return singleEntityPath;
         }
 
         private static string AppendMultiColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath)
         {
-            foreach (var key in entitySet.EntityType().Key())
+            Contract.Ensures(Contract.Result<string>() != null);
+
+            foreach (var key in entitySet.GetEntityType().GetKey())
             {
+                Contract.Assume(key != null);
                 singleEntityPath += key.Name + "={" + key.Name + "}, ";
             }
+            Contract.Assume(singleEntityPath != null);
             return singleEntityPath;
         }
 
@@ -386,8 +408,11 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerOperationPath = GetPathForEntitySet(routePrefix, entitySet) +"/" + operation.FullName() + "(";
             if (operation.IsFunction())
             {
-                foreach (var parameter in operation.Parameters.Skip(1))
+                var edmOperationParameters = operation.Parameters;
+                Contract.Assume(edmOperationParameters != null);
+                foreach (var parameter in edmOperationParameters.Skip(1))
                 {
+                    Contract.Assume(parameter != null);
                     swaggerOperationPath += parameter.Name + "=" + "{" + parameter.Name + "},";
                 }
             }
@@ -420,8 +445,11 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerOperationPath = GetPathForEntity(routePrefix, entitySet) + "/" + operation.FullName() + "(";
             if (operation.IsFunction())
             {
-                foreach (var parameter in operation.Parameters.Skip(1))
+                var edmOperationParameters = operation.Parameters;
+                Contract.Assume(edmOperationParameters != null);
+                foreach (var parameter in edmOperationParameters.Skip(1))
                 {
+                    Contract.Assume(parameter != null);
                     swaggerOperationPath += parameter.Name + "=" + "{" + parameter.Name + "},";
                 }
             }
@@ -443,6 +471,8 @@ namespace Swashbuckle.OData.Descriptions
         /// </returns>
         public static Schema CreateSwaggerDefinitionForStructureType(IEdmStructuredType edmType)
         {
+            Contract.Requires(edmType.StructuralProperties() != null);
+
             if (edmType == null)
             {
                 return new Schema();
@@ -452,7 +482,7 @@ namespace Swashbuckle.OData.Descriptions
             foreach (var property in edmType.StructuralProperties())
             {
                 var swaggerProperty = new Schema().Description(property.Name);
-                SetSwaggerType(swaggerProperty, property.Type.Definition);
+                SetSwaggerType(swaggerProperty, property.GetPropertyType().GetDefinition());
                 swaggerProperties.Add(property.Name, swaggerProperty);
             }
 
@@ -466,6 +496,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(obj != null);
             Contract.Requires(edmType != null);
+            Contract.Requires(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
 
             switch (edmType.TypeKind)
             {
@@ -486,7 +517,7 @@ namespace Swashbuckle.OData.Descriptions
                     obj.type = "string";
                     break;
                 case EdmTypeKind.Collection:
-                    var itemEdmType = ((IEdmCollectionType) edmType).ElementType.Definition;
+                    var itemEdmType = ((IEdmCollectionType) edmType).ElementType.GetDefinition();
                     var nestedItem = new Parameter();
                     SetSwaggerType(nestedItem, itemEdmType);
                     obj.type = "array";
@@ -507,6 +538,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(obj != null);
             Contract.Requires(edmType != null);
+            Contract.Requires(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
 
             switch (edmType.TypeKind)
             {
@@ -527,7 +559,7 @@ namespace Swashbuckle.OData.Descriptions
                     obj.type = "string";
                     break;
                 case EdmTypeKind.Collection:
-                    var itemEdmType = ((IEdmCollectionType) edmType).ElementType.Definition;
+                    var itemEdmType = ((IEdmCollectionType) edmType).ElementType.GetDefinition();
                     var nestedItem = new Schema();
                     SetSwaggerType(nestedItem, itemEdmType);
                     obj.type = "array";
@@ -751,7 +783,10 @@ namespace Swashbuckle.OData.Descriptions
         /// <param name="source">The object instance to copy.</param>
         /// <returns>The copied object.</returns>
         public static T DeepClone<T>(this T source)
+            where T : class
         {
+            Contract.Ensures(Contract.Result<T>() != null || source == null);
+
             var serializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
@@ -761,7 +796,13 @@ namespace Swashbuckle.OData.Descriptions
                 MetadataPropertyHandling = MetadataPropertyHandling.Ignore
             };
             // Don't serialize a null object, simply return the default for that object
-            return ReferenceEquals(source, null) ? default(T) : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, serializerSettings), serializerSettings);
+            if (source == null)
+            {
+                return null;
+            }
+            var result = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, serializerSettings), serializerSettings);
+            Contract.Assume(result != null);
+            return result;
         }
     }
 }

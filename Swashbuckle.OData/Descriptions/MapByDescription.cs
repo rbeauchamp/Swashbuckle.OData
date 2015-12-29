@@ -11,7 +11,7 @@ namespace Swashbuckle.OData.Descriptions
             // Maybe the parameter is a key parameter, e.g., where Id in the URI path maps to a parameter named 'key'
             if (swaggerParameter.description != null && swaggerParameter.description.StartsWith("key:"))
             {
-                var parameterDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterName == "key");
+                var parameterDescriptor = actionDescriptor.GetParameters()?.SingleOrDefault(descriptor => descriptor.ParameterName == "key");
                 if (parameterDescriptor != null)
                 {
                     // Need to assign the correct name expected by OData

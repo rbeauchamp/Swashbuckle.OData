@@ -143,7 +143,9 @@ namespace System.Web.OData
             // get inner type from Task<T>
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Task<>))
             {
-                type = type.GetGenericArguments().First();
+                var genericArguments = type.GetGenericArguments();
+                Contract.Assume(genericArguments.Any());
+                type = genericArguments.First();
             }
 
             if (type.IsGenericType && type.IsInterface && (type.GetGenericTypeDefinition() == typeof (IEnumerable<>) || type.GetGenericTypeDefinition() == typeof (IQueryable<>)))
@@ -168,6 +170,7 @@ namespace System.Web.OData
 
             // Go through all assemblies referenced by the application and search for types matching a predicate
             var assemblies = assembliesResolver.GetAssemblies();
+            Contract.Assume(assemblies != null);
             foreach (var assembly in assemblies)
             {
                 Type[] exportedTypes;
@@ -202,6 +205,7 @@ namespace System.Web.OData
         private static Type GetInnerGenericType(Type interfaceType)
         {
             Contract.Requires(interfaceType != null);
+            Contract.Requires(interfaceType.GetGenericArguments() != null);
 
             // Getting the type T definition if the returning type implements IEnumerable<T>
             var parameterTypes = interfaceType.GetGenericArguments();

@@ -7,6 +7,11 @@ namespace Swashbuckle.OData.Descriptions
 {
     internal class ODataActionDescriptor
     {
+        private readonly string _relativePathTemplate;
+        private readonly ODataRoute _route;
+        private readonly HttpActionDescriptor _actionDescriptor;
+        private readonly Operation _operation;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionDescriptor"/> class.
         /// </summary>
@@ -18,20 +23,40 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(route != null);
-            Contract.Requires(!string.IsNullOrWhiteSpace(relativePathTemplate));
+            Contract.Requires(relativePathTemplate != null);
 
-            ActionDescriptor = actionDescriptor;
-            Route = route;
-            RelativePathTemplate = relativePathTemplate;
-            Operation = operation;
+            _actionDescriptor = actionDescriptor;
+            _route = route;
+            _relativePathTemplate = relativePathTemplate;
+            _operation = operation;
         }
 
-        public HttpActionDescriptor ActionDescriptor { get; }
+        public HttpActionDescriptor ActionDescriptor
+        {
+            get { return _actionDescriptor; }
+        }
 
-        public ODataRoute Route { get; }
+        public ODataRoute Route
+        {
+            get { return _route; }
+        }
 
-        public string RelativePathTemplate { get; }
+        public string RelativePathTemplate
+        {
+            get { return _relativePathTemplate; }
+        }
 
-        public Operation Operation { get; }
+        public Operation Operation
+        {
+            get { return _operation; }
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants()
+        {
+            Contract.Invariant(ActionDescriptor != null);
+            Contract.Invariant(Route != null);
+            Contract.Invariant(RelativePathTemplate != null);
+        }
     }
 }

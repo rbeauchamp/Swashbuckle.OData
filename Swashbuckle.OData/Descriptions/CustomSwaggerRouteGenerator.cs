@@ -17,6 +17,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(httpConfig != null);
             Contract.Requires(oDataRoute != null);
+            Contract.Requires(httpConfig.Properties != null);
             Contract.Ensures(Contract.Result<List<SwaggerRoute>>() != null);
 
             object swaggerRoutes;

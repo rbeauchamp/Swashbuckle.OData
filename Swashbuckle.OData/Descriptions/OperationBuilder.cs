@@ -27,7 +27,9 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(!string.IsNullOrWhiteSpace(parameterName));
             Contract.Ensures(Contract.Result<OperationBuilder>() != null);
 
-            _operation.Parameters().Parameter(parameterName, ParameterSource.Path.ToString().ToLower(), null, GetEdmModel().GetEdmType(typeof (T)));
+            var edmType = GetEdmModel().GetEdmType(typeof (T));
+            Contract.Assume(edmType != null);
+            _operation.Parameters().Parameter(parameterName, ParameterSource.Path.ToString().ToLower(), null, edmType);
 
             return this;
         }
@@ -42,7 +44,9 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(!string.IsNullOrWhiteSpace(parameterName));
             Contract.Ensures(Contract.Result<OperationBuilder>() != null);
 
-            _operation.Parameters().Parameter(parameterName, ParameterSource.Body.ToString().ToLower(), null, GetEdmModel().GetEdmType(typeof (T)));
+            var edmType = GetEdmModel().GetEdmType(typeof(T));
+            Contract.Assume(edmType != null);
+            _operation.Parameters().Parameter(parameterName, ParameterSource.Body.ToString().ToLower(), null, edmType);
 
             return this;
         }

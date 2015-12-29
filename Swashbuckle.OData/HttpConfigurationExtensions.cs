@@ -42,6 +42,7 @@ namespace Swashbuckle.OData
         internal static JsonSerializerSettings SerializerSettingsOrDefault(this HttpConfiguration httpConfig)
         {
             Contract.Requires(httpConfig != null);
+            Contract.Requires(httpConfig.Formatters != null);
 
             var formatter = httpConfig.Formatters.JsonFormatter;
             return formatter != null 
@@ -53,6 +54,7 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(httpConfig != null);
             Contract.Requires(oDataRoute != null);
+            Contract.Requires(httpConfig.Properties != null);
             Contract.Ensures(Contract.Result<SwaggerRouteBuilder>() != null);
 
             var fullRouteTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(routeTemplate));

@@ -6,18 +6,26 @@ namespace Swashbuckle.OData
     internal static class ReflectionExtensions
     {
         /// <summary>
-        ///     Uses reflection to get the field value from an object.
+        /// Uses reflection to get the field value from an object.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="instance">The instance object.</param>
         /// <param name="fieldName">The field's name which is to be fetched.</param>
-        /// <returns>The field value from the object.</returns>
-        internal static T GetInstanceField<T>(this object instance, string fieldName)
+        /// <param name="ensureNonNull">if set to <c>true</c> [ensure non null].</param>
+        /// <returns>
+        /// The field value from the object.
+        /// </returns>
+        internal static T GetInstanceField<T>(this object instance, string fieldName, bool ensureNonNull = false)
         {
             Contract.Requires(instance != null);
+            Contract.Ensures(Contract.Result<T>() != null || !ensureNonNull);
 
             const BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-            var field = instance.GetType().GetField(fieldName, bindFlags);
-            return (T)field.GetValue(instance);
+            var fieldInfo = instance.GetType().GetField(fieldName, bindFlags);
+            Contract.Assume(fieldInfo != null);
+            var value = fieldInfo.GetValue(instance);
+            Contract.Assume(value != null || !ensureNonNull);
+            return value != null ? (T)value : default (T);
         }
 
         /// <summary>

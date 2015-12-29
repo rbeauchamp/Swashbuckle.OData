@@ -28,6 +28,24 @@ namespace Swashbuckle.OData
         }
 
         /// <summary>
+        ///     Adds the elements of the specified collection to the end of the <see cref="List{T}" />.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source">The source collection.</param>
+        /// <param name="collection">
+        ///     The collection whose elements should be added to the end of the <see cref="List{T}" />.
+        /// </param>
+        public static void AddRangeIfNotNull<T>(this List<T> source, IEnumerable<T> collection)
+        {
+            Contract.Requires(source != null);
+
+            if (collection != null)
+            {
+                source.AddRange(collection);
+            }
+        }
+
+        /// <summary>
         ///     Adds the given item to the collection if the item is not null.
         /// </summary>
         /// <typeparam name="T"></typeparam>

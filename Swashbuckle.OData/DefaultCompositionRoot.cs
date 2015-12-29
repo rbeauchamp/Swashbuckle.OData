@@ -73,14 +73,14 @@ namespace Swashbuckle.OData
                 swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string>>("_groupingKeySelector"),
                 swaggerDocsConfig.GetFieldValue<IComparer<string>>("_groupingKeyComparer"),
                 swaggerDocsConfig.GetFieldValue<IDictionary<Type, Func<Schema>>>("_customSchemaMappings"),
-                swaggerDocsConfig.GetFieldValue<IList<Func<ISchemaFilter>>>("_schemaFilters").Select(factory => factory()),
-                swaggerDocsConfig.GetFieldValue<IList<Func<IModelFilter>>>("_modelFilters").Select(factory => factory()),
+                swaggerDocsConfig.GetFieldValue<IList<Func<ISchemaFilter>>>("_schemaFilters", true).Select(factory => factory()),
+                swaggerDocsConfig.GetFieldValue<IList<Func<IModelFilter>>>("_modelFilters", true).Select(factory => factory()),
                 swaggerDocsConfig.GetFieldValue<bool>("_ignoreObsoleteProperties"),
                 swaggerDocsConfig.GetFieldValue<Func<Type, string>>("_schemaIdSelector"),
                 swaggerDocsConfig.GetFieldValue<bool>("_describeAllEnumsAsStrings"),
                 swaggerDocsConfig.GetFieldValue<bool>("_describeStringEnumsInCamelCase"),
-                swaggerDocsConfig.GetFieldValue<IList<Func<IOperationFilter>>>("_operationFilters").Select(factory => factory()),
-                swaggerDocsConfig.GetFieldValue<IList<Func<IDocumentFilter>>>("_documentFilters").Select(factory => factory()),
+                swaggerDocsConfig.GetFieldValue<IList<Func<IOperationFilter>>>("_operationFilters", true).Select(factory => factory()),
+                swaggerDocsConfig.GetFieldValue<IList<Func<IDocumentFilter>>>("_documentFilters", true).Select(factory => factory()),
                 swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver")
             );
         }
@@ -101,7 +101,7 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(swaggerDocsConfig != null);
 
-            return swaggerDocsConfig.GetFieldValue<VersionInfoBuilder>("_versionInfoBuilder").Build();
+            return swaggerDocsConfig.GetFieldValue<VersionInfoBuilder>("_versionInfoBuilder", true).Build();
         }
     }
 }

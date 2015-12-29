@@ -10,15 +10,23 @@ namespace Swashbuckle.OData.Descriptions
         public static IEdmModel GetEdmModel(this ODataRoute oDataRoute)
         {
             Contract.Requires(oDataRoute != null);
+            Contract.Ensures(Contract.Result<IEdmModel>() != null);
 
-            return oDataRoute.GetODataPathRouteConstraint().EdmModel;
+            var result = oDataRoute.GetODataPathRouteConstraint().EdmModel;
+            Contract.Assume(result != null);
+            return result;
         }
 
         public static ODataPathRouteConstraint GetODataPathRouteConstraint(this ODataRoute oDataRoute)
         {
             Contract.Requires(oDataRoute != null);
+            Contract.Ensures(Contract.Result<ODataPathRouteConstraint>() != null);
 
-            return oDataRoute.Constraints.Values.SingleOrDefault(value => value is ODataPathRouteConstraint) as ODataPathRouteConstraint;
+            Contract.Assume(oDataRoute.Constraints != null);
+            Contract.Assume(oDataRoute.Constraints.Values.Count > 0);
+            var result = (ODataPathRouteConstraint)oDataRoute.Constraints.Values.Single(value => value is ODataPathRouteConstraint);
+            Contract.Assume(result != null);
+            return result;
         }
     }
 }

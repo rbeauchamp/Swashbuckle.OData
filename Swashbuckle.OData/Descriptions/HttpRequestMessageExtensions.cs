@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -11,6 +12,8 @@ namespace Swashbuckle.OData.Descriptions
     {
         public static HttpActionDescriptor GetHttpActionDescriptor(this HttpRequestMessage request)
         {
+            Contract.Requires(request.GetRequestContext() != null);
+
             HttpActionDescriptor actionDescriptor = null;
 
             var controllerDescriptor = request.GetControllerDesciptor();
@@ -33,7 +36,7 @@ namespace Swashbuckle.OData.Descriptions
                     var controllerContext = new HttpControllerContext(requestContext, request, controllerDescriptor, controller);
                     try
                     {
-                        actionDescriptor = perControllerConfig.Services.GetActionSelector().SelectAction(controllerContext);
+                        actionDescriptor = perControllerConfig.Services.GetActionSelector()?.SelectAction(controllerContext);
                     }
                     catch (HttpResponseException ex)
                     {
@@ -54,6 +57,9 @@ namespace Swashbuckle.OData.Descriptions
 
         public static HttpControllerDescriptor GetControllerDesciptor(this HttpRequestMessage request)
         {
+            Contract.Requires(request.GetConfiguration() != null);
+            Contract.Requires(request.GetConfiguration().Services.GetHttpControllerSelector() != null);
+
             try
             {
                 return request.GetConfiguration().Services.GetHttpControllerSelector().SelectController(request);

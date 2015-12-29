@@ -51,6 +51,7 @@ namespace Swashbuckle.OData.Descriptions
         public Operation GetOperation(HttpMethod httpMethod)
         {
             Contract.Requires(httpMethod != null);
+            Contract.Requires(httpMethod.Method != null);
 
             switch (httpMethod.Method.ToUpper())
             {

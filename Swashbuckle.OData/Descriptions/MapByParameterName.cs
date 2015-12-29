@@ -9,7 +9,7 @@ namespace Swashbuckle.OData.Descriptions
     {
         public HttpParameterDescriptor Map(Parameter swaggerParameter, int parameterIndex, HttpActionDescriptor actionDescriptor)
         {
-            return actionDescriptor.GetParameters()
+            return actionDescriptor.GetParameters()?
                 .SingleOrDefault(descriptor => string.Equals(descriptor.ParameterName, swaggerParameter.name, StringComparison.CurrentCultureIgnoreCase));
         }
     }

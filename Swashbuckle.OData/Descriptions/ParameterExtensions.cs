@@ -119,6 +119,8 @@ namespace Swashbuckle.OData.Descriptions
         private static Type GetEntityTypeForBodyParameter(Parameter parameter)
         {
             Contract.Requires(parameter != null);
+            Contract.Requires(parameter.schema != null);
+            Contract.Requires(!string.IsNullOrWhiteSpace(parameter.schema.@ref));
             Contract.Requires(parameter.@in == "body");
 
             var fullTypeName = parameter.schema.@ref.Replace("#/definitions/", string.Empty);
@@ -140,6 +142,8 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(schema != null);
             Contract.Requires(schema.type == "array");
+            Contract.Requires(schema.items != null);
+            Contract.Requires(schema.items.@ref != null);
 
             var queryableType = typeof(IQueryable<>);
             var fullTypeName = schema.items.@ref.Replace("#/definitions/", string.Empty);
