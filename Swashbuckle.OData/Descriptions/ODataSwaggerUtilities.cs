@@ -265,8 +265,11 @@ namespace Swashbuckle.OData.Descriptions
                 swaggerParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
             }
 
-            foreach (var parameter in operation.Parameters.Skip(1))
+            var edmOperationParameters = operation.Parameters;
+            Contract.Assume(edmOperationParameters != null);
+            foreach (var parameter in edmOperationParameters.Skip(1))
             {
+                Contract.Assume(parameter != null);
                 swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, parameter.GetOperationType().GetDefinition());
             }
 
@@ -381,6 +384,7 @@ namespace Swashbuckle.OData.Descriptions
             {
                 swaggerOperationImportPath = operationImport.Operation.Parameters.Aggregate(swaggerOperationImportPath, (current, parameter) => current + parameter.Name + "=" + "{" + parameter.Name + "},");
             }
+            Contract.Assume(swaggerOperationImportPath != null);
             if (swaggerOperationImportPath.EndsWith(",", StringComparison.Ordinal))
             {
                 swaggerOperationImportPath = swaggerOperationImportPath.Substring(0, swaggerOperationImportPath.Length - 1);
@@ -481,9 +485,12 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerProperties = new Dictionary<string, Schema>();
             foreach (var property in edmType.StructuralProperties())
             {
-                var swaggerProperty = new Schema().Description(property.Name);
+                Contract.Assume(property != null);
+                var propertyName = property.Name;
+                Contract.Assume(!ReferenceEquals(propertyName, null));
+                var swaggerProperty = new Schema().Description(propertyName);
                 SetSwaggerType(swaggerProperty, property.GetPropertyType().GetDefinition());
-                swaggerProperties.Add(property.Name, swaggerProperty);
+                swaggerProperties.Add(propertyName, swaggerProperty);
             }
 
             return new Schema

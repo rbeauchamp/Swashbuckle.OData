@@ -57,14 +57,21 @@ namespace Swashbuckle.OData.Descriptions
         private HttpParameterDescriptor GetHttpParameterDescriptor(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)
         {
             Contract.Requires(_parameterMappers != null);
+            Contract.Ensures(Contract.Result<HttpParameterDescriptor>() != null);
+            Contract.Ensures(Contract.Result<HttpParameterDescriptor>().Configuration != null);
 
-            return _parameterMappers
+            var result = _parameterMappers
                 .Select(mapper => mapper.Map(parameter, index, actionDescriptor))
                 .FirstOrDefault(httpParameterDescriptor => httpParameterDescriptor != null);
+
+            Contract.Assume(result != null);
+            Contract.Assume(result.Configuration != null);
+            return result;
         }
 
         private static string GetApiParameterDocumentation(Parameter parameter, HttpParameterDescriptor parameterDescriptor)
         {
+            Contract.Requires(parameter != null);
             Contract.Requires(parameterDescriptor != null);
             Contract.Requires(parameterDescriptor.Configuration != null);
 
@@ -79,6 +86,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(actionDescriptor.Configuration != null);
+            Contract.Requires(operation != null);
 
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
             return documentationProvider != null

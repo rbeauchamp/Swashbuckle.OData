@@ -7,14 +7,19 @@ namespace Swashbuckle.OData.Descriptions
 {
     public class SwaggerRouteBuilder
     {
+        private readonly SwaggerRoute _swaggerRoute;
+
         public SwaggerRouteBuilder(SwaggerRoute swaggerRoute)
         {
             Contract.Requires(swaggerRoute != null);
 
-            SwaggerRoute = swaggerRoute;
+            _swaggerRoute = swaggerRoute;
         }
 
-        public SwaggerRoute SwaggerRoute { get; }
+        public SwaggerRoute SwaggerRoute
+        {
+            get { return _swaggerRoute; }
+        }
 
         public OperationBuilder Operation(HttpMethod httpMethod)
         {
@@ -52,6 +57,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(httpMethod != null);
             Contract.Requires(httpMethod.Method != null);
+            Contract.Requires(httpMethod.Method.ToUpper() == @"GET" || httpMethod.Method.ToUpper() == @"PUT" || httpMethod.Method.ToUpper() == @"POST" || httpMethod.Method.ToUpper() != @"DELETE" || httpMethod.Method.ToUpper() != @"PATCH" || httpMethod.Method.ToUpper() != @"MERGE");
 
             switch (httpMethod.Method.ToUpper())
             {
@@ -64,10 +70,17 @@ namespace Swashbuckle.OData.Descriptions
                 case "DELETE":
                     return SwaggerRoute.PathItem.delete;
                 case "PATCH":
+                case "MERGE":
                     return SwaggerRoute.PathItem.patch;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(httpMethod));
             }
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants()
+        {
+            Contract.Invariant(SwaggerRoute != null);
         }
     }
 }

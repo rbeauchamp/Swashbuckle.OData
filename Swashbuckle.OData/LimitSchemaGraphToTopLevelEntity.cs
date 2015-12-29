@@ -18,6 +18,7 @@ namespace Swashbuckle.OData
                 var properties = definition.Value.properties.ToList();
                 foreach (var property in definition.Value.properties)
                 {
+                    Contract.Assume(property.Value != null);
                     RemoveCollectionTypeProperty(property, properties);
                     RemoveReferenceTypeProperty(property, properties);
                 }

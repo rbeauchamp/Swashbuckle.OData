@@ -145,6 +145,7 @@ namespace Swashbuckle.OData
         private PathItem CreatePathItem(IEnumerable<ApiDescription> apiDescriptions, SchemaRegistry schemaRegistry)
         {
             Contract.Requires(apiDescriptions != null);
+            Contract.Requires(schemaRegistry != null);
 
             var pathItem = new PathItem();
 
@@ -161,6 +162,7 @@ namespace Swashbuckle.OData
                     : _options.ConflictingActionsResolver(group);
 
                 Contract.Assume(apiDescription != null);
+                Contract.Assume(apiDescription.ParameterDescriptions != null);
                 switch (httpMethod)
                 {
                     case "get":
@@ -241,6 +243,7 @@ namespace Swashbuckle.OData
         private static Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
         {
             Contract.Requires(paramDesc != null);
+            Contract.Requires(schemaRegistry != null);
 
             var @in = inPath
                 ? "path"

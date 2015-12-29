@@ -35,9 +35,10 @@ namespace Swashbuckle.OData.Descriptions
                 var parameterBindings = actionBinding.ParameterBindings;
                 if (parameterBindings != null)
                 {
-                    foreach (var parameter in parameterBindings)
+                    foreach (var parameterBinding in parameterBindings)
                     {
-                        parameterDescriptions.Add(CreateParameterDescriptionFromBinding(parameter));
+                        Contract.Assume(parameterBinding != null);
+                        parameterDescriptions.Add(CreateParameterDescriptionFromBinding(parameterBinding));
                     }
                 }
             }

@@ -41,7 +41,6 @@ namespace Swashbuckle.OData.Descriptions
         private static IEnumerable<ODataActionDescriptor> GetActionDescriptors(SwaggerRoute potentialSwaggerRoute, HttpConfiguration httpConfig)
         {
             Contract.Requires(potentialSwaggerRoute != null);
-            Contract.Requires(potentialSwaggerRoute.PathItem != null);
 
             var oDataActionDescriptors = new List<ODataActionDescriptor>();
 
@@ -81,6 +80,8 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(httpConfig != null);
             Contract.Requires(oDataRoute != null);
             Contract.Requires(oDataRoute.Constraints != null);
+            Contract.Ensures(Contract.Result<HttpRequestMessage>() != null);
+            Contract.Ensures(Contract.Result<HttpRequestMessage>().GetRequestContext() != null);
 
             var oDataAbsoluteUri = potentialOperation.GenerateSampleODataAbsoluteUri(ServiceRoot, potentialPathTemplate);
 
@@ -113,6 +114,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(operation != null);
+            Contract.Requires(operation.tags != null);
             Contract.Requires(actionDescriptor.ControllerDescriptor != null);
             Contract.Requires(actionDescriptor.ControllerDescriptor.ControllerName != @"Restier" || operation.responses != null);
 
@@ -130,6 +132,8 @@ namespace Swashbuckle.OData.Descriptions
                 }
                 if (response?.schema?.type == "array")
                 {
+                    Contract.Assume(response.schema.items != null);
+                    Contract.Assume(response.schema.items.@ref != null);
                     return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
                     {
                         Configuration = actionDescriptor.Configuration,

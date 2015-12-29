@@ -123,6 +123,7 @@ namespace System.Web.OData
                 else if (type.HasElementType)
                 {
                     type = type.GetElementType();
+                    Contract.Assume(type != null);
                 }
                 else
                 {
@@ -147,7 +148,7 @@ namespace System.Web.OData
                 Contract.Assume(genericArguments.Any());
                 type = genericArguments.First();
             }
-
+            Contract.Assume(type != null);
             if (type.IsGenericType && type.IsInterface && (type.GetGenericTypeDefinition() == typeof (IEnumerable<>) || type.GetGenericTypeDefinition() == typeof (IQueryable<>)))
             {
                 // special case the IEnumerable<T>

@@ -29,6 +29,24 @@ namespace Swashbuckle.OData
         }
 
         /// <summary>
+        /// Uses reflection to set the property value in an object.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instance">The instance object.</param>
+        /// <param name="propertyName">The name of the property to be set.</param>
+        /// <param name="newValue">The new value.</param>
+        internal static void SetInstanceProperty<T>(this object instance, string propertyName, T newValue)
+        {
+            Contract.Requires(instance != null);
+            Contract.Requires(propertyName != null);
+
+            const BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+            var propertyInfo = instance.GetType().GetProperty(propertyName, bindFlags);
+            Contract.Assume(propertyInfo != null);
+            propertyInfo.SetValue(instance, newValue);
+        }
+
+        /// <summary>
         /// Invokes the function.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -41,7 +59,10 @@ namespace Swashbuckle.OData
             Contract.Requires(methodName != null);
 
             var methodInfo = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
-            return (T)methodInfo.Invoke(instance, null);
+
+            var result = methodInfo.Invoke(instance, null);
+
+            return result != null ? (T) result : default(T);
         }
     }
 }

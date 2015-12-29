@@ -6,15 +6,19 @@ namespace Swashbuckle.OData.Descriptions
 {
     public class SwaggerRoute
     {
+        private readonly string _template;
+        private readonly ODataRoute _oDataRoute;
+        private readonly PathItem _pathItem;
+
         public SwaggerRoute(string template, ODataRoute oDataRoute, PathItem pathItem)
         {
             Contract.Requires(!string.IsNullOrWhiteSpace(template));
             Contract.Requires(pathItem != null);
             Contract.Requires(oDataRoute != null);
 
-            Template = template;
-            ODataRoute = oDataRoute;
-            PathItem = pathItem;
+            _template = template;
+            _oDataRoute = oDataRoute;
+            _pathItem = pathItem;
         }
 
         public SwaggerRoute(string template, ODataRoute oDataRoute) :
@@ -24,10 +28,27 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(oDataRoute != null);
         }
 
-        public string Template { get; }
+        public string Template
+        {
+            get { return _template; }
+        }
 
-        public ODataRoute ODataRoute { get; }
+        public ODataRoute ODataRoute
+        {
+            get { return _oDataRoute; }
+        }
 
-        public PathItem PathItem { get; }
+        public PathItem PathItem
+        {
+            get { return _pathItem; }
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants()
+        {
+            Contract.Invariant(!string.IsNullOrWhiteSpace(Template));
+            Contract.Invariant(ODataRoute != null);
+            Contract.Invariant(PathItem != null);
+        }
     }
 }

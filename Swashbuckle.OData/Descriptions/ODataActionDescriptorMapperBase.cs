@@ -15,6 +15,9 @@ namespace Swashbuckle.OData.Descriptions
     {
         protected void PopulateApiDescriptions(ODataActionDescriptor oDataActionDescriptor, List<ApiParameterDescription> parameterDescriptions, string apiDocumentation, List<ApiDescription> apiDescriptions)
         {
+            Contract.Requires(oDataActionDescriptor != null);
+            Contract.Requires(apiDescriptions != null);
+
             // request formatters
             var bodyParameter = default(ApiParameterDescription);
             if (parameterDescriptions != null)
@@ -38,8 +41,8 @@ namespace Swashbuckle.OData.Descriptions
 
 
                 // Replacing the formatter tracers with formatters if tracers are present.
-                supportedRequestBodyFormatters = SwaggerOperationMapper.GetInnerFormatters(supportedRequestBodyFormatters);
-                supportedResponseFormatters = SwaggerOperationMapper.GetInnerFormatters(supportedResponseFormatters);
+                supportedRequestBodyFormatters = GetInnerFormatters(supportedRequestBodyFormatters);
+                supportedResponseFormatters = GetInnerFormatters(supportedResponseFormatters);
             }
 
             var supportedHttpMethods = GetHttpMethodsSupportedByAction(oDataActionDescriptor.Route, oDataActionDescriptor.ActionDescriptor);
@@ -54,17 +57,28 @@ namespace Swashbuckle.OData.Descriptions
                     Route = oDataActionDescriptor.Route
                 };
 
-                apiDescription.SupportedResponseFormatters.AddRange(supportedResponseFormatters);
-                apiDescription.SupportedRequestBodyFormatters.AddRange(supportedRequestBodyFormatters.ToList());
+                var apiSupportedResponseFormatters = apiDescription.SupportedResponseFormatters;
+                Contract.Assume(apiSupportedResponseFormatters != null);
+                apiSupportedResponseFormatters.AddRange(supportedResponseFormatters);
+
+                var apiSupportedRequestBodyFormatters = apiDescription.SupportedRequestBodyFormatters;
+                Contract.Assume(apiSupportedRequestBodyFormatters != null);
+                apiSupportedRequestBodyFormatters.AddRange(supportedRequestBodyFormatters);
+
                 if (parameterDescriptions != null)
                 {
-                    apiDescription.ParameterDescriptions.AddRange(parameterDescriptions);
+                    var apiParameterDescriptions = apiDescription.ParameterDescriptions;
+                    Contract.Assume(apiParameterDescriptions != null);
+                    apiParameterDescriptions.AddRange(parameterDescriptions);
                 }
 
                 // Have to set ResponseDescription because it's internal!??
-                apiDescription.GetType().GetProperty("ResponseDescription").SetValue(apiDescription, responseDescription);
+                apiDescription.SetInstanceProperty("ResponseDescription", responseDescription);
 
-                apiDescription.RelativePath = apiDescription.GetRelativePathForSwagger();
+                if (apiDescription.ParameterDescriptions != null)
+                {
+                    apiDescription.RelativePath = apiDescription.GetRelativePathForSwagger();
+                }
 
                 apiDescriptions.Add(apiDescription);
             }
@@ -82,8 +96,10 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(route != null);
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(route.Constraints != null);
+            Contract.Ensures(Contract.Result<IEnumerable<HttpMethod>>() != null);
 
             IList<HttpMethod> actionHttpMethods = actionDescriptor.SupportedHttpMethods;
+            Contract.Assume(actionHttpMethods != null);
             var httpMethodConstraint = route.Constraints.Values.FirstOrDefault(c => c is HttpMethodConstraint) as HttpMethodConstraint;
 
             return httpMethodConstraint?.AllowedMethods?.Intersect(actionHttpMethods).ToList() ?? actionHttpMethods;
@@ -93,7 +109,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(mediaTypeFormatters != null);
 
-            return mediaTypeFormatters.Select(Decorator.GetInner);
+            return mediaTypeFormatters.Select<MediaTypeFormatter, MediaTypeFormatter>(Decorator.GetInner);
         }
     }
 }

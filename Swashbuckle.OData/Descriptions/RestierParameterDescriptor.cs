@@ -12,6 +12,7 @@ namespace Swashbuckle.OData.Descriptions
         public RestierParameterDescriptor(Parameter parameter)
         {
             Contract.Requires(parameter != null);
+            Contract.Requires(parameter.@in.Equals(@"body"));
 
             Parameter = parameter;
             DefaultValue = null;

@@ -155,7 +155,7 @@ namespace System.Web.OData.Formatter
                 if (enumerableOfT != null)
                 {
                     var elementClrType = enumerableOfT.GetGenericArguments()[0];
-
+                    Contract.Assume(elementClrType != null);
                     var elementType = GetEdmType(edmModel, elementClrType, false);
                     if (elementType != null)
                     {
