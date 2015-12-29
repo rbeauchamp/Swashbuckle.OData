@@ -11,7 +11,7 @@ namespace SwashbuckleODataSample
     {
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
         {
-            var controllerType = controllerContext.Controller.GetType();
+            var controllerType = controllerContext.ControllerDescriptor.ControllerType;
 
             if (typeof(CustomersController) == controllerType)
             {

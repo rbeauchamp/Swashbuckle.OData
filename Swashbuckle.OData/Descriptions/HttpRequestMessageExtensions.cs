@@ -10,33 +10,25 @@ namespace Swashbuckle.OData.Descriptions
 {
     internal static class HttpRequestMessageExtensions
     {
-        public static HttpActionDescriptor GetHttpActionDescriptor(this HttpRequestMessage request)
+        public static HttpActionDescriptor GetHttpActionDescriptor(this HttpRequestMessage request, HttpConfiguration httpConfig)
         {
             Contract.Requires(request.GetRequestContext() != null);
             Contract.Ensures(Contract.Result<HttpActionDescriptor>() == null || Contract.Result<HttpActionDescriptor>().ControllerDescriptor != null);
 
             HttpActionDescriptor actionDescriptor = null;
 
-            var controllerDescriptor = request.GetControllerDesciptor();
+            var controllerDescriptor = request.GetControllerDescriptor();
 
             if (controllerDescriptor != null)
             {
-
                 var perControllerConfig = controllerDescriptor.Configuration;
                 request.SetConfiguration(perControllerConfig);
-                var requestContext = request.GetRequestContext();
-                Contract.Assume(requestContext != null);
-                requestContext.Configuration = perControllerConfig;
-                requestContext.RouteData = request.GetRouteData();
-                requestContext.Url = new UrlHelper(request);
-                Contract.Assume(perControllerConfig != null);
-                requestContext.VirtualPathRoot = perControllerConfig.VirtualPathRoot;
 
-                var controller = controllerDescriptor.CreateController(request);
-
-                using (controller as IDisposable)
+                var controllerContext = new HttpControllerContext(httpConfig, request.GetRouteData(), request)
                 {
-                    var controllerContext = new HttpControllerContext(requestContext, request, controllerDescriptor, controller);
+                    ControllerDescriptor = controllerDescriptor
+                };
+
                     try
                     {
                         actionDescriptor = perControllerConfig.Services.GetActionSelector()?.SelectAction(controllerContext);
@@ -53,14 +45,13 @@ namespace Swashbuckle.OData.Descriptions
                         }
                     }
                 }
-            }
 
             Contract.Assume(actionDescriptor == null || actionDescriptor.ControllerDescriptor != null);
 
             return actionDescriptor;
         }
 
-        public static HttpControllerDescriptor GetControllerDesciptor(this HttpRequestMessage request)
+        public static HttpControllerDescriptor GetControllerDescriptor(this HttpRequestMessage request)
         {
             Contract.Requires(request.GetConfiguration() != null);
             Contract.Requires(request.GetConfiguration().Services.GetHttpControllerSelector() != null);
