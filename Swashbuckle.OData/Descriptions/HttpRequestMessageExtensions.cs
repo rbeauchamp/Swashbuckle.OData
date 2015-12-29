@@ -9,42 +9,35 @@ namespace Swashbuckle.OData.Descriptions
 {
     internal static class HttpRequestMessageExtensions
     {
-        public static HttpActionDescriptor GetHttpActionDescriptor(this HttpRequestMessage request)
+        public static HttpActionDescriptor GetHttpActionDescriptor(this HttpRequestMessage request, HttpConfiguration httpConfig)
         {
             HttpActionDescriptor actionDescriptor = null;
 
-            var controllerDescriptor = request.GetControllerDesciptor();
+            var controllerDescriptor = request.GetControllerDescriptor();
 
             if (controllerDescriptor != null)
             {
-
                 var perControllerConfig = controllerDescriptor.Configuration;
                 request.SetConfiguration(perControllerConfig);
-                var requestContext = request.GetRequestContext();
-                requestContext.Configuration = perControllerConfig;
-                requestContext.RouteData = request.GetRouteData();
-                requestContext.Url = new UrlHelper(request);
-                requestContext.VirtualPathRoot = perControllerConfig.VirtualPathRoot;
 
-                var controller = controllerDescriptor.CreateController(request);
-
-                using (controller as IDisposable)
+                var controllerContext = new HttpControllerContext(httpConfig, request.GetRouteData(), request)
                 {
-                    var controllerContext = new HttpControllerContext(requestContext, request, controllerDescriptor, controller);
-                    try
+                    ControllerDescriptor = controllerDescriptor
+                };
+
+                try
+                {
+                    actionDescriptor = perControllerConfig.Services.GetActionSelector().SelectAction(controllerContext);
+                }
+                catch (HttpResponseException ex)
+                {
+                    if (ex.Response.StatusCode == HttpStatusCode.NotFound || ex.Response.StatusCode == HttpStatusCode.MethodNotAllowed)
                     {
-                        actionDescriptor = perControllerConfig.Services.GetActionSelector().SelectAction(controllerContext);
+                        actionDescriptor = null;
                     }
-                    catch (HttpResponseException ex)
+                    else
                     {
-                        if (ex.Response.StatusCode == HttpStatusCode.NotFound || ex.Response.StatusCode == HttpStatusCode.MethodNotAllowed)
-                        {
-                            actionDescriptor = null;
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        throw;
                     }
                 }
             }
@@ -52,7 +45,7 @@ namespace Swashbuckle.OData.Descriptions
             return actionDescriptor;
         }
 
-        public static HttpControllerDescriptor GetControllerDesciptor(this HttpRequestMessage request)
+        public static HttpControllerDescriptor GetControllerDescriptor(this HttpRequestMessage request)
         {
             try
             {

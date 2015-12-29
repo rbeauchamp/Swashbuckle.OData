@@ -59,7 +59,7 @@ namespace Swashbuckle.OData.Descriptions
             {
                 var request = CreateHttpRequestMessage(httpMethod, potentialOperation, potentialPathTemplate, oDataRoute, httpConfig);
 
-                var actionDescriptor = request.GetHttpActionDescriptor();
+                var actionDescriptor = request.GetHttpActionDescriptor(httpConfig);
 
                 if (actionDescriptor != null)
                 {
