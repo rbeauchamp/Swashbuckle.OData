@@ -24,21 +24,15 @@ namespace SwashbuckleODataSample.ODataControllers
             return _db.Customers;
         }
 
+        /// <summary>
+        /// Query the customer by id
+        /// </summary>
+        /// <param name="key">The customer id</param>
         [EnableQuery]
-        public Task<IHttpActionResult> Get(int key)
+        public SingleResult<Customer> GetCustomer([FromODataUri] int key)
         {
-            throw new NotImplementedException();
+            return SingleResult.Create(_db.Customers.Where(customer => customer.Id == key));
         }
-
-        ///// <summary>
-        ///// Query the customer by id
-        ///// </summary>
-        ///// <param name="key">The customer id</param>
-        //[EnableQuery]
-        //public SingleResult<Customer> GetCustomer([FromODataUri] int key)
-        //{
-        //    return SingleResult.Create(_db.Customers.Where(customer => customer.Id == key));
-        //}
 
         /// <summary>
         /// Replace all data for the customer with the given id

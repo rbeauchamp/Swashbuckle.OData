@@ -47,11 +47,6 @@ namespace SwashbuckleODataSample.ODataControllers
             return Created(order);
         }
 
-        public async Task<IHttpActionResult> Delete([FromODataUri] int customerId, [FromODataUri] Guid orderID)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Query the order by id
         /// </summary>
