@@ -104,10 +104,7 @@ namespace Swashbuckle.OData.Descriptions
             httpRequestMessageProperties.RouteName = oDataRoute.GetODataPathRouteConstraint().RouteName;
             httpRequestMessageProperties.RoutingConventions = oDataRoute.GetODataPathRouteConstraint().RoutingConventions;
             httpRequestMessageProperties.PathHandler = oDataRoute.GetODataPathRouteConstraint().PathHandler;
-            var httpRouteCollection = httpConfig.Routes;
-            Contract.Assume(httpRouteCollection != null);
-            var routeData = httpRouteCollection.GetRouteData(httpRequestMessage);
-            httpRequestMessage.SetRouteData(routeData);
+            httpRequestMessage.SetRouteData(oDataRoute.GetRouteData("/", httpRequestMessage));
             return httpRequestMessage;
         }
 
