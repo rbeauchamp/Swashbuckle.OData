@@ -10,7 +10,7 @@ namespace Swashbuckle.OData.Descriptions
         private readonly Operation _operation;
         private readonly SwaggerRouteBuilder _swaggerRouteBuilder;
 
-        public OperationBuilder(Operation operation, SwaggerRouteBuilder swaggerRouteBuilder)
+        internal OperationBuilder(Operation operation, SwaggerRouteBuilder swaggerRouteBuilder)
         {
             _operation = operation;
             _swaggerRouteBuilder = swaggerRouteBuilder;

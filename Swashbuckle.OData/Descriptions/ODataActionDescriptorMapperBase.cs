@@ -95,13 +95,13 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(route != null);
             Contract.Requires(actionDescriptor != null);
-            Contract.Requires(route.Constraints != null);
             Contract.Ensures(Contract.Result<IEnumerable<HttpMethod>>() != null);
+
+            Contract.Assume(route.Constraints != null);
+            var httpMethodConstraint = route.Constraints.Values.FirstOrDefault(c => c is HttpMethodConstraint) as HttpMethodConstraint;
 
             IList<HttpMethod> actionHttpMethods = actionDescriptor.SupportedHttpMethods;
             Contract.Assume(actionHttpMethods != null);
-            var httpMethodConstraint = route.Constraints.Values.FirstOrDefault(c => c is HttpMethodConstraint) as HttpMethodConstraint;
-
             return httpMethodConstraint?.AllowedMethods?.Intersect(actionHttpMethods).ToList() ?? actionHttpMethods;
         }
 
@@ -109,7 +109,7 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(mediaTypeFormatters != null);
 
-            return mediaTypeFormatters.Select<MediaTypeFormatter, MediaTypeFormatter>(Decorator.GetInner);
+            return mediaTypeFormatters.Select(Decorator.GetInner);
         }
     }
 }

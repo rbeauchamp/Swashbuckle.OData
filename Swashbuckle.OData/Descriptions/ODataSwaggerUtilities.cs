@@ -144,7 +144,10 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerParameters = new List<Parameter>();
             foreach (var parameter in operationImport.Operation.Parameters)
             {
+                Contract.Assume(parameter != null);
+
                 var edmType = parameter.GetOperationType().GetDefinition();
+
                 swaggerParameters.Parameter(parameter.Name, isFunctionImport ? "path" : "body", "parameter: " + parameter.Name, edmType);
             }
 
@@ -202,7 +205,10 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerParameters = new List<Parameter>();
             foreach (var parameter in operation.Parameters.Skip(1))
             {
+                Contract.Assume(parameter != null);
+
                 var edmType = parameter.GetOperationType().GetDefinition();
+
                 swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, edmType);
             }
 
@@ -382,7 +388,7 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerOperationImportPath = routePrefix.AppendPathSegment(operationImport.Name) + "(";
             if (operationImport.IsFunctionImport())
             {
-                swaggerOperationImportPath = operationImport.Operation.Parameters.Aggregate(swaggerOperationImportPath, (current, parameter) => current + parameter.Name + "=" + "{" + parameter.Name + "},");
+                swaggerOperationImportPath = operationImport.Operation?.Parameters?.Aggregate(swaggerOperationImportPath, (current, parameter) => current + parameter.Name + "=" + "{" + parameter.Name + "},");
             }
             Contract.Assume(swaggerOperationImportPath != null);
             if (swaggerOperationImportPath.EndsWith(",", StringComparison.Ordinal))
@@ -503,7 +509,8 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(obj != null);
             Contract.Requires(edmType != null);
-            Contract.Requires(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
+
+            Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
 
             switch (edmType.TypeKind)
             {
@@ -545,7 +552,8 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(obj != null);
             Contract.Requires(edmType != null);
-            Contract.Requires(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
+
+            Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
 
             switch (edmType.TypeKind)
             {

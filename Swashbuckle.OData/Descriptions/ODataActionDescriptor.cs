@@ -23,7 +23,6 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(route != null);
-            Contract.Requires(route.Constraints != null);
             Contract.Requires(relativePathTemplate != null);
 
             _actionDescriptor = actionDescriptor;
@@ -57,7 +56,6 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Invariant(ActionDescriptor != null);
             Contract.Invariant(Route != null);
-            Contract.Invariant(Route.Constraints != null);
             Contract.Invariant(RelativePathTemplate != null);
         }
     }

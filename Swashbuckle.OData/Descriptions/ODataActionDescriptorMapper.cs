@@ -24,7 +24,8 @@ namespace Swashbuckle.OData.Descriptions
         private static List<ApiParameterDescription> CreateParameterDescriptions(HttpActionDescriptor actionDescriptor)
         {
             Contract.Requires(actionDescriptor != null);
-            Contract.Requires(actionDescriptor.ControllerDescriptor == null || actionDescriptor.ControllerDescriptor.Configuration != null);
+
+            Contract.Assume(actionDescriptor.ControllerDescriptor == null || actionDescriptor.ControllerDescriptor.Configuration != null);
 
             var parameterDescriptions = new List<ApiParameterDescription>();
             var actionBinding = GetActionBinding(actionDescriptor);
@@ -49,6 +50,8 @@ namespace Swashbuckle.OData.Descriptions
                 {
                     foreach (var parameter in parameters)
                     {
+                        Contract.Assume(parameter != null);
+
                         parameterDescriptions.Add(CreateParameterDescriptionFromDescriptor(parameter));
                     }
                 }
@@ -77,8 +80,8 @@ namespace Swashbuckle.OData.Descriptions
         private static ApiParameterDescription CreateParameterDescriptionFromBinding(HttpParameterBinding parameterBinding)
         {
             Contract.Requires(parameterBinding != null);
-            Contract.Requires(parameterBinding.Descriptor != null);
-            Contract.Requires(parameterBinding.Descriptor.Configuration != null);
+
+            Contract.Assume(parameterBinding.Descriptor?.Configuration != null);
 
             var parameterDescription = CreateParameterDescriptionFromDescriptor(parameterBinding.Descriptor);
             if (parameterBinding.WillReadBody)
@@ -96,7 +99,8 @@ namespace Swashbuckle.OData.Descriptions
         private static ApiParameterDescription CreateParameterDescriptionFromDescriptor(HttpParameterDescriptor parameter)
         {
             Contract.Requires(parameter != null);
-            Contract.Requires(parameter.Configuration != null);
+
+            Contract.Assume(parameter.Configuration != null);
 
             return new ApiParameterDescription
             {

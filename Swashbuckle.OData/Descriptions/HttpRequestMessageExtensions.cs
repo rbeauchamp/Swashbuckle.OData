@@ -1,10 +1,8 @@
-﻿using System;
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
 
 namespace Swashbuckle.OData.Descriptions
 {
@@ -12,7 +10,6 @@ namespace Swashbuckle.OData.Descriptions
     {
         public static HttpActionDescriptor GetHttpActionDescriptor(this HttpRequestMessage request, HttpConfiguration httpConfig)
         {
-            Contract.Requires(request.GetRequestContext() != null);
             Contract.Ensures(Contract.Result<HttpActionDescriptor>() == null || Contract.Result<HttpActionDescriptor>().ControllerDescriptor != null);
 
             HttpActionDescriptor actionDescriptor = null;
@@ -22,6 +19,8 @@ namespace Swashbuckle.OData.Descriptions
             if (controllerDescriptor != null)
             {
                 var perControllerConfig = controllerDescriptor.Configuration;
+                Contract.Assume(perControllerConfig != null);
+
                 request.SetConfiguration(perControllerConfig);
 
                 var controllerContext = new HttpControllerContext(httpConfig, request.GetRouteData(), request)
@@ -29,22 +28,24 @@ namespace Swashbuckle.OData.Descriptions
                     ControllerDescriptor = controllerDescriptor
                 };
 
-                    try
+                try
+                {
+                    var actionSelector = perControllerConfig.Services?.GetActionSelector();
+                    Contract.Assume(actionSelector != null);
+                    actionDescriptor = actionSelector.SelectAction(controllerContext);
+                }
+                catch (HttpResponseException ex)
+                {
+                    if (ex.Response.StatusCode == HttpStatusCode.NotFound || ex.Response.StatusCode == HttpStatusCode.MethodNotAllowed)
                     {
-                        actionDescriptor = perControllerConfig.Services.GetActionSelector()?.SelectAction(controllerContext);
+                        actionDescriptor = null;
                     }
-                    catch (HttpResponseException ex)
+                    else
                     {
-                        if (ex.Response.StatusCode == HttpStatusCode.NotFound || ex.Response.StatusCode == HttpStatusCode.MethodNotAllowed)
-                        {
-                            actionDescriptor = null;
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        throw;
                     }
                 }
+            }
 
             Contract.Assume(actionDescriptor == null || actionDescriptor.ControllerDescriptor != null);
 

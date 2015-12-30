@@ -27,7 +27,7 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(parameterIndex >= 0);
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(actionDescriptor.GetParameters() != null);
-            Contract.Ensures(Contract.Result<HttpParameterDescriptor>() == null || Contract.Result<HttpParameterDescriptor>().Configuration != null);
+            //Contract.Ensures(Contract.Result<HttpParameterDescriptor>() == null || Contract.Result<HttpParameterDescriptor>().Configuration != null);
 
             throw new NotImplementedException();
         }

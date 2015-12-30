@@ -30,25 +30,37 @@ namespace Swashbuckle.OData.Descriptions
 
         public string Template
         {
-            get { return _template; }
+            get
+            {
+                Contract.Ensures(!string.IsNullOrWhiteSpace(Contract.Result<string>()));
+                return _template;
+            }
         }
 
         public ODataRoute ODataRoute
         {
-            get { return _oDataRoute; }
+            get
+            {
+                Contract.Ensures(Contract.Result<ODataRoute>() != null);
+                return _oDataRoute;
+            }
         }
 
         public PathItem PathItem
         {
-            get { return _pathItem; }
+            get
+            {
+                Contract.Ensures(Contract.Result<PathItem>() != null);
+                return _pathItem;
+            }
         }
 
         [ContractInvariantMethod]
         private void ObjectInvariants()
         {
-            Contract.Invariant(!string.IsNullOrWhiteSpace(Template));
-            Contract.Invariant(ODataRoute != null);
-            Contract.Invariant(PathItem != null);
+            Contract.Invariant(!string.IsNullOrWhiteSpace(_template));
+            Contract.Invariant(_oDataRoute != null);
+            Contract.Invariant(_pathItem != null);
         }
     }
 }

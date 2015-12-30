@@ -107,6 +107,8 @@ namespace Swashbuckle.OData
 
             foreach(var filter in _options.DocumentFilters)
             {
+                Contract.Assume(filter != null);
+
                 filter.Apply(odataSwaggerDoc, schemaRegistry, _odataApiExplorer);
             }
 
@@ -155,6 +157,8 @@ namespace Swashbuckle.OData
 
             foreach (var group in perMethodGrouping)
             {
+                Contract.Assume(group != null);
+
                 var httpMethod = group.Key;
 
                 var apiDescription = group.Count() == 1
@@ -300,7 +304,9 @@ namespace Swashbuckle.OData
             parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
             parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
 
-            var schema = schemaRegistry.GetOrRegisterODataType(paramDesc.ParameterDescriptor.ParameterType);
+            var parameterType = paramDesc.ParameterDescriptor.ParameterType;
+            Contract.Assume(parameterType != null);
+            var schema = schemaRegistry.GetOrRegisterODataType(parameterType);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else
@@ -330,12 +336,16 @@ namespace Swashbuckle.OData
 
         private IEnumerable<ApiDescription> GetApiDescriptionsFor(string apiVersion)
         {
-            Contract.Requires(_options.VersionSupportResolver == null || _odataApiExplorer.ApiDescriptions != null);
             Contract.Ensures(Contract.Result<IEnumerable<ApiDescription>>() != null);
 
-            return _options.VersionSupportResolver == null 
+            Contract.Assume(_options.VersionSupportResolver == null || _odataApiExplorer.ApiDescriptions != null);
+
+            var result = _options.VersionSupportResolver == null 
                 ? _odataApiExplorer.ApiDescriptions 
                 : _odataApiExplorer.ApiDescriptions.Where(apiDesc => _options.VersionSupportResolver(apiDesc, apiVersion));
+
+            Contract.Assume(result != null);
+            return result;
         }
 
         [ContractInvariantMethod]

@@ -59,6 +59,7 @@ namespace Swashbuckle.OData
             Contract.Requires(methodName != null);
 
             var methodInfo = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            Contract.Assume(methodInfo != null);
 
             var result = methodInfo.Invoke(instance, null);
 

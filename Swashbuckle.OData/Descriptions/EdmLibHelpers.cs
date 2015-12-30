@@ -154,7 +154,9 @@ namespace System.Web.OData.Formatter
                 var enumerableOfT = ExtractGenericInterface(clrType, typeof (IEnumerable<>));
                 if (enumerableOfT != null)
                 {
-                    var elementClrType = enumerableOfT.GetGenericArguments()[0];
+                    var genericArguments = enumerableOfT.GetGenericArguments();
+                    Contract.Assume(genericArguments != null);
+                    var elementClrType = genericArguments[0];
                     Contract.Assume(elementClrType != null);
                     var elementType = GetEdmType(edmModel, elementClrType, false);
                     if (elementType != null)
@@ -220,6 +222,8 @@ namespace System.Web.OData.Formatter
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
         {
             Contract.Requires(edmTypeReference != null);
+            Contract.Requires(edmModel != null);
+            Contract.Requires(assembliesResolver != null);
 
             var primitiveClrType = BuiltInTypesMapping.Where(kvp => edmTypeReference.GetDefinition().IsEquivalentTo(kvp.Value) && (!edmTypeReference.IsNullable || IsNullable(kvp.Key))).Select(kvp => kvp.Key).FirstOrDefault();
 
@@ -227,7 +231,9 @@ namespace System.Web.OData.Formatter
             {
                 return primitiveClrType;
             }
-            var clrType = GetClrType(edmTypeReference.GetDefinition(), edmModel, assembliesResolver);
+            var edmType = edmTypeReference.GetDefinition();
+            Contract.Assume(edmType is IEdmSchemaType);
+            var clrType = GetClrType(edmType, edmModel, assembliesResolver);
             if (clrType != null && clrType.IsEnum && edmTypeReference.IsNullable)
             {
                 return clrType.ToNullable();
@@ -239,6 +245,7 @@ namespace System.Web.OData.Formatter
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
         {
             Contract.Requires(edmType is IEdmSchemaType);
+            Contract.Requires(edmModel != null);
             Contract.Requires(assembliesResolver != null);
 
             var edmSchemaType = (IEdmSchemaType) edmType;
@@ -310,6 +317,8 @@ namespace System.Web.OData.Formatter
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)
         {
+            Contract.Requires(queryType != null);
+
             Func<Type, bool> matchesInterface = t => t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType;
             return matchesInterface(queryType) ? queryType : queryType.GetInterfaces().FirstOrDefault(matchesInterface);
         }

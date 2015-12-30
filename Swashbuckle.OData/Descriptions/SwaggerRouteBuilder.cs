@@ -9,7 +9,7 @@ namespace Swashbuckle.OData.Descriptions
     {
         private readonly SwaggerRoute _swaggerRoute;
 
-        public SwaggerRouteBuilder(SwaggerRoute swaggerRoute)
+        internal SwaggerRouteBuilder(SwaggerRoute swaggerRoute)
         {
             Contract.Requires(swaggerRoute != null);
 
@@ -18,7 +18,11 @@ namespace Swashbuckle.OData.Descriptions
 
         public SwaggerRoute SwaggerRoute
         {
-            get { return _swaggerRoute; }
+            get
+            {
+                Contract.Ensures(Contract.Result<SwaggerRoute>() != null);
+                return _swaggerRoute;
+            }
         }
 
         public OperationBuilder Operation(HttpMethod httpMethod)
@@ -43,6 +47,7 @@ namespace Swashbuckle.OData.Descriptions
                     SwaggerRoute.PathItem.delete = operation;
                     break;
                 case "PATCH":
+                case "MERGE":
                     SwaggerRoute.PathItem.patch = operation;
                     break;
                 default:

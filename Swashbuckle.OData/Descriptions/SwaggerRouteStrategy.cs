@@ -41,6 +41,7 @@ namespace Swashbuckle.OData.Descriptions
         private static IEnumerable<ODataActionDescriptor> GetActionDescriptors(SwaggerRoute potentialSwaggerRoute, HttpConfiguration httpConfig)
         {
             Contract.Requires(potentialSwaggerRoute != null);
+            Contract.Requires(httpConfig != null);
 
             var oDataActionDescriptors = new List<ODataActionDescriptor>();
 
@@ -79,9 +80,9 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(httpConfig != null);
             Contract.Requires(oDataRoute != null);
-            Contract.Requires(oDataRoute.Constraints != null);
             Contract.Ensures(Contract.Result<HttpRequestMessage>() != null);
-            Contract.Ensures(Contract.Result<HttpRequestMessage>().GetRequestContext() != null);
+
+            Contract.Assume(oDataRoute.Constraints != null);
 
             var oDataAbsoluteUri = potentialOperation.GenerateSampleODataAbsoluteUri(ServiceRoot, potentialPathTemplate);
 
@@ -114,17 +115,21 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(operation != null);
-            Contract.Requires(operation.tags != null);
             Contract.Requires(actionDescriptor.ControllerDescriptor != null);
-            Contract.Requires(actionDescriptor.ControllerDescriptor.ControllerName != @"Restier" || operation.responses != null);
+
+            Contract.Assume(actionDescriptor.ControllerDescriptor.ControllerName != @"Restier" || operation.responses != null);
 
             if (actionDescriptor.ControllerDescriptor.ControllerName == "Restier")
             {
+                Contract.Assume(operation.tags != null);
+                Contract.Assume(operation.tags.Any());
+                var entitySetName = operation.tags.First();
+                Contract.Assume(!string.IsNullOrWhiteSpace(entitySetName));
                 Response response;
                 operation.responses.TryGetValue("200", out response);
                 if (!string.IsNullOrWhiteSpace(response?.schema?.@ref))
                 {
-                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntityType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
+                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntityType(), actionDescriptor.SupportedHttpMethods, entitySetName)
                     {
                         Configuration = actionDescriptor.Configuration,
                         ControllerDescriptor = actionDescriptor.ControllerDescriptor
@@ -134,13 +139,13 @@ namespace Swashbuckle.OData.Descriptions
                 {
                     Contract.Assume(response.schema.items != null);
                     Contract.Assume(response.schema.items.@ref != null);
-                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods, operation.tags.First())
+                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods, entitySetName)
                     {
                         Configuration = actionDescriptor.Configuration,
                         ControllerDescriptor = actionDescriptor.ControllerDescriptor
                     };
                 }
-                return new RestierHttpActionDescriptor(actionDescriptor.ActionName, null, actionDescriptor.SupportedHttpMethods, operation.tags.First())
+                return new RestierHttpActionDescriptor(actionDescriptor.ActionName, null, actionDescriptor.SupportedHttpMethods, entitySetName)
                 {
                     Configuration = actionDescriptor.Configuration,
                     ControllerDescriptor = actionDescriptor.ControllerDescriptor
@@ -153,12 +158,17 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(oDataRoute != null);
             Contract.Requires(oDataRoute.Constraints != null);
+            Contract.Ensures(Contract.Result<ODataPath>() != null);
 
             var oDataPathRouteConstraint = oDataRoute.GetODataPathRouteConstraint();
 
             var model = oDataRoute.GetEdmModel();
 
-            return oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot.AppendPathSegment(oDataRoute.RoutePrefix), sampleODataAbsoluteUri);
+            Contract.Assume(oDataPathRouteConstraint.PathHandler != null);
+
+            var result = oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot.AppendPathSegment(oDataRoute.RoutePrefix), sampleODataAbsoluteUri);
+            Contract.Assume(result != null);
+            return result;
         }
 
         [ContractInvariantMethod]

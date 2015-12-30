@@ -66,6 +66,8 @@ namespace System.Web.OData
             if (collectionInterface != null)
             {
                 elementType = collectionInterface.GetGenericArguments().Single();
+
+                Contract.Assume(elementType != null);
                 return true;
             }
 

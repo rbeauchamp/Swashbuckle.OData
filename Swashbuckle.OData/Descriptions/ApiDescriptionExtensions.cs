@@ -35,7 +35,12 @@ namespace Swashbuckle.OData.Descriptions
 
             foreach (var parameter in parameters)
             {
-                if (newRelativePathSansQueryString.Contains("{" + parameter.Name + "}") && parameter.ParameterDescriptor.ParameterType == typeof (string))
+                Contract.Assume(parameter != null);
+
+                var parameterType = parameter.ParameterDescriptor?.ParameterType;
+                Contract.Assume(parameterType != null);
+
+                if (newRelativePathSansQueryString.Contains("{" + parameter.Name + "}") && parameterType == typeof (string))
                 {
                     newRelativePathSansQueryString = newRelativePathSansQueryString.Replace("{" + parameter.Name + "}", "\'{" + parameter.Name + "}\'");
                 }
@@ -50,9 +55,14 @@ namespace Swashbuckle.OData.Descriptions
 
             foreach (var parameter in parameters)
             {
+                Contract.Assume(parameter != null);
+
+                var parameterType = parameter.ParameterDescriptor?.ParameterType;
+                Contract.Assume(parameterType != null);
+
                 if (newRelativePathSansQueryString.Contains("{" + parameter.Name + "}")
-                    && typeof(IEnumerable).IsAssignableFrom(parameter.ParameterDescriptor.ParameterType)
-                    && parameter.ParameterDescriptor.ParameterType != typeof(string))
+                    && typeof(IEnumerable).IsAssignableFrom(parameterType)
+                    && parameterType != typeof(string))
                 {
                     newRelativePathSansQueryString = newRelativePathSansQueryString.Replace("{" + parameter.Name + "}", "[{" + parameter.Name + "}]");
                 }

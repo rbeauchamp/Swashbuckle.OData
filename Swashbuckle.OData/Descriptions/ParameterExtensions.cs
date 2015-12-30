@@ -31,7 +31,6 @@ namespace Swashbuckle.OData.Descriptions
         public static Type GetClrType(this Parameter parameter)
         {
             Contract.Requires(parameter != null);
-            Contract.Requires(parameter.@in.Equals(@"body"));
 
             var type = parameter.type;
             var format = parameter.format;
@@ -42,6 +41,8 @@ namespace Swashbuckle.OData.Descriptions
                     switch (type)
                     {
                         case null:
+                            Contract.Assume(parameter.@in.Equals(@"body"));
+                            Contract.Assume(!string.IsNullOrWhiteSpace(parameter.schema?.@ref));
                             return GetEntityTypeForBodyParameter(parameter);
                         case "string":
                             return typeof(string);
