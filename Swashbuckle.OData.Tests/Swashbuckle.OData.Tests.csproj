@@ -168,6 +168,7 @@
     <Compile Include="NorthwindAPI\Shipper.cs" />
     <Compile Include="NorthwindAPI\Supplier.cs" />
     <Compile Include="NorthwindAPI\Territory.cs" />
+    <Compile Include="ODataQueryOptions\ODataQueryOptionsTests.cs" />
     <Compile Include="ODataResponse.cs" />
     <Compile Include="ODataVersionControllerSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
