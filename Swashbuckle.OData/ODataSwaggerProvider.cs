@@ -107,6 +107,8 @@ namespace Swashbuckle.OData
 
             foreach(var filter in _options.DocumentFilters)
             {
+                Contract.Assume(filter != null);
+
                 filter.Apply(odataSwaggerDoc, schemaRegistry, _odataApiExplorer);
             }
 
@@ -118,6 +120,8 @@ namespace Swashbuckle.OData
             Contract.Requires(odataSwaggerDoc != null);
 
             var webApiSwaggerDoc = _defaultProvider.GetSwagger(rootUrl, apiVersion);
+
+            Contract.Assume(webApiSwaggerDoc != null);
 
             webApiSwaggerDoc.paths = webApiSwaggerDoc.paths.UnionEvenIfNull(odataSwaggerDoc.paths).ToLookup(pair => pair.Key, pair => pair.Value)
                          .ToDictionary(group => group.Key, group => group.First());
@@ -143,6 +147,7 @@ namespace Swashbuckle.OData
         private PathItem CreatePathItem(IEnumerable<ApiDescription> apiDescriptions, SchemaRegistry schemaRegistry)
         {
             Contract.Requires(apiDescriptions != null);
+            Contract.Requires(schemaRegistry != null);
 
             var pathItem = new PathItem();
 
@@ -152,12 +157,16 @@ namespace Swashbuckle.OData
 
             foreach (var group in perMethodGrouping)
             {
+                Contract.Assume(group != null);
+
                 var httpMethod = group.Key;
 
                 var apiDescription = group.Count() == 1
                     ? group.First()
                     : _options.ConflictingActionsResolver(group);
 
+                Contract.Assume(apiDescription != null);
+                Contract.Assume(apiDescription.ParameterDescriptions != null);
                 switch (httpMethod)
                 {
                     case "get":
@@ -179,8 +188,11 @@ namespace Swashbuckle.OData
                         pathItem.head = CreateOperation(apiDescription, schemaRegistry);
                         break;
                     case "patch":
+                    case "merge":
                         pathItem.patch = CreateOperation(apiDescription, schemaRegistry);
                         break;
+                    default:
+                        throw new InvalidOperationException($"HttpMethod {httpMethod} is not supported.");
                 }
             }
 
@@ -191,6 +203,7 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(apiDescription != null);
             Contract.Requires(schemaRegistry != null);
+            Contract.Requires(apiDescription.ParameterDescriptions != null);
 
             var parameters = apiDescription.ParameterDescriptions
                 .Select(paramDesc =>
@@ -215,8 +228,8 @@ namespace Swashbuckle.OData
                 summary = apiDescription.Documentation,
                 tags = new[] { _options.GroupingKeySelector(apiDescription) },
                 operationId = apiDescription.FriendlyId(),
-                produces = apiDescription.Produces().ToList(),
-                consumes = apiDescription.Consumes().ToList(),
+                produces = apiDescription.Produces()?.ToList(),
+                consumes = apiDescription.Consumes()?.ToList(),
                 parameters = parameters.Any() ? parameters : null, // parameters can be null but not empty
                 responses = responses,
                 deprecated = apiDescription.IsObsolete()
@@ -224,6 +237,7 @@ namespace Swashbuckle.OData
 
             foreach (var filter in _options.OperationFilters)
             {
+                Contract.Assume(filter != null);
                 filter.Apply(operation, schemaRegistry, apiDescription);
             }
 
@@ -233,6 +247,7 @@ namespace Swashbuckle.OData
         private static Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
         {
             Contract.Requires(paramDesc != null);
+            Contract.Requires(schemaRegistry != null);
 
             var @in = inPath
                 ? "path"
@@ -266,6 +281,7 @@ namespace Swashbuckle.OData
         private static Parameter CreateParameter(SwaggerApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
         {
             Contract.Requires(paramDesc != null);
+            Contract.Requires(schemaRegistry != null);
 
             var @in = inPath
                 ? "path"
@@ -288,7 +304,9 @@ namespace Swashbuckle.OData
             parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
             parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
 
-            var schema = schemaRegistry.GetOrRegisterODataType(paramDesc.ParameterDescriptor.ParameterType);
+            var parameterType = paramDesc.ParameterDescriptor.ParameterType;
+            Contract.Assume(parameterType != null);
+            var schema = schemaRegistry.GetOrRegisterODataType(parameterType);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else
@@ -318,9 +336,16 @@ namespace Swashbuckle.OData
 
         private IEnumerable<ApiDescription> GetApiDescriptionsFor(string apiVersion)
         {
-            return _options.VersionSupportResolver == null 
+            Contract.Ensures(Contract.Result<IEnumerable<ApiDescription>>() != null);
+
+            Contract.Assume(_options.VersionSupportResolver == null || _odataApiExplorer.ApiDescriptions != null);
+
+            var result = _options.VersionSupportResolver == null 
                 ? _odataApiExplorer.ApiDescriptions 
                 : _odataApiExplorer.ApiDescriptions.Where(apiDesc => _options.VersionSupportResolver(apiDesc, apiVersion));
+
+            Contract.Assume(result != null);
+            return result;
         }
 
         [ContractInvariantMethod]

@@ -43,7 +43,10 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(httpConfig != null);
 
-            var formatter = httpConfig.Formatters.JsonFormatter;
+            var mediaTypeFormatterCollection = httpConfig.Formatters;
+            Contract.Assume(mediaTypeFormatterCollection != null);
+
+            var formatter = mediaTypeFormatterCollection.JsonFormatter;
             return formatter != null 
                 ? formatter.SerializerSettings 
                 : new JsonSerializerSettings();
@@ -53,9 +56,11 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(httpConfig != null);
             Contract.Requires(oDataRoute != null);
+            Contract.Requires(httpConfig.Properties != null);
             Contract.Ensures(Contract.Result<SwaggerRouteBuilder>() != null);
 
             var fullRouteTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(routeTemplate));
+            Contract.Assume(!string.IsNullOrWhiteSpace(fullRouteTemplate));
 
             var swaggerRoute = new SwaggerRoute(fullRouteTemplate, oDataRoute);
 

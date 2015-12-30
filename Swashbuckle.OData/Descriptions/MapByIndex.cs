@@ -1,3 +1,4 @@
+using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
 
@@ -12,10 +13,11 @@ namespace Swashbuckle.OData.Descriptions
                 var parameterDescriptor = actionDescriptor.GetParameters()[parameterIndex];
                 if (parameterDescriptor != null)
                 {
-                    // Need to assign the correct name expected by OData
+                    var httpControllerDescriptor = actionDescriptor.ControllerDescriptor;
+                    Contract.Assume(httpControllerDescriptor != null);
                     return new ODataParameterDescriptor(swaggerParameter.name, parameterDescriptor.ParameterType, parameterDescriptor.IsOptional)
                     {
-                        Configuration = actionDescriptor.ControllerDescriptor.Configuration,
+                        Configuration = httpControllerDescriptor.Configuration,
                         ActionDescriptor = actionDescriptor,
                         ParameterBinderAttribute = parameterDescriptor.ParameterBinderAttribute
                     };

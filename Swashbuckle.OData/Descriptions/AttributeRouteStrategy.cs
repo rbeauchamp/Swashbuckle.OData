@@ -22,15 +22,18 @@ namespace Swashbuckle.OData.Descriptions
 
         private static IEnumerable<ODataActionDescriptor> GetODataActionDescriptorsFromAttributeRoutes(ODataRoute oDataRoute)
         {
+            Contract.Requires(oDataRoute != null);
+            Contract.Requires(oDataRoute.Constraints != null);
+
             var attributeRoutingConvention = (AttributeRoutingConvention)oDataRoute
                 .GetODataPathRouteConstraint()
-                .RoutingConventions
+                .RoutingConventions?
                 .SingleOrDefault(convention => convention is AttributeRoutingConvention);
 
             if (attributeRoutingConvention != null)
             {
                 return attributeRoutingConvention
-                    .GetInstanceField<IDictionary<ODataPathTemplate, HttpActionDescriptor>>("_attributeMappings")
+                    .GetInstanceField<IDictionary<ODataPathTemplate, HttpActionDescriptor>>("_attributeMappings", true)
                     .Select(pair => GetODataActionDescriptorFromAttributeRoute(pair.Value, oDataRoute))
                     .Where(descriptor => descriptor != null);
             }
@@ -41,12 +44,13 @@ namespace Swashbuckle.OData.Descriptions
         private static ODataActionDescriptor GetODataActionDescriptorFromAttributeRoute(HttpActionDescriptor actionDescriptor, ODataRoute oDataRoute)
         {
             Contract.Requires(actionDescriptor != null);
+            Contract.Requires(oDataRoute != null);
 
-            var odataRouteAttribute = actionDescriptor.GetCustomAttributes<ODataRouteAttribute>().FirstOrDefault();
+            var odataRouteAttribute = actionDescriptor.GetCustomAttributes<ODataRouteAttribute>()?.FirstOrDefault();
             if (odataRouteAttribute != null)
             {
                 var pathTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(odataRouteAttribute.PathTemplate));
-
+                Contract.Assume(pathTemplate != null);
                 return new ODataActionDescriptor(actionDescriptor, oDataRoute, pathTemplate);
             }
             return null;

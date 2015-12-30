@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
@@ -25,8 +26,10 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(swaggerParameter != null);
             Contract.Requires(parameterIndex >= 0);
             Contract.Requires(actionDescriptor != null);
+            Contract.Requires(actionDescriptor.GetParameters() != null);
+            //Contract.Ensures(Contract.Result<HttpParameterDescriptor>() == null || Contract.Result<HttpParameterDescriptor>().Configuration != null);
 
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

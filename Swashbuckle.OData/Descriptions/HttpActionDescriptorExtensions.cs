@@ -13,7 +13,7 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(actionDescriptor != null);
 
             var responseTypeAttribute = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>();
-            var responseType = responseTypeAttribute.Select(attribute => attribute.ResponseType).FirstOrDefault();
+            var responseType = responseTypeAttribute?.Select(attribute => attribute.ResponseType).FirstOrDefault();
 
             return new ResponseDescription
             {
@@ -26,6 +26,8 @@ namespace Swashbuckle.OData.Descriptions
         private static string GetApiResponseDocumentation(this HttpActionDescriptor actionDescriptor)
         {
             Contract.Requires(actionDescriptor != null);
+
+            Contract.Assume(actionDescriptor.Configuration != null);
 
             var documentationProvider = actionDescriptor.Configuration.Services.GetDocumentationProvider();
             return documentationProvider?.GetResponseDocumentation(actionDescriptor);

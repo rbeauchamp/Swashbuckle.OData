@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Web.Http;
@@ -22,7 +23,7 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(httpConfig != null);
             Contract.Ensures(Contract.Result<IEnumerable<ODataActionDescriptor>>() != null);
 
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

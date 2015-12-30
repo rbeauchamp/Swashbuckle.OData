@@ -56,9 +56,7 @@ namespace SwashbuckleODataSample.Versioning
             constraints.Add(ODataRouteConstants.ConstraintName, routeConstraint);
             routes.MapHttpRoute(
                 routeName,
-                routeTemplate,
-                defaults: null,
-                constraints: constraints);
+                routeTemplate, null, constraints);
         }
     }
 }

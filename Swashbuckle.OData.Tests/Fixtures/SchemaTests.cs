@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using FluentAssertions;
-using FluentAssertions.Common;
 using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
