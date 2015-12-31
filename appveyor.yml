@@ -4,8 +4,9 @@ before_build:
 - cmd: nuget restore
 
 build:
+  project: Swashbuckle.OData.sln
   publish_wap: true
-  verbosity: minimal
+  verbosity: detailed
 
 environment:
     COVERALLS_REPO_TOKEN:  
