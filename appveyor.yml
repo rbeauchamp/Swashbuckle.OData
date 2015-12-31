@@ -6,7 +6,7 @@ before_build:
 build:
   project: Swashbuckle.OData.sln
   publish_wap: true
-  verbosity: detailed
+  verbosity: minimal
 
 environment:
     COVERALLS_REPO_TOKEN:  

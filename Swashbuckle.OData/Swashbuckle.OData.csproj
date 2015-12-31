@@ -204,7 +204,6 @@
     <Compile Include="Descriptions\SwaggerRoute.cs" />
     <Compile Include="Descriptions\SwaggerRouteBuilder.cs" />
     <Compile Include="Descriptions\SwaggerRouteStrategy.cs" />
-    <Compile Include="Descriptions\SwaggerTypeAndFormat.cs" />
     <Compile Include="Descriptions\TypeExtensions.cs" />
     <Compile Include="Descriptions\TypeHelper.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
