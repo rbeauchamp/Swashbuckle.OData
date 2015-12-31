@@ -2,7 +2,7 @@ Swashbuckle.OData
 =========
 
 [![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata/)
-[![Coverage Status](https://coveralls.io/repos/rbeauchamp/Swashbuckle.OData/badge.svg?branch=feature%2Finstall_code_coverage&service=github)](https://coveralls.io/github/rbeauchamp/Swashbuckle.OData?branch=feature%2Finstall_code_coverage)
+[![Coverage Status](https://coveralls.io/repos/rbeauchamp/Swashbuckle.OData/badge.svg?branch=master&service=github)](https://coveralls.io/github/rbeauchamp/Swashbuckle.OData?branch=master)
 [![Issue Stats](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData/badge/pr)](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData)
 [![Issue Stats](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData/badge/issue)](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData)
 
