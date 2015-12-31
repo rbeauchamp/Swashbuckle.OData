@@ -1,0 +1,1052 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" TreatAsLocalProperty="OutDir;IntermediateOutputPath" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(CustomBeforeNuProjTargets)" Condition="'$(CustomBeforeNuProjTargets)' != '' and Exists('$(CustomBeforeNuProjTargets)')"/>
+
+  <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')"/>
+
+  <PropertyGroup>
+    <NuProjRulesDir>$(MSBuildThisFileDirectory)Rules\</NuProjRulesDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PropertyPageSchema Include="$(NuProjRulesDir)\ProjectItemsSchema.xaml">
+      <Context>Project</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(NuProjRulesDir)\scc.xaml;">
+      <Context>Invisible</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(NuProjRulesDir)\general.xaml">
+      <Context>Project;File</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(NuProjRulesDir)\general.browseobject.xaml">
+      <Context>BrowseObject</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(NuProjRulesDir)\folder.xaml;
+                                 $(NuProjRulesDir)\none.xaml;
+                                 $(NuProjRulesDir)\content.xaml">
+      <Context>File;BrowseObject</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(NuProjRulesDir)\ResolvedProjectReference.xaml">
+      <Context>ProjectSubscriptionService;BrowseObject</Context>
+    </PropertyPageSchema>
+    <PropertyPageSchema Include="$(NuProjRulesDir)\ProjectReference.xaml">
+      <Context>;BrowseObject</Context>
+    </PropertyPageSchema>
+
+    <ProjectCapability Include="ProjectReferences;ReferencesFolder" />
+    <ProjectCapability Include="ProjectConfigurationsDeclaredAsItems" />
+    <ProjectCapability Include="NuProj" />
+  </ItemGroup>
+
+  <PropertyGroup> 
+    <AvailablePlatforms>Any CPU,x86,x64,ARM</AvailablePlatforms>
+    <DefaultContentType>Content</DefaultContentType>
+  </PropertyGroup>
+
+  <!-- Set output and intermmediate output properties. -->
+  <PropertyGroup>
+    <OutputPath Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)'==''">bin\$(Configuration)\</OutputPath>
+
+    <OutDirWasSpecified Condition=" '$(OutDir)'!='' and '$(OutDirWasSpecified)'=='' ">true</OutDirWasSpecified>
+    <OutDir Condition="'$(OutDir)' == ''">$(OutputPath)</OutDir>
+    <OutDir Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')">$(OutDir)\</OutDir>
+
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">obj\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
+
+    <IntermediateOutputPathWasSpecified Condition=" '$(IntermediateOutputPath)'!='' and '$(IntermediateOutputPathWasSpecified)'=='' ">true</IntermediateOutputPathWasSpecified>
+    <IntermediateOutputPath Condition="$(IntermediateOutputPath) == ''">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <!-- For projects that want a per-project output directory, update OutDir and IntermediateOutputPath to include the project name. -->
+  <PropertyGroup>
+    <ProjectName Condition=" '$(ProjectName)' == '' ">$(MSBuildProjectName)</ProjectName>
+    <OutDir Condition="'$(OutDir)' != '' and '$(OutDirWasSpecified)' == 'true' and '$(GenerateProjectSpecificOutputFolder)' == 'true'">$(OutDir)$(ProjectName)\</OutDir>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' != '' and '$(IntermediateOutputPathWasSpecified)' == 'true' and '$(GenerateProjectSpecificOutputFolder)' == 'true'">$(IntermediateOutputPath)$(ProjectName)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetDir Condition="'$(OutDir)' != ''">$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
+  </PropertyGroup>
+
+  <!--
+      NUSPEC PATH
+  -->
+
+  <PropertyGroup>
+    <NuSpecPath>$(IntermediateOutputPath)$(Id).nuspec</NuSpecPath>
+  </PropertyGroup>
+
+  <!--
+      OUTPUT PATHS
+
+      These properties aren't passed to NuGet.exe - they're implicit. However, we need to know the output paths
+      at several occasions (e.g. incremental build or clean up) so we want a central spot to capture those.
+
+      We set these properties in a Target so that other targets that determine what $(Version)
+      should be can run first.
+  -->
+
+  <Target Name="EstablishNuGetPaths" DependsOnTargets="$(VersionDependsOn)">
+  <PropertyGroup>
+    <NuGetOutputPath>$(TargetDir)$(Id).$(Version).nupkg</NuGetOutputPath>
+    <NuGetSymbolsOutputPath>$(TargetDir)$(Id).$(Version).symbols.nupkg</NuGetSymbolsOutputPath>
+  </PropertyGroup>
+  </Target>
+
+  <!--
+      Properties relevant to Visual Studio:
+
+      $(BuildingInsideVisualStudio)       This will indicate whether this project is building inside the IDE. When
+                                          building via MSBuild, this property will not be set.
+
+      $(DesignTimeBuild)                  Visual Studio uses this property to indicate whether it's performing a
+                                          design time build or a full build. A design time build is designed to do
+                                          minimal amount of work; the intent of those builds is to expose information
+                                          around resolved dependencies and properties back to Visual Studio without
+                                          actually producing assets on disk.
+  -->
+
+  <PropertyGroup>
+    <!-- We don't want to build in case we're performing a design time build as we are expected to not
+         produce any assets.
+
+         We also don't want to build the references in cases where we build inside the IDE. The reason
+         is that Visual Studio already built our dependencies. Doing it again can regress performance.
+         However, the real issue is that it impacts correctness as this can result in building the same
+         project simultaneously from different projects.
+
+         Most particularly on the correctness side, this shows up when VS is doing a "rebuild". NuProj
+         will end up causing multiple build breaks being reported because it will re-delete outputs that
+         VS just produced and that other project references that are building in parallel now expect to
+         be there. -->
+    <BuildProjectReferences Condition="'$(BuildProjectReferences)' == '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(DesignTimeBuild)' == 'true')">false</BuildProjectReferences>
+    <!-- By default we will build (and if applicable, clean) all project references. But this can be used
+         to disable that. -->
+    <BuildProjectReferences Condition="'$(BuildProjectReferences)' == ''">true</BuildProjectReferences>
+  </PropertyGroup>
+
+  <!--
+      MSBuildAllProjects is used to keep track of all projects the build depends on.
+      We make all targets depending on it to make sure everything rebuilds.
+  -->
+
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="Exists('$(MSBuildProjectFullPath)')">$(MSBuildAllProjects);$(MSBuildProjectFullPath)</MSBuildAllProjects>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <!--
+      OUTPUT GROUPS
+
+      These are the groups we are using to discover outputs from our project references.
+  -->
+
+  <PropertyGroup>
+    <ProjectOutputGroups>
+      BuiltProjectOutputGroup;
+      BuiltProjectOutputGroupDependencies;
+      DebugSymbolsProjectOutputGroup;
+      DebugSymbolsProjectOutputGroupDependencies;
+      DocumentationProjectOutputGroup;
+      DocumentationProjectOutputGroupDependencies;
+      SatelliteDllsProjectOutputGroup;
+      SatelliteDllsProjectOutputGroupDependencies;
+      SGenFilesOutputGroup;
+      SGenFilesOutputGroupDependencies;
+    </ProjectOutputGroups>
+  </PropertyGroup>
+
+  <!--
+      ITEM DEFINITIONS
+      
+      Defines default metadata for our items.
+  -->
+  
+  <ItemDefinitionGroup>
+    <ProjectReference>
+      <PackageDirectory>Lib</PackageDirectory>
+      <TargetFramework></TargetFramework>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+
+  
+  <!--
+      COMMON TASKS
+  -->
+  
+  <UsingTask TaskName="Microsoft.Build.Tasks.AssignProjectConfiguration"            AssemblyName="Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' == ''" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.AssignProjectConfiguration"            AssemblyName="Microsoft.Build.Tasks.v12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+
+  <!--
+      CUSTOM TASKS
+  -->
+
+  <UsingTask AssemblyFile="$(NuProjTasksPath)" TaskName="GenerateNuSpec" />
+  <UsingTask AssemblyFile="$(NuProjTasksPath)" TaskName="NuGetPack" />
+  <UsingTask AssemblyFile="$(NuProjTasksPath)" TaskName="AssignTargetFramework" />
+  <UsingTask AssemblyFile="$(NuProjTasksPath)" TaskName="ReadPackagesConfig" />
+  <UsingTask AssemblyFile="$(NuProjTasksPath)" TaskName="ReadPdbSourceFiles" />
+  <UsingTask AssemblyFile="$(NuProjTasksPath)" TaskName="AssignSourceTargetPaths" />
+
+  <!--
+    ============================================================
+                                        PrepareForBuild
+
+    Prepare the prerequisites for building.
+    ============================================================
+    -->
+    <PropertyGroup>
+      <PrepareForBuildDependsOn>EstablishNuGetPaths</PrepareForBuildDependsOn>
+    </PropertyGroup>
+    <Target Name="PrepareForBuild"
+            DependsOnTargets="$(PrepareForBuildDependsOn)">
+    </Target>
+
+  <!--
+    ============================================================
+                                        AssignProjectConfiguration
+
+    Assigns the appropriate configuration to each project in the list of project references passed in.
+    Adds to the project references passed in any project references implied by dependencies expressed in the solution file, if any.
+
+        [IN]
+        @(ProjectReference) - the list of all project references
+
+        [OUT]
+        @(ProjectReferenceWithConfiguration) - the list of project references (MSBuild and potentially VSIP projects)
+                                               with metadata values FullConfiguration, Configuration, Platform,
+                                               SetConfiguration, and SetPlatform
+    ============================================================
+    -->
+  <Target
+      Name="AssignProjectConfiguration"
+      Condition="'$(CurrentSolutionConfigurationContents)' != '' or '@(ProjectReference)' != ''">
+
+    <PropertyGroup>
+      <OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration Condition="'$(OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)' == ''">true</OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration>
+      <ShouldUnsetParentConfigurationAndPlatform Condition="'$(ShouldUnsetParentConfigurationAndPlatform)' == '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildingSolutionFile)' == 'true')">true</ShouldUnsetParentConfigurationAndPlatform>
+      <ShouldUnsetParentConfigurationAndPlatform Condition="'$(ShouldUnsetParentConfigurationAndPlatform)' == ''">false</ShouldUnsetParentConfigurationAndPlatform>
+
+      <!-- Web Application projects can "secretly" reference Silverlight projects, which can take project dependencies on that same Web Application.  If the project 
+           dependencies are promoted to project references, this ends up creating a situation where we have a circular reference between the two projects.  We don't 
+           want this to happen, so just turn off synthetic project reference generation for Silverlight projects. -->
+      <AddSyntheticProjectReferencesForSolutionDependencies Condition="'$(AddSyntheticProjectReferencesForSolutionDependencies)' == '' and '$(TargetFrameworkIdentifier)' == 'Silverlight'">false</AddSyntheticProjectReferencesForSolutionDependencies>
+
+      <!-- Inside VS, we do not need to add synthetic references, as VS already organizes the build per any solution-level dependencies; we only do this on the command line-->
+      <AddSyntheticProjectReferencesForSolutionDependencies Condition="'$(AddSyntheticProjectReferencesForSolutionDependencies)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">true</AddSyntheticProjectReferencesForSolutionDependencies>
+    </PropertyGroup>
+
+    <!-- Assign a project configuration to each project reference if we're building a solution file. -->
+    <AssignProjectConfiguration
+        ProjectReferences="@(ProjectReference)"
+        CurrentProject="$(MSBuildProjectFullPath)"
+        CurrentProjectConfiguration="$(Configuration)"
+        CurrentProjectPlatform="$(Platform)"
+        DefaultToVcxPlatformMapping="$(DefaultToVcxPlatformMapping)"
+        VcxToDefaultPlatformMapping="$(VcxToDefaultPlatformMapping)"
+        OutputType="$(OutputType)"
+        ResolveConfigurationPlatformUsingMappings="false"
+        SolutionConfigurationContents="$(CurrentSolutionConfigurationContents)"
+        AddSyntheticProjectReferencesForSolutionDependencies="$(AddSyntheticProjectReferencesForSolutionDependencies)"
+        OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration = "$(OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)"
+        ShouldUnsetParentConfigurationAndPlatform = "$(ShouldUnsetParentConfigurationAndPlatform)" >
+
+      <Output TaskParameter="AssignedProjects" ItemName="ProjectReferenceWithConfiguration"/>
+      <Output TaskParameter="UnassignedProjects" ItemName="ProjectReferenceWithConfiguration"/>
+    </AssignProjectConfiguration>
+
+    <ItemGroup>
+      <ProjectReferenceWithConfiguration>
+        <BuildReference Condition="'%(ProjectReferenceWithConfiguration.BuildReference)' == ''">true</BuildReference>
+        <ReferenceOutputAssembly Condition="'%(ProjectReferenceWithConfiguration.ReferenceOutputAssembly)' == ''">true</ReferenceOutputAssembly>
+      </ProjectReferenceWithConfiguration>
+    </ItemGroup>
+  </Target>
+
+
+  <!--
+    ===================================================================================================================
+    _NuProjGetProjectClosure
+    ===================================================================================================================
+
+    This target returns the closure of all project references.
+
+    INPUTS:
+        @(ProjectReferenceWithConfiguration)  The project references that actually exist.
+
+    OUTPUTS:
+        @(_ProjectReferenceClosure)           The closure of all references. Doesn't include duplicates.
+
+    =================================================================================================================== -->
+
+  <Target Name="_NuProjGetProjectClosure"
+          DependsOnTargets="AssignProjectConfiguration"
+          Inputs="%(ProjectReferenceWithConfiguration.Identity)"
+          Outputs="fake"
+          Returns="@(_ProjectReferenceClosure)">
+    <!-- First let's make sure that the project references have been fully built,
+             unless building project references is disabled. -->
+
+    <MSBuild Targets="Build"
+             Condition="'$(BuildProjectReferences)' == 'true'"
+             Projects="@(ProjectReferenceWithConfiguration)"
+             Properties="%(ProjectReferenceWithConfiguration.SetConfiguration); %(ProjectReferenceWithConfiguration.SetPlatform)"
+             ContinueOnError="WarnAndContinue"/>
+
+    <!-- Get closure of indirect references -->
+    <MSBuild Projects="@(ProjectReferenceWithConfiguration)"
+             Targets="_NuProjGetProjectClosure"
+             Properties="%(ProjectReferenceWithConfiguration.SetConfiguration); %(ProjectReferenceWithConfiguration.SetPlatform)"
+             ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="TargetOutputs"
+              ItemName="_ProjectReferenceClosureWithDuplicates" />
+    </MSBuild>
+
+    <!-- Remove duplicates from closure -->
+    <RemoveDuplicates Inputs="@(_ProjectReferenceClosureWithDuplicates)">
+      <Output TaskParameter="Filtered"
+              ItemName="_ProjectReferenceClosureWithoutMetadata"/>
+    </RemoveDuplicates>
+
+    <ItemGroup>
+      <!-- Remove references that are also direct references -->
+      <_ProjectReferenceClosureWithoutMetadata Remove="%(ProjectReferenceWithConfiguration.FullPath)" />
+      <!-- We can now mark all the closure references as indirect -->
+      <_ProjectReferenceClosure Include="@(_ProjectReferenceClosureWithoutMetadata)">
+        <DependencyKind>Indirect</DependencyKind>
+        <PackageDirectory>%(ProjectReferenceWithConfiguration.PackageDirectory)</PackageDirectory>
+      </_ProjectReferenceClosure>
+      <!-- Now add the direct references, preserving metadata -->
+      <_ProjectReferenceClosure Include="@(ProjectReferenceWithConfiguration->'%(FullPath)')">
+        <DependencyKind>Direct</DependencyKind>
+      </_ProjectReferenceClosure>
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    SplitProjectReferences
+    ===================================================================================================================
+
+    This target will split the project references into NuProj project references and non-NuProj references.
+
+    INPUTS:
+        @(_ProjectReferenceClosure)           The direct and indirect project references
+
+    OUTPUTS:
+        @(_NuProjProjectReference)            Direct references to NuProj projects.
+        @(_NonNuProjProjectReference)         Direct references to regular, i.e. non-NuProj projects.
+        @(_NuProjProjectReferenceClosure)     Direct and indirect references to NuProj projects.
+        @(_NonNuProjProjectReferenceClosure)  Direct and indirect references to regular, i.e. non-NuProj projects.
+
+    =================================================================================================================== -->
+
+    <Target Name="SplitProjectReferences"
+            DependsOnTargets="_NuProjGetProjectClosure">
+        <ItemGroup>
+            <!-- Split direct and indirect project dependencies -->
+            <_NuProjProjectReferenceClosure Include="@(_ProjectReferenceClosure)"
+                                            Condition="'%(_ProjectReferenceClosure.Extension)' == '.nuproj'" />
+            <_NonNuProjProjectReferenceClosure Include="@(_ProjectReferenceClosure)"
+                                               Condition="'%(_ProjectReferenceClosure.Extension)' != '.nuproj'" />
+
+            <!-- Split direct project dependencies -->
+            <_NuProjProjectReference Include="@(_NuProjProjectReferenceClosure)"
+                                     Condition="'%(DependencyKind)' == 'Direct'" />
+            <_NonNuProjProjectReference Include="@(_NonNuProjProjectReferenceClosure)"
+                                        Condition="'%(DependencyKind)' == 'Direct'" />
+
+        </ItemGroup>
+    </Target>
+
+  <!--
+    ===================================================================================================================
+    ResolveProjectReferencesDesignTime
+    ===================================================================================================================
+
+    This target is called by Visual Studio to get the project references
+
+    OUTPUTS:
+        @(_ResolvedProjectReference)         The resolved project references
+
+    =================================================================================================================== -->
+
+  <Target Name="ResolveProjectReferencesDesignTime"
+          Returns="@(_ResolvedProjectReference)">
+    <ItemGroup>
+      <_ResolvedProjectReference Include="@(ProjectReference->'%(FullPath)')"
+                                 Condition="Exists('%(FullPath)')">
+        <OriginalItemSpec>%(Identity)</OriginalItemSpec>
+        <ReferenceSourceTarget>ProjectReference</ReferenceSourceTarget>
+      </_ResolvedProjectReference>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    ExpandProjectReferences
+    ===================================================================================================================
+
+    This target will get the build outputs of the project references
+
+    INPUTS:
+        @(_NonNuProjProjectReference)  The project references
+
+    OUTPUTS:
+        @(ProjectReferenceOutput)      The output of all project references
+
+    =================================================================================================================== -->
+
+    <Target Name="ExpandProjectReferences"
+            DependsOnTargets="SplitProjectReferences"
+            Inputs="%(_NonNuProjProjectReference.Identity)"
+            Outputs="fake">
+
+        <!-- Ask for the output and all dependencies. -->
+
+        <MSBuild Targets="$(ProjectOutputGroups)"
+                 Projects="@(_NonNuProjProjectReference)"
+                 Properties="%(_NonNuProjProjectReference.SetConfiguration); %(_NonNuProjProjectReference.SetPlatform)">
+            <Output TaskParameter="TargetOutputs"
+                    ItemName="_NonNuProjProjectOutput" />
+        </MSBuild>
+
+        <!-- Since the dependencies include platform assemblies, we'll filter
+             out all files that don't exist in this project's output folder.
+             First we need the project's output folder. The easiest way is
+             to ask for the target path and then use a property function to
+             get the directory name. -->
+        <MSBuild Targets="GetTargetPath"
+                 Projects="@(_NonNuProjProjectReference)"
+                 Properties="%(_NonNuProjProjectReference.SetConfiguration); %(_NonNuProjProjectReference.SetPlatform)">
+            <Output TaskParameter="TargetOutputs"
+                    PropertyName="_NonNuProjProjectTargetPath" />
+        </MSBuild>
+
+        <PropertyGroup>
+             <_NonNuProjProjectTargetPath>$([System.IO.Path]::GetDirectoryName($(_NonNuProjProjectTargetPath)))\</_NonNuProjProjectTargetPath>
+             <_NonNuProjProjectPath>$([System.IO.Path]::GetDirectoryName(%(_NonNuProjProjectReference.FullPath)))\</_NonNuProjProjectPath>
+        </PropertyGroup>
+
+        <!-- Make sure we package the final output path of project references so that any post-compile step
+             applied to the project's output (such as signing) is included in the version we package up. 
+             In some cases final output path can be relative to output directory. -->
+        <ItemGroup>
+            <_NonNuProjProjectOutput_ToReplace Include="@(_NonNuProjProjectOutput)"
+                                               Condition=" '%(_NonNuProjProjectOutput.FinalOutputPath)' != '' ">
+              <FullFinalOutputPath>$([System.IO.Path]::Combine($(_NonNuProjProjectPath),%(_NonNuProjProjectOutput.FinalOutputPath)))</FullFinalOutputPath>
+            </_NonNuProjProjectOutput_ToReplace>
+            <_NonNuProjProjectOutput Remove="@(_NonNuProjProjectOutput_ToReplace)" />
+          <_NonNuProjProjectOutput Include="@(_NonNuProjProjectOutput_ToReplace->'%(FullFinalOutputPath)')" />
+        </ItemGroup>
+
+      
+        <!-- Now we can filter the outputs based on whether they are framework assemblies,
+             are not private, and exist in output directory. -->
+        <ItemGroup>
+            <_FilteredNonNuProjProjectOutput Include="@(_NonNuProjProjectOutput)"
+                                             Condition=" '%(_NonNuProjProjectOutput.FrameworkFile)' != 'true'
+                                             AND '%(_NonNuProjProjectOutput.CopyLocal)' != 'false'
+                                             AND Exists('%(_NonNuProjProjectOutput.FullPath)')" />
+            <_NonNuProjProjectOutput Remove="@(_NonNuProjProjectOutput)"
+                                     Condition=" '%(_NonNuProjProjectOutput.FrameworkFile)' == 'true'
+                                     OR '%(_NonNuProjProjectOutput.CopyLocal)' == 'false'
+                                     OR !Exists('%(_NonNuProjProjectOutput.FullPath)')"/>
+        </ItemGroup>
+
+        <!-- In order to package the the files in the correct folder in the
+             NuGet package we need need to know the target framework moniker. -->
+
+        <MSBuild Targets="GetTargetFrameworkMoniker"
+                 Projects="@(_NonNuProjProjectReference)"
+                 Properties="%(_NonNuProjProjectReference.SetConfiguration); %(_NonNuProjProjectReference.SetPlatform)">
+          
+            <Output TaskParameter="TargetOutputs"
+                    PropertyName="_NonNuProjProjectTargetFrameworkMoniker" />
+        </MSBuild>
+
+        <!-- In order to add custom metadata, we need to create a new item list -->
+
+        <CreateItem Include="@(_FilteredNonNuProjProjectOutput)"
+                    AdditionalMetadata="TargetFrameworkMoniker=$(_NonNuProjProjectTargetFrameworkMoniker)">
+            <Output TaskParameter="Include"
+                    ItemName="_NonNuProjProjectOutputWithTargetFrameworkMoniker"/>
+        </CreateItem>
+
+        <!-- Now we can run the AssignTargetFramework task. It will use the
+             %(TargetFrameworkMoniker) metadata to create the %(TargetPath).
+             The target path will use the NuGet lib convention, e.g.
+             lib\net40\foo.dll -->
+
+        <AssignTargetFramework OutputsWithTargetFrameworkInformation="@(_NonNuProjProjectOutputWithTargetFrameworkMoniker)">
+            <Output TaskParameter="PackageFiles"
+                    ItemName="ProjectReferenceOutput" />
+        </AssignTargetFramework>
+
+    </Target>
+
+    <!--
+    ===================================================================================================================
+    ConvertItems
+    ===================================================================================================================
+
+    This target is converting specialized items groups into the general <File> item list that indicates what should
+    be packaged.
+
+    INPUTS:
+        @(ProjectReferenceOutput)   Output of referenced projects to be packaged
+        @(Content)                  Content items to be packaged
+
+    OUTPUTS:
+        @(File)                     The <File> elements to be packaged.
+
+    =================================================================================================================== -->
+
+  <Target Name="ConvertItems"
+          DependsOnTargets="ExpandProjectReferences">
+    <CreateItem Include="@(ProjectReferenceOutput)">
+      <Output TaskParameter="Include"
+              ItemName="File"/>
+    </CreateItem>
+    <ItemGroup>
+      <_LinkedContentFiles Include="@(Content)"
+                           Condition="'%(Content.Link)' != ''" />
+      <_UnlinkedContentFiles Include="@(Content)"
+                             Condition="'%(Content.Link)' == ''" />
+    </ItemGroup>
+    <CreateItem Include="@(_LinkedContentFiles)"
+                AdditionalMetadata="TargetPath=%(Link)">
+      <Output TaskParameter="Include"
+              ItemName="File"/>
+    </CreateItem>
+    <CreateItem Include="@(_UnlinkedContentFiles)"
+                AdditionalMetadata="TargetPath=%(RelativeDir)">
+      <Output TaskParameter="Include"
+              ItemName="File"/>
+    </CreateItem>
+
+    <!-- We need to special case library files in later phases. In order to make this
+         easier, we add custom metadata 'IsLibrary' that indicates whether the file is
+         targeting the lib folder or not. -->
+
+    <ItemGroup>
+      <_FileWithIsLibrary Include="@(File)"
+                          Condition="'%(File.TargetPath)' == 'lib' OR
+                                     $([System.String]::Copy('%(File.TargetPath)').ToLower().StartsWith('lib\')) OR
+                                     $([System.String]::Copy('%(File.TargetPath)').ToLower().StartsWith('lib/'))">
+        <PackageDirectory>Lib</PackageDirectory>
+      </_FileWithIsLibrary>
+      <_FileWithIsLibrary Include="@(File)"
+                          Condition="'%(File.TargetPath)' != 'lib' AND
+                                     !$([System.String]::Copy('%(File.TargetPath)').ToLower().StartsWith('lib\')) AND
+                                     !$([System.String]::Copy('%(File.TargetPath)').ToLower().StartsWith('lib/'))">
+        <PackageDirectory></PackageDirectory>
+      </_FileWithIsLibrary>
+      <File Remove="@(File)" />
+      <File Include="@(_FileWithIsLibrary)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GenerateNuSpec
+    ===================================================================================================================
+
+    This target is creates the .nuspec file that is used to create the NuGet package (.nupkg).
+
+    INPUTS:
+        $(NuSpecPath)                  The path where the NuSpec should be written to.
+        $(NuSpecTemplate)               (Optional) The path to the NuSpec template.
+
+        $(Id),
+        $(Version),
+        $(Title),
+        $(Authors),
+        $(Owners),
+        $(Description),
+        $(ReleaseNotes),
+        $(Summary),
+        $(Language),
+        $(ProjectUrl),
+        $(IconUrl),
+        $(LicenseUrl),
+        $(Copyright),
+        $(RequireLicenseAcceptance),
+        $(Tags),
+        $(DevelopmentDependency)       General properties of the NuSpec
+
+        @(Dependency)                  (Optional) The NuGet package dependencies
+        @(FrameworkReference)          (Optional) Framework assembly references
+        @(Reference)                   (Optional) The assembly references
+        @(File)                        (Optional) The files to be packaged
+
+    =================================================================================================================== -->
+
+  <Target Name="GenerateNuSpec"
+          DependsOnTargets="GetPackageDependencies;GetPackageFiles;GetSourceFiles;$(VersionDependsOn)">
+    <!-- Please Note:
+         In order to avoid incremental build issues this target will always run.
+         However, the task will make sure that it doesn't touch the file if the
+         contents it would generate are identical to a previously generated
+         nuspec. -->
+    <GenerateNuSpec InputFileName="$(NuSpecTemplate)"
+                    OutputFileName="$(NuSpecPath)"
+                    MinClientVersion="$(MinClientVersion)"
+                    Id="$(Id)"
+                    Version="$(Version)"
+                    Title="$(Title)"
+                    Authors="$(Authors)"
+                    Owners="$(Owners)"
+                    Description="$(Description)"
+                    ReleaseNotes="$(ReleaseNotes)"
+                    Summary="$(Summary)"
+                    Language="$(Language)"
+                    ProjectUrl="$(ProjectUrl)"
+                    IconUrl="$(IconUrl)"
+                    LicenseUrl="$(LicenseUrl)"
+                    Copyright="$(Copyright)"
+                    RequireLicenseAcceptance="$(RequireLicenseAcceptance)"
+                    Tags="$(Tags)"
+                    DevelopmentDependency="$(DevelopmentDependency)"
+                    Dependencies="@(Dependency)"
+                    References="@(Reference)"
+                    FrameworkReferences="@(FrameworkReference)"
+                    Files="@(PackageFile)"/>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    CreatePackage
+    ===================================================================================================================
+
+    This target creates the NuGet package from a .nuspec file
+
+    INPUTS:
+        $(NuSpecPath)                  The path to the NuSpec file.
+        $(OutDir)                      The path to the directory where the .nupkg should be created
+        $(NuGetToolPath)               The path of the directory that contains to NuGet.exe
+        $(NuGetToolExe)                The name of NuGet.exe
+
+    =================================================================================================================== -->
+
+  <Target Name="CreatePackage"
+          Inputs="$(MSBuildAllProjects);
+                  $(NuSpecPath);
+                  @(File)"
+          Outputs="$(NuGetOutputPath)"
+          DependsOnTargets="GenerateNuSpec;PrepareForBuild">
+    <MakeDir Directories="$(OutDir)"
+             Condition="!Exists('$(OutDir)')" />
+    <NuGetPack OutputDirectory="$(OutDir)"
+               NoPackageAnalysis="$(NoPackageAnalysis)"
+               NoDefaultExcludes="$(NoDefaultExcludes)"
+               Symbols="$(GenerateSymbolPackage)"
+               ToolPath="$(NuGetToolPath)"
+               ToolExe="$(NuGetToolExe)"
+               NuSpecPath="$(NuSpecPath)"/>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetPackageFiles
+    ===================================================================================================================
+
+    Gets the set of files that will be included in this package. This set will not include any files that are already
+    provided by our NuGet dependencies.
+
+    OUTPUTS:
+        @(PackageFile)                        The files that will be included in this package.
+
+    =================================================================================================================== -->
+
+  <Target Name="GetPackageFiles"
+          Returns="@(PackageFile)"
+          DependsOnTargets="GetFiles;GetFileDependencies;$(VersionDependsOn)">
+
+      <ItemGroup>
+        <!-- We need to ensure that package libraries occur only once in their intended target path.
+             Depending on referenced projects, single library can come from multiple locations,
+             e.g target and intermediate output directories. -->
+        <_RawLibraryTargetPath Include="@(File->'%(TargetPath)\%(FileName)%(Extension)')"
+                         Condition="'%(File.PackageDirectory)' == 'Lib'">
+            <OriginalItemSpec>%(File.Identity)</OriginalItemSpec>
+        </_RawLibraryTargetPath>
+      </ItemGroup>
+
+      <RemoveDuplicates Inputs="@(_RawLibraryTargetPath)">
+        <Output TaskParameter="Filtered"
+            ItemName="_FilteredLibraryTargetPath" />
+      </RemoveDuplicates>
+
+      <ItemGroup>
+        <!-- We don't want to package libraries that come from dependencies.
+             Please note that we do want to package non-library files regardless
+             as we generally don't automatically pick those up from dependencies.
+
+             This allows people to include binaries in their tools folder, for
+             example.
+
+             In order to filter based on the simple file name, we'll set the
+             identity to the simple file name and record the original identity
+             as new metadata that we'll use to restore afterwards.
+
+             Since we want to only filer libraries we'll set the identity to an
+             illegal file name if the packaged file isn't a library. -->
+
+        <_FileTargetPath Include="@(_FilteredLibraryTargetPath->'%(FileName)%(Extension)')" />
+
+        <_FileTargetPath Include="@(File->'::KEEP::')"
+                         Condition="'%(File.PackageDirectory)' != 'Lib'">
+            <OriginalItemSpec>%(File.Identity)</OriginalItemSpec>
+        </_FileTargetPath>
+
+        <!-- Now we can remove all files from _FileTargetPath that come from
+             dependencies. -->
+
+        <_FileDependencyTargetPath Include="@(FileDependency->'%(FileName)%(Extension)')" />
+        <_FileTargetPath Remove="@(_FileDependencyTargetPath)" />
+
+        <!-- Remove references that request to be excluded. -->
+
+        <_FileTargetPath
+            Remove="@(_FileTargetPath)"
+            Condition=" '%(_FileTargetPath.ExcludeFromNuPkg)' == 'true' " />
+
+        <!-- In order to produce the final list we have to restore the original
+             identity. -->
+
+        <PackageFile Remove="@(PackageFile)" />
+        <PackageFile Include="@(_FileTargetPath->'%(OriginalItemSpec)')" />
+
+      </ItemGroup>
+
+      <ItemGroup>
+        <PackageFile Condition="'%(PackageFile.NuProjPackageId)' == ''">
+          <NuProjPackageId>$(Id)</NuProjPackageId>
+          <NuProjPackageVersion>$(Version)</NuProjPackageVersion>
+        </PackageFile>
+      </ItemGroup>
+
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetFiles
+    ===================================================================================================================
+
+    Gets the set of candidate files to be packaged. This set will also contain any files that are already provided by
+    our NuGet dependencies.
+
+    OUTPUTS:
+        @(File)                        The files that are being packaged
+
+    =================================================================================================================== -->
+
+  <Target Name="GetFiles"
+          Returns="@(File)"
+          DependsOnTargets="ConvertItems" />
+
+  <!--
+    ===================================================================================================================
+    GetFileDependencies
+    ===================================================================================================================
+
+    Returns the files coming from the transitive closure of all NuGet dependencies from this package.
+
+    OUTPUTS:
+        @(FileDependency)               Files coming from dependencies
+
+    =================================================================================================================== -->
+
+  <Target Name="GetFileDependencies"
+          DependsOnTargets="GetNuProjFileDependencies;GetNuGetFileDependencies"
+          Returns="@(FileDependency)">
+      <ItemGroup>
+          <FileDependency Include="@(NuProjFileDependency)" />
+          <FileDependency Include="@(NuGetFileDependency)" />
+      </ItemGroup>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetNuProjFileDependencies
+    ===================================================================================================================
+
+    Returns the files coming from the transitive closure of all NuGet dependencies from this package.
+
+    OUTPUTS:
+        @(FileDependency)               Files coming from dependencies
+
+    =================================================================================================================== -->
+
+  <Target Name="GetNuProjFileDependencies"
+          Returns="@(NuProjFileDependency)"
+          DependsOnTargets="SplitProjectReferences">
+      <MSBuild Targets="GetPackageFiles"
+               Projects="@(_NuProjProjectReferenceClosure)"
+               Properties="%(_NuProjProjectReferenceClosure.SetConfiguration); %(_NuProjProjectReferenceClosure.SetPlatform)">
+        <Output TaskParameter="TargetOutputs"
+                ItemName="NuProjFileDependency" />
+      </MSBuild>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetNuGetFileDependencies
+    ===================================================================================================================
+
+    Returns the files coming from the transitive closure of all NuGet dependencies from this package.
+
+    OUTPUTS:
+        @(NuGetFileDependency)               Files coming from dependencies
+
+    =================================================================================================================== -->
+
+  <Target Name="GetNuGetFileDependencies"
+          DependsOnTargets="GetNuGetPackageDependencies"
+          Returns="@(NuGetFileDependency)">
+      <ItemGroup>
+        <NuGetFileDependency Include="%(NuGetDependency.PackageDirectoryPath)\**\*"
+                             Condition="'%(NuGetDependency.PackageDirectoryPath)' != ''" />
+      </ItemGroup>
+  </Target>
+
+  <!--
+  ===================================================================================================================
+  AssignNuProjPackageDependenciesTargetFramework
+  ===================================================================================================================
+
+  Assigns "TargetFramework" metadata to dependencies coming from NuProj projects based on referenced files that can be 
+  removed from package.
+
+  INPUTS:
+      @(NuGetFileDependency)               Files coming from dependencies
+
+  OUTPUTS:
+      @(NuGetFileDependency)               Files coming from dependencies with target framework
+
+  =================================================================================================================== -->
+  
+  <Target Name="AssignNuProjPackageDependenciesTargetFramework"
+          Inputs="@(NuProjDependency)"
+          Outputs="%(NuProjDependency.Identity)"
+          DependsOnTargets="GetNuProjPackageDependencies;GetFiles">
+
+    <ItemGroup>
+      <!-- Clear temporary items. -->
+      <_NuProjDependency Remove="@(_NuProjDependency)" />
+      <_DependencyFile Remove="@(_DependencyFile)" />
+      
+      <!-- Get files that are library and have assigned target framework (so no debug symbols files). -->
+      <_DependencyFile Include="@(File)" 
+                       Condition="'%(File.PackageDirectory)' == 'Lib' 
+                         and '%(File.TargetFramework)' != '' 
+                         and '%(File.NuProjPackageId)' == '%(NuProjDependency.Identity)'"/>
+      
+      <_NuProjDependency Include="@(NuProjDependency)">
+        <TargetFramework>%(_DependencyFile.TargetFramework)</TargetFramework>
+      </_NuProjDependency>
+      
+      <!-- Replace dependency item with ones that have target framework. -->
+      <NuProjDependency Remove="@(_NuProjDependency)" />
+      <NuProjDependency Include="@(_NuProjDependency)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetPackageDependencies
+    ===================================================================================================================
+
+    Get the direct package dependencies of this package. It doesn't include dependencies of dependencies.
+
+    OUTPUTS:
+        @(Dependency)               The NuGet dependencies of this package.
+
+    =================================================================================================================== -->
+
+  <Target Name="GetPackageDependencies"
+          DependsOnTargets="AssignNuProjPackageDependenciesTargetFramework;GetNuGetPackageDependencies"
+          Returns="@(Dependency)">
+    <ItemGroup>
+      <Dependency Include="@(NuProjDependency)"
+                  Condition="'%(NuProjDependency.DependencyKind)' == 'Direct'" />
+      <Dependency Include="@(NuGetDependency)"
+                  Condition="'%(NuGetDependency.DependencyKind)' == 'Direct'" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetNuProjPackageDependencies
+    ===================================================================================================================
+
+    Get the direct and indirect package dependencies that come from other .nuproj files.
+
+    OUTPUTS:
+        @(NuProjDependency)               The closure of NuGet dependencies of this package.
+
+    =================================================================================================================== -->
+
+  <Target Name="GetNuProjPackageDependencies"
+          Returns="@(NuProjDependency)"
+          Inputs="%(_NuProjProjectReferenceClosure.DependencyKind)"
+          Outputs="fake"
+          DependsOnTargets="SplitProjectReferences">
+      <MSBuild Targets="GetPackageIdentity"
+               Projects="@(_NuProjProjectReferenceClosure)"
+               Properties="%(_NuProjProjectReferenceClosure.SetConfiguration); %(_NuProjProjectReferenceClosure.SetPlatform)">
+        <Output TaskParameter="TargetOutputs"
+                ItemName="_NuProjDependency" />
+      </MSBuild>
+      <ItemGroup>
+          <NuProjDependency Include="@(_NuProjDependency)">
+              <DependencyKind>%(_NuProjProjectReferenceClosure.DependencyKind)</DependencyKind>
+          </NuProjDependency>
+      </ItemGroup>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetNuGetPackageDependencies
+    ===================================================================================================================
+
+    Get the direct and indirect package dependencies that come from regular, i.e. non-.nuproj NuGet dependencies.
+
+    OUTPUTS:
+        @(NuGetDependency)               The closure of NuGet dependencies of this package.
+
+    =================================================================================================================== -->
+
+  <Target Name="GetNuGetPackageDependencies"
+          Returns="@(NuGetDependency)">
+
+      <!-- Read each project's packages.config file. -->
+      <ReadPackagesConfig Projects="@(_ProjectReferenceClosure)"
+                          Condition="'%(PackageDirectory)' == 'Lib'">
+        <Output TaskParameter="PackageReferences"
+                ItemName="_PackageReference" />
+      </ReadPackagesConfig>
+
+      <!-- Turn all dependencies into NuGetDependency items with appropriate metadata. -->
+      <ItemGroup Condition="'@(_PackageReference)' != ''">
+        <NuGetDependency Include="@(_PackageReference)"
+                         Condition="!%(IsDevelopmentDependency)"
+                         RemoveMetadata="IsDevelopmentDependency;RequireReinstallation;VersionConstraint">
+          <Version Condition="'%(_PackageReference.VersionConstraint)' != ''">%(_PackageReference.VersionConstraint)</Version>
+        </NuGetDependency>
+      </ItemGroup>
+
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetSourceFiles
+    =================================================================================================================== -->
+
+  <Target Name="GetSourceFiles"
+          DependsOnTargets="GetPackageFiles"
+          Condition="'$(EmbedSourceFiles)' == 'True'"
+          Returns="@(_SourceFileWithTargetPath)">
+    <ItemGroup>
+      <_PdbFiles Include="@(PackageFile)"
+                 Condition="'%(Extension)' == '.pdb'" />
+    </ItemGroup>
+    <ReadPdbSourceFiles PdbPath="%(_PdbFiles.Identity)">
+      <Output TaskParameter="SourcePaths"
+              ItemName="_SourceFile" />
+    </ReadPdbSourceFiles>
+    <!-- Some compilers (like VB) have source files listed that don't actually exist.
+         Since we can only package existing files we'll need to exclude those files. -->
+    <ItemGroup>
+      <_SourceFile Remove="@(_SourceFile)"
+                   Condition="!Exists(%(_SourceFile.Identity))" />
+    </ItemGroup>
+    <AssignSourceTargetPaths SourceFiles="@(_SourceFile)">
+      <Output TaskParameter="SourceFilesWithTargetPath"
+              ItemName="_SourceFileWithTargetPath" />
+      <Output TaskParameter="SourceFilesWithTargetPath"
+              ItemName="PackageFile" />
+    </AssignSourceTargetPaths>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    GetPackageIdentity
+    ===================================================================================================================
+
+    Returns an item whose identity is the $(Id). The version is included in custom metadata item Version. This format
+    is identical to the one used to describe package dependencies.
+
+    OUTPUTS:
+        $(_PackageIdentity)               The Id and Version of this package
+
+    =================================================================================================================== -->
+
+  <Target Name="GetPackageIdentity"
+          Returns="@(_PackageIdentity)"
+          DependsOnTargets="$(VersionDependsOn)">
+    <ItemGroup>
+      <_PackageIdentity Include="$(Id)">
+        <Version>$(Version)</Version>
+      </_PackageIdentity>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    ===================================================================================================================
+    Clean, Build, Rebuild
+    ===================================================================================================================
+
+    These are the standard targets to clean, build and rebuild a NuGet package.
+
+    =================================================================================================================== -->
+
+  <Target Name="Clean" DependsOnTargets="AssignProjectConfiguration;EstablishNuGetPaths">
+
+    <!-- We should also clear our references.
+
+         Note: We should forward calling the Clear target when building from the command line.
+               Assuming, of course, we're not suppressing building project references. -->
+
+    <MSBuild Targets="Clean"
+             Condition="'$(BuildProjectReferences)' == 'true'"
+             Projects="@(ProjectReferenceWithConfiguration)"
+             Properties="%(ProjectReferenceWithConfiguration.SetConfiguration); %(ProjectReferenceWithConfiguration.SetPlatform)" />
+
+    <!-- Delete our outputs and intermediates. -->
+
+    <ItemGroup>
+      <_ToBeDeleted Include="$(NuSpecPath)" />
+      <_ToBeDeleted Include="$(NuGetOutputPath)" />
+      <_ToBeDeleted Include="$(NuGetSymbolsOutputPath)" />
+    </ItemGroup>
+    <Delete Files="@(_ToBeDeleted)" />
+
+  </Target>
+
+  <Target Name="Build"
+          DependsOnTargets="CreatePackage" 
+          Returns="@(_NuGetOutputFile)">
+    <Message Text="$(MSBuildProjectName) -> $(NuGetOutputPath)"
+             Importance="high" />
+
+    <ItemGroup>
+      <_NuGetOutputFile Include="$(NuGetOutputPath)" />
+      <_NuGetOutputFile Include="$(NuGetSymbolsOutputPath)" Condition=" '$(GenerateSymbolPackage)' == 'true' " />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="Rebuild"
+          DependsOnTargets="Clean;Build"
+          Returns="@(_NuGetOutputFile)" />
+  <Import Project="$(CustomAfterNuProjTargets)" Condition="'$(CustomAfterNuProjTargets)' != '' and Exists('$(CustomAfterNuProjTargets)')"/>
+
+</Project>
