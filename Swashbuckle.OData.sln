@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Swashbuckle.OData", "Swashb
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF4A9CB1-3309-4630-9980-10A5E11D4101}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		coverage.bat = coverage.bat
 		License.txt = License.txt
 		README.md = README.md
 	EndProjectSection

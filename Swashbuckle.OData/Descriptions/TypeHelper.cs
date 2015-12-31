@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -8,9 +9,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
-using System.Web.OData.Formatter;
 
-namespace System.Web.OData
+namespace Swashbuckle.OData.Descriptions
 {
     internal static class TypeHelper
     {

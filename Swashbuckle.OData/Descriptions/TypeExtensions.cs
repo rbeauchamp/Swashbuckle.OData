@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 
-namespace System
+namespace Swashbuckle.OData.Descriptions
 {
     /// <summary>
     /// Extension methods for <see cref="Type"/>.

@@ -1,17 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web.Http.Dispatcher;
+using System.Web.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
 
-namespace System.Web.OData.Formatter
+namespace Swashbuckle.OData.Descriptions
 {
     internal static class EdmLibHelpers
     {

@@ -1,0 +1,29 @@
+version: 2.8.5.{build}
+
+before_build:
+- cmd: nuget restore
+
+build:
+  publish_wap: true
+  verbosity: minimal
+
+environment:
+    COVERALLS_REPO_TOKEN:  
+       secure: EFTW/YldlkfUPVuAZTbv09gYi8MtEbZ6WZ6AU23f5Bg9BuCPN8wMAZxvOzycWGvK
+
+after_test: 
+- packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -register:user -filter:"+[Swashbuckle.OData]* -[*Test]*" -target:"packages\NUnit.Runners.2.6.4\tools\nunit-console-x86.exe" -targetargs:"/noshadow /domain:single Swashbuckle.OData.Tests\bin\Debug\Swashbuckle.OData.Tests.dll" -output:coverage.xml
+- packages\coveralls.io.1.3.4\tools\coveralls.net.exe --opencover coverage.xml
+
+deploy:
+- provider: WebDeploy
+  server: https://swashbuckleodata.scm.azurewebsites.net:443/msdeploy.axd?site=swashbuckleodata
+  website: swashbuckleodata
+  username: $swashbuckleodata
+  password:
+    secure: z9oNmombcwIUfbJB7LRtDDWWGfc8wuDbe9omwGpLZz19kK3jzf0ZZTuYQFrOgLVDNR+qBtQjM/PD8VeuY4dfpQ==
+  remove_files: true
+  artifact: Swashbuckle.OData.Sample.zip
+  aspnet5: true
+  on:
+    branch: master
