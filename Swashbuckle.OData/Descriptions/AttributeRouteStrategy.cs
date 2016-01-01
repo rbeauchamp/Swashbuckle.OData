@@ -45,15 +45,13 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(oDataRoute != null);
+            Contract.Ensures(Contract.Result<ODataActionDescriptor>() != null);
 
             var odataRouteAttribute = actionDescriptor.GetCustomAttributes<ODataRouteAttribute>()?.FirstOrDefault();
-            if (odataRouteAttribute != null)
-            {
-                var pathTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(odataRouteAttribute.PathTemplate));
-                Contract.Assume(pathTemplate != null);
-                return new ODataActionDescriptor(actionDescriptor, oDataRoute, pathTemplate);
-            }
-            return null;
+            Contract.Assume(odataRouteAttribute != null);
+            var pathTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(odataRouteAttribute.PathTemplate));
+            Contract.Assume(pathTemplate != null);
+            return new ODataActionDescriptor(actionDescriptor, oDataRoute, pathTemplate);
         }
     }
 }

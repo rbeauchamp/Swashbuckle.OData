@@ -5,7 +5,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 
-namespace Swashbuckle.OData.Descriptions
+namespace System
 {
     /// <summary>
     /// Extension methods for <see cref="Type"/>.

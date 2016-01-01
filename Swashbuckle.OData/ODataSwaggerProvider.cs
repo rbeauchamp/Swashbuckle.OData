@@ -135,7 +135,7 @@ namespace Swashbuckle.OData
                          .ToDictionary(group => group.Key, group => group.First());
             webApiSwaggerDoc.vendorExtensions = webApiSwaggerDoc.vendorExtensions.UnionEvenIfNull(odataSwaggerDoc.vendorExtensions).ToLookup(pair => pair.Key, pair => pair.Value)
                          .ToDictionary(group => group.Key, group => group.First());
-            webApiSwaggerDoc.tags = webApiSwaggerDoc.tags.UnionEvenIfNull(odataSwaggerDoc.tags, EqualityComparer<Tag>.Create(tag => tag.name)).ToList();
+            webApiSwaggerDoc.tags = webApiSwaggerDoc.tags.UnionEvenIfNull(odataSwaggerDoc.tags, new TagComparer()).ToList();
             webApiSwaggerDoc.consumes = webApiSwaggerDoc.consumes.UnionEvenIfNull(odataSwaggerDoc.consumes).ToList();
             webApiSwaggerDoc.security = webApiSwaggerDoc.security.UnionEvenIfNull(odataSwaggerDoc.security).ToList();
             webApiSwaggerDoc.produces = webApiSwaggerDoc.produces.UnionEvenIfNull(odataSwaggerDoc.produces).ToList();
@@ -180,12 +180,6 @@ namespace Swashbuckle.OData
                         break;
                     case "delete":
                         pathItem.delete = CreateOperation(apiDescription, schemaRegistry);
-                        break;
-                    case "options":
-                        pathItem.options = CreateOperation(apiDescription, schemaRegistry);
-                        break;
-                    case "head":
-                        pathItem.head = CreateOperation(apiDescription, schemaRegistry);
                         break;
                     case "patch":
                     case "merge":
@@ -248,6 +242,7 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(paramDesc != null);
             Contract.Requires(schemaRegistry != null);
+            Contract.Assume(paramDesc.ParameterDescriptor != null);
 
             var @in = inPath
                 ? "path"
@@ -258,13 +253,6 @@ namespace Swashbuckle.OData
                 name = paramDesc.Name,
                 @in = @in
             };
-
-            if (paramDesc.ParameterDescriptor == null)
-            {
-                parameter.type = "string";
-                parameter.required = true;
-                return parameter;
-            }
 
             parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
             parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
@@ -282,6 +270,7 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(paramDesc != null);
             Contract.Requires(schemaRegistry != null);
+            Contract.Assume(paramDesc.ParameterDescriptor != null);
 
             var @in = inPath
                 ? "path"
@@ -293,13 +282,6 @@ namespace Swashbuckle.OData
                 description = paramDesc.Documentation,
                 @in = @in
             };
-
-            if (paramDesc.ParameterDescriptor == null)
-            {
-                parameter.type = "string";
-                parameter.required = true;
-                return parameter;
-            }
 
             parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
             parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;

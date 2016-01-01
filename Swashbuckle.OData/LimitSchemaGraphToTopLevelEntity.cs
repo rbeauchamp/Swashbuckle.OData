@@ -32,6 +32,8 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(properties != null);
 
+            Contract.Assume(property.Value != null);
+
             Contract.Assume(property.Value.type != "array" || property.Value?.items != null);
             if (property.Value.type == "array" && property.Value.items.@ref != null)
             {

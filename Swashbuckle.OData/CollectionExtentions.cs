@@ -82,7 +82,7 @@ namespace Swashbuckle.OData
             var nonNullSource = source ?? new List<T>();
             var nonNullOther = other ?? new List<T>();
 
-            return nonNullSource.Union(nonNullOther, comparer ?? System.Collections.Generic.EqualityComparer<T>.Default);
+            return nonNullSource.Union(nonNullOther, comparer ?? EqualityComparer<T>.Default);
         }
     }
 }

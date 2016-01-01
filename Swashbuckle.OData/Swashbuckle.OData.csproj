@@ -208,7 +208,6 @@
     <Compile Include="Descriptions\TypeHelper.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
-    <Compile Include="EqualityComparer.cs" />
     <Compile Include="LimitSchemaGraphToTopLevelEntity.cs" />
     <Compile Include="ODataSwaggerProviderOptions.cs" />
     <Compile Include="SwaggerDocsConfigExtensions.cs" />
@@ -221,6 +220,7 @@
     <Compile Include="SchemaRegistryExtensions.cs" />
     <Compile Include="Descriptions\SwaggerApiParameterDescription.cs" />
     <Compile Include="Descriptions\ParameterSource.cs" />
+    <Compile Include="TagComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

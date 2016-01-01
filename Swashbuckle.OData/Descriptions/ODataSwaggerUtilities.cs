@@ -20,17 +20,13 @@ namespace Swashbuckle.OData.Descriptions
     internal static class ODataSwaggerUtilities
     {
         /// <summary>
-        ///     Create the Swagger path for the Edm entity set.
+        /// Create the Swagger path for the Edm entity set.
         /// </summary>
-        /// <param name="navigationSource">The Edm navigation source.</param>
-        /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject" /> represents the related Edm entity set.</returns>
-        public static PathItem CreateSwaggerPathForEntitySet(IEdmNavigationSource navigationSource)
+        /// <param name="entitySet">The entity set.</param>
+        public static PathItem CreateSwaggerPathForEntitySet(IEdmEntitySet entitySet)
         {
-            var entitySet = navigationSource as IEdmEntitySet;
-            if (entitySet == null)
-            {
-                return new PathItem();
-            }
+            Contract.Requires(entitySet != null);
+            Contract.Ensures(Contract.Result<PathItem>() != null);
 
             return new PathItem
             {
@@ -60,17 +56,14 @@ namespace Swashbuckle.OData.Descriptions
         }
 
         /// <summary>
-        ///     Create the Swagger path for the Edm entity.
+        /// Create the Swagger path for the Edm entity.
         /// </summary>
-        /// <param name="navigationSource">The Edm navigation source.</param>
-        /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject" /> represents the related Edm entity.</returns>
-        public static PathItem CreateSwaggerPathForEntity(IEdmNavigationSource navigationSource)
+        /// <param name="entitySet">The entity set.</param>
+        /// <returns></returns>
+        public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet)
         {
-            var entitySet = navigationSource as IEdmEntitySet;
-            if (entitySet == null)
-            {
-                return new PathItem();
-            }
+            Contract.Requires(entitySet != null);
+            Contract.Ensures(Contract.Result<PathItem>() != null);
 
             var keyParameters = new List<Parameter>();
             foreach (var key in entitySet.GetEntityType().GetKey())
@@ -132,13 +125,9 @@ namespace Swashbuckle.OData.Descriptions
         /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject" /> represents the related Edm operation import.</returns>
         public static PathItem CreateSwaggerPathForOperationImport(IEdmOperationImport operationImport)
         {
-            Contract.Requires(operationImport == null || operationImport.Operation != null);
-            Contract.Requires(operationImport == null || operationImport.Operation.Parameters != null);
+            Contract.Requires(operationImport != null);
 
-            if (operationImport == null)
-            {
-                return new PathItem();
-            }
+            Contract.Assume(operationImport.Operation?.Parameters != null);
 
             var isFunctionImport = operationImport is IEdmFunctionImport;
             var swaggerParameters = new List<Parameter>();
@@ -183,23 +172,16 @@ namespace Swashbuckle.OData.Descriptions
         }
 
         /// <summary>
-        ///     Create the Swagger path for the Edm operation bound to the Edm entity set.
+        /// Create the Swagger path for the Edm operation bound to the Edm entity set.
         /// </summary>
         /// <param name="operation">The Edm operation.</param>
-        /// <param name="navigationSource">The Edm navigation source.</param>
-        /// <returns>
-        ///     The <see cref="Newtonsoft.Json.Linq.JObject" /> represents the related Edm operation bound to the Edm entity
-        ///     set.
-        /// </returns>
-        public static PathItem CreateSwaggerPathForOperationOfEntitySet(IEdmOperation operation, IEdmNavigationSource navigationSource)
+        /// <param name="entitySet">The entity set.</param>
+        public static PathItem CreateSwaggerPathForOperationOfEntitySet(IEdmOperation operation, IEdmEntitySet entitySet)
         {
-            Contract.Requires(operation == null || !(navigationSource is IEdmEntitySet) || operation.Parameters != null);
+            Contract.Requires(operation != null);
+            Contract.Requires(entitySet != null);
 
-            var entitySet = navigationSource as IEdmEntitySet;
-            if (operation == null || entitySet == null)
-            {
-                return new PathItem();
-            }
+            Contract.Assume(operation.Parameters != null);
 
             var isFunction = operation is IEdmFunction;
             var swaggerParameters = new List<Parameter>();
