@@ -30,30 +30,13 @@ namespace Swashbuckle.OData.Descriptions
             var parameterDescriptions = new List<ApiParameterDescription>();
             var actionBinding = GetActionBinding(actionDescriptor);
 
-            // try get parameter binding information if available
-            if (actionBinding != null)
+            var parameterBindings = actionBinding.ParameterBindings;
+            if (parameterBindings != null)
             {
-                var parameterBindings = actionBinding.ParameterBindings;
-                if (parameterBindings != null)
+                foreach (var parameterBinding in parameterBindings)
                 {
-                    foreach (var parameterBinding in parameterBindings)
-                    {
-                        Contract.Assume(parameterBinding != null);
-                        parameterDescriptions.Add(CreateParameterDescriptionFromBinding(parameterBinding));
-                    }
-                }
-            }
-            else
-            {
-                var parameters = actionDescriptor.GetParameters();
-                if (parameters != null)
-                {
-                    foreach (var parameter in parameters)
-                    {
-                        Contract.Assume(parameter != null);
-
-                        parameterDescriptions.Add(CreateParameterDescriptionFromDescriptor(parameter));
-                    }
+                    Contract.Assume(parameterBinding != null);
+                    parameterDescriptions.Add(CreateParameterDescriptionFromBinding(parameterBinding));
                 }
             }
 
@@ -63,17 +46,16 @@ namespace Swashbuckle.OData.Descriptions
         private static HttpActionBinding GetActionBinding(HttpActionDescriptor actionDescriptor)
         {
             Contract.Requires(actionDescriptor != null);
-            Contract.Requires((actionDescriptor.ControllerDescriptor == null || actionDescriptor.ControllerDescriptor.Configuration != null));
+            Contract.Ensures(Contract.Result<HttpActionBinding>() != null);
+
+            Contract.Assume(actionDescriptor.ControllerDescriptor?.Configuration != null);
 
             var controllerDescriptor = actionDescriptor.ControllerDescriptor;
-            if (controllerDescriptor == null)
-            {
-                return null;
-            }
-
             var controllerServices = controllerDescriptor.Configuration.Services;
             var actionValueBinder = controllerServices.GetActionValueBinder();
-            var actionBinding = actionValueBinder?.GetBinding(actionDescriptor);
+            Contract.Assume(actionValueBinder != null);
+            var actionBinding = actionValueBinder.GetBinding(actionDescriptor);
+            Contract.Assume(actionBinding != null);
             return actionBinding;
         }
 
