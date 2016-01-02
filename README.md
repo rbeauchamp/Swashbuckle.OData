@@ -74,3 +74,5 @@ You'll need:
 
 1. Visual Studio 2015
 2. [Code Contracts](https://visualstudiogallery.msdn.microsoft.com/1ec7db13-3363-46c9-851f-1ce455f66970)
+
+If you submit an enhancement or bug fix, please include a unit test similar to [this](https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/Swashbuckle.OData.Tests/Fixtures/FunctionTests.cs#L27) that verifies the change. I'm shooting for 100% unit test [coverage](https://coveralls.io/github/rbeauchamp/Swashbuckle.OData?branch=master) of the code base.
