@@ -24,6 +24,31 @@ namespace Swashbuckle.OData.Tests
     public class FunctionTests
     {
         [Test]
+        public async Task It_supports_functions_with_multiple_parameters()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+                // Verify that the OData route in the test controller is valid
+                var products = await httpClient.GetJsonAsync<ODataResponse<Product1>>("/odata/v1/Products/Default.MultipleParams(Id=3,Year=2015)");
+                products.Should().NotBeNull();
+                products.Value.Count.Should().Be(2);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/v1/Products/Default.MultipleParams(Id={Id},Year={Year})", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
         public async Task It_supports_a_parameterless_function_bound_to_a_collection()
         {
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
@@ -150,6 +175,12 @@ namespace Swashbuckle.OData.Tests
 
             var productType = builder.EntityType<Product>();
 
+            // Function bound to a collection that accepts multiple parameters
+            var multiParamFunction = productType.Collection.Function("MultipleParams");
+            multiParamFunction.Parameter<int>("Id");
+            multiParamFunction.Parameter<int>("Year");
+            multiParamFunction.ReturnsCollectionFromEntitySet<Product>("Products");
+
             // Function bound to a collection
             // Returns the most expensive product, a single entity
             productType.Collection
@@ -201,6 +232,13 @@ namespace Swashbuckle.OData.Tests
                 Name = "Product " + i,
                 Price = rand.NextDouble() * 1000
             }).ToList().ForEach(p => Data.TryAdd(p.Id, p));
+        }
+
+        [HttpGet]
+        [ResponseType(typeof(List<Product>))]
+        public IHttpActionResult MultipleParams([FromODataUri]int Id, [FromODataUri]int Year)
+        {
+            return Ok(Data.Values.Take(2));
         }
 
         /// <summary>

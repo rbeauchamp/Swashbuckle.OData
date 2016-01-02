@@ -446,39 +446,6 @@ namespace Swashbuckle.OData.Descriptions
             return swaggerOperationPath;
         }
 
-        /// <summary>
-        ///     Create the Swagger definition for the structure Edm type.
-        /// </summary>
-        /// <param name="edmType">The structure Edm type.</param>
-        /// <returns>
-        ///     The <see cref="Schema" /> represents the related structure Edm type.
-        /// </returns>
-        public static Schema CreateSwaggerDefinitionForStructureType(IEdmStructuredType edmType)
-        {
-            Contract.Requires(edmType.StructuralProperties() != null);
-
-            if (edmType == null)
-            {
-                return new Schema();
-            }
-
-            var swaggerProperties = new Dictionary<string, Schema>();
-            foreach (var property in edmType.StructuralProperties())
-            {
-                Contract.Assume(property != null);
-                var propertyName = property.Name;
-                Contract.Assume(!ReferenceEquals(propertyName, null));
-                var swaggerProperty = new Schema().Description(propertyName);
-                SetSwaggerType(swaggerProperty, property.GetPropertyType().GetDefinition());
-                swaggerProperties.Add(propertyName, swaggerProperty);
-            }
-
-            return new Schema
-            {
-                properties = swaggerProperties
-            };
-        }
-
         private static void SetSwaggerType(Parameter obj, IEdmType edmType)
         {
             Contract.Requires(obj != null);
@@ -742,14 +709,6 @@ namespace Swashbuckle.OData.Descriptions
         }
 
         private static Operation Description(this Operation obj, string description)
-        {
-            Contract.Requires(obj != null);
-
-            obj.description = description;
-            return obj;
-        }
-
-        private static Schema Description(this Schema obj, string description)
         {
             Contract.Requires(obj != null);
 
