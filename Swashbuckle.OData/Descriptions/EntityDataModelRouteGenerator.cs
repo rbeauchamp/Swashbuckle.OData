@@ -11,7 +11,11 @@ using Microsoft.OData.Edm;
 
 namespace Swashbuckle.OData.Descriptions
 {
-    internal class StandardSwaggerRouteGenerator : ISwaggerRouteGenerator
+    /// <summary>
+    /// Generates a set of potential SwaggerRoutes based upon the <see cref="IEdmModel"/>
+    /// associated with an ODataRoute.
+    /// </summary>
+    internal class EntityDataModelRouteGenerator : ISwaggerRouteGenerator
     {
         public IEnumerable<SwaggerRoute> Generate(HttpConfiguration httpConfig)
         {
@@ -100,7 +104,7 @@ namespace Swashbuckle.OData.Descriptions
                         // skip operation bound to non entity (or entity collection)
                         if (boundType.TypeKind == EdmTypeKind.Entity)
                         {
-                            var entityType = (IEdmEntityType) boundType;
+                            var entityType = (IEdmEntityType)boundType;
                             var edmEntitySets = oDataRoute.GetEdmModel().EntityContainer.EntitySets();
                             Contract.Assume(edmEntitySets != null);
                             routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntity(oDataRoute.RoutePrefix, operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntity(operation, entitySet))));
@@ -111,7 +115,7 @@ namespace Swashbuckle.OData.Descriptions
 
                             if (collectionType?.ElementType?.GetDefinition().TypeKind == EdmTypeKind.Entity)
                             {
-                                var entityType = (IEdmEntityType) collectionType.ElementType?.GetDefinition();
+                                var entityType = (IEdmEntityType)collectionType.ElementType?.GetDefinition();
                                 var edmEntitySets = oDataRoute.GetEdmModel().EntityContainer.EntitySets();
                                 Contract.Assume(edmEntitySets != null);
                                 routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntitySet(operation, entitySet, oDataRoute.RoutePrefix), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntitySet(operation, entitySet))));

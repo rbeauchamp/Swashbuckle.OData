@@ -212,7 +212,7 @@
     <Compile Include="ODataSwaggerProviderOptions.cs" />
     <Compile Include="SwaggerDocsConfigExtensions.cs" />
     <Compile Include="SwaggerProviderOptions.cs" />
-    <Compile Include="Descriptions\StandardSwaggerRouteGenerator.cs" />
+    <Compile Include="Descriptions\EntityDataModelRouteGenerator.cs" />
     <Compile Include="ODataSwaggerProvider.cs" />
     <Compile Include="Descriptions\ODataSwaggerUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

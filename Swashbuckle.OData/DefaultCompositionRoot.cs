@@ -33,7 +33,7 @@ namespace Swashbuckle.OData
         {
             return new List<ISwaggerRouteGenerator>
             {
-                new StandardSwaggerRouteGenerator(),
+                new EntityDataModelRouteGenerator(),
                 new CustomSwaggerRouteGenerator()
             };
         }
