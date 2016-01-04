@@ -35,14 +35,7 @@ namespace Swashbuckle.OData.Descriptions
                 .OperationId(entitySet.Name + "_Get")
                 .Description("Returns the EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(new List<Parameter>()
-                .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
-                .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string", false)
-                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false)
-                .Parameter("$orderby", "query", "Sorts the results.", "string", false)
-                .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
-                .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
-                .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean", false))
+                .Parameters(AddQueryOptionParameters(new List<Parameter>()))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.Type).DefaultErrorResponse()),
                 post = new Operation()
                 .Summary("Post a new entity to EntitySet " + entitySet.Name)
@@ -53,6 +46,18 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameter(entitySet.GetEntityType().Name, "body", "The entity to post", entitySet.GetEntityType()))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse())
             };
+        }
+
+        public static IList<Parameter> AddQueryOptionParameters(IList<Parameter> parameterList)
+        {
+            return parameterList
+                .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
+                .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string", false)
+                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false)
+                .Parameter("$orderby", "query", "Sorts the results.", "string", false)
+                .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
+                .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
+                .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean", false);
         }
 
         /// <summary>

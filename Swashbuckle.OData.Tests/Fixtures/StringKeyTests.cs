@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
+using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using FluentAssertions;
@@ -9,7 +14,6 @@ using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
 using Swashbuckle.Swagger;
-using SwashbuckleODataSample.Models;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -63,6 +67,42 @@ namespace Swashbuckle.OData.Tests
             builder.EntitySet<ProductWithStringKey>("ProductWithStringKeys");
 
             return builder.GetEdmModel();
+        }
+    }
+
+    public class ProductWithStringKey
+    {
+        [Key]
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
+        public double Price { get; set; }
+    }
+
+    public class ProductWithStringKeysController : ODataController
+    {
+        private static readonly ConcurrentDictionary<string, ProductWithStringKey> Data;
+
+        static ProductWithStringKeysController()
+        {
+            Data = new ConcurrentDictionary<string, ProductWithStringKey>();
+            var rand = new Random();
+
+            Enumerable.Range(0, 100).Select(i => new ProductWithStringKey
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Product " + i,
+                Price = rand.NextDouble() * 1000
+            }).ToList().ForEach(p => Data.TryAdd(p.Id, p));
+        }
+
+        public IHttpActionResult Put([FromODataUri] string key, [FromBody] ProductWithStringKey product)
+        {
+            key.Should().NotStartWith("'");
+            key.Should().NotEndWith("'");
+
+            return Updated(Data.Values.First());
         }
     }
 }
