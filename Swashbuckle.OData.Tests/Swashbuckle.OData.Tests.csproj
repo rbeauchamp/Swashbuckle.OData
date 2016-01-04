@@ -143,6 +143,7 @@
     <Compile Include="Containment\ODataModels.cs" />
     <Compile Include="Containment\Program.cs" />
     <Compile Include="ContentType.cs" />
+    <Compile Include="Fixtures\EnableQueryTests.cs" />
     <Compile Include="Fixtures\FromUriArrayTests.cs" />
     <Compile Include="Fixtures\CustomRouteTests.cs" />
     <Compile Include="Fixtures\FunctionTests.cs" />
@@ -174,9 +175,7 @@
     <Compile Include="ODataVersionControllerSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpExtensions.cs" />
-    <Compile Include="StringKey\ProductWithStringKey.cs" />
-    <Compile Include="StringKey\ProductWithStringKeysController.cs" />
-    <Compile Include="StringKey\StringKeyTests.cs" />
+    <Compile Include="Fixtures\StringKeyTests.cs" />
     <Compile Include="TestRestierODataContext.cs" />
     <Compile Include="AppBuilderExtensions.cs" />
     <Compile Include="UnitTestControllerSelector.cs" />

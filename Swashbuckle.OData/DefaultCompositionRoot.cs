@@ -64,6 +64,7 @@ namespace Swashbuckle.OData
             Contract.Requires(swaggerDocsConfig != null);
 
             AddInternalDocumentFilters(swaggerDocsConfig);
+            AddInternalOperationFilters(swaggerDocsConfig);
 
             return new SwaggerProviderOptions(
                 swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string, bool>>("_versionSupportResolver"),
@@ -90,6 +91,13 @@ namespace Swashbuckle.OData
             Contract.Requires(swaggerDocsConfig != null);
 
             swaggerDocsConfig.DocumentFilter(() => new LimitSchemaGraphToTopLevelEntity());
+        }
+
+        private static void AddInternalOperationFilters(SwaggerDocsConfig swaggerDocsConfig)
+        {
+            Contract.Requires(swaggerDocsConfig != null);
+
+            swaggerDocsConfig.OperationFilter(() => new EnableQueryFilter());
         }
 
         /// <summary>

@@ -206,6 +206,7 @@
     <Compile Include="Descriptions\SwaggerRouteStrategy.cs" />
     <Compile Include="Descriptions\TypeExtensions.cs" />
     <Compile Include="Descriptions\TypeHelper.cs" />
+    <Compile Include="EnableQueryFilter.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
     <Compile Include="LimitSchemaGraphToTopLevelEntity.cs" />

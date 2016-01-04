@@ -51,6 +51,7 @@ namespace SwashbuckleODataSample.ODataControllers
         /// Get the top 10 most expensive products. This is a function bound to a collection that returns a collection.
         /// </summary>
         [HttpGet]
+        [EnableQuery]
         [ResponseType(typeof(List<Product>))]
         public IHttpActionResult Top10()
         {
@@ -102,8 +103,8 @@ namespace SwashbuckleODataSample.ODataControllers
         /// Get products with the given Ids. This function accepts a parameter of type 'array'.
         /// </summary>
         /// <param name="Ids">The ids.</param>
-        /// <returns></returns>
         [HttpGet]
+        [EnableQuery]
         public IQueryable<Product> ProductsWithIds([FromODataUri]int[] Ids)
         {
             return Data.Values.Where(p => Ids.Contains(p.Id)).AsQueryable();
