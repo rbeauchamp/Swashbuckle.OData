@@ -42,18 +42,17 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(allOperations != null);
 
-            foreach (var operation in allOperations)
+            foreach (var operation in allOperations.Where(operation => !operation.operationId.Contains("By") 
+                                                                        && operation.parameters != null
+                                                                        && operation.parameters.Any(p => p.@in == "path")))
             {
-                if (operation.parameters != null && operation.parameters.Any(p => p.@in == "body" || p.@in == "path"))
-                {
-                    // Select the capitalized parameter names
-                    var parameters = operation.parameters
-                        .Where(p => p.@in == "body" || p.@in == "path")
-                        .Select(p => CultureInfo.InvariantCulture.TextInfo.ToTitleCase(p.name));
+                // Select the capitalized parameter names
+                var parameters = operation.parameters
+                    .Where(p => p.@in == "path")
+                    .Select(p => CultureInfo.InvariantCulture.TextInfo.ToTitleCase(p.name));
 
-                    // Set the operation id to match the format "OperationByParam1AndParam2"
-                    operation.operationId = $"{operation.operationId}By{string.Join("And", parameters)}";
-                }
+                // Set the operation id to match the format "OperationByParam1AndParam2"
+                operation.operationId = $"{operation.operationId}By{string.Join("And", parameters)}";
             }
         }
 
