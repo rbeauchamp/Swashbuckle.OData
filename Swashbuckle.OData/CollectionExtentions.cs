@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Swashbuckle.OData
 {
-    internal static class CollectionExtentions
+    public static class CollectionExtentions
     {
         /// <summary>
         ///     Adds the elements of the specified collection to the end of the <see cref="Collection{T}" />.
@@ -83,6 +83,14 @@ namespace Swashbuckle.OData
             var nonNullOther = other ?? new List<T>();
 
             return nonNullSource.Union(nonNullOther, comparer ?? EqualityComparer<T>.Default);
+        }
+
+        public static IEnumerable<T> ConcatEvenIfNull<T>(this IEnumerable<T> source, IEnumerable<T> other)
+        {
+            var nonNullSource = source ?? new List<T>();
+            var nonNullOther = other ?? new List<T>();
+
+            return nonNullSource.Concat(nonNullOther);
         }
     }
 }

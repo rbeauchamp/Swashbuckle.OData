@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Description;
-using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
@@ -18,7 +17,7 @@ namespace Swashbuckle.OData
             Schemes = swaggerProviderOptions.Schemes;
             SecurityDefinitions = swaggerProviderOptions.SecurityDefinitions;
             IgnoreObsoleteActions = swaggerProviderOptions.IgnoreObsoleteActions;
-            GroupingKeySelector = swaggerProviderOptions.GroupingKeySelector ?? DefaultGroupingKeySelector;
+            GroupingKeySelector = swaggerProviderOptions.GroupingKeySelector ?? Descriptions.ApiDescriptionExtensions.DefaultGroupingKeySelector;
             GroupingKeyComparer = swaggerProviderOptions.GroupingKeyComparer ?? Comparer<string>.Default;
             CustomSchemaMappings = swaggerProviderOptions.CustomSchemaMappings ?? new Dictionary<Type, Func<Schema>>();
             SchemaFilters = swaggerProviderOptions.SchemaFilters ?? new List<ISchemaFilter>();
@@ -63,17 +62,6 @@ namespace Swashbuckle.OData
         public IEnumerable<IDocumentFilter> DocumentFilters { get; private set; }
 
         public Func<IEnumerable<ApiDescription>, ApiDescription> ConflictingActionsResolver { get; private set; }
-
-        private static string DefaultGroupingKeySelector(ApiDescription apiDescription)
-        {
-            Contract.Requires(apiDescription != null);
-            Contract.Requires(apiDescription.ActionDescriptor != null);
-            Contract.Requires(apiDescription.ActionDescriptor.ControllerDescriptor != null);
-
-            return apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName == "Restier"
-                ? ((RestierHttpActionDescriptor)apiDescription.ActionDescriptor).EntitySetName
-                : apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName;
-        }
 
         private static string DefaultSchemaIdSelector(Type type)
         {

@@ -221,7 +221,7 @@ namespace Swashbuckle.OData
             {
                 summary = apiDescription.Documentation,
                 tags = new[] { _options.GroupingKeySelector(apiDescription) },
-                operationId = apiDescription.FriendlyId(),
+                operationId = apiDescription.OperationId(),
                 produces = apiDescription.Produces()?.ToList(),
                 consumes = apiDescription.Consumes()?.ToList(),
                 parameters = parameters.Any() ? parameters : null, // parameters can be null but not empty

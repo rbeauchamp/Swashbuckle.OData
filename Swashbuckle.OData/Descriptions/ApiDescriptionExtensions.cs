@@ -8,6 +8,22 @@ namespace Swashbuckle.OData.Descriptions
 {
     public static class ApiDescriptionExtensions
     {
+        public static string DefaultGroupingKeySelector(this ApiDescription apiDescription)
+        {
+            Contract.Requires(apiDescription != null);
+            Contract.Requires(apiDescription.ActionDescriptor != null);
+            Contract.Requires(apiDescription.ActionDescriptor.ControllerDescriptor != null);
+
+            return apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName == "Restier"
+                ? ((RestierHttpActionDescriptor)apiDescription.ActionDescriptor).EntitySetName
+                : apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName;
+        }
+
+        public static string OperationId(this ApiDescription apiDescription)
+        {
+            return $"{apiDescription.DefaultGroupingKeySelector()}_{apiDescription.ActionDescriptor.ActionName}";
+        }
+
         public static string GetRelativePathForSwagger(this ApiDescription apiDescription)
         {
             Contract.Requires(apiDescription != null);

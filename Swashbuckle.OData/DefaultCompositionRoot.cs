@@ -91,6 +91,7 @@ namespace Swashbuckle.OData
             Contract.Requires(swaggerDocsConfig != null);
 
             swaggerDocsConfig.DocumentFilter(() => new LimitSchemaGraphToTopLevelEntity());
+            swaggerDocsConfig.DocumentFilter(() => new EnsureUniqueOperationIdsFilter());
         }
 
         private static void AddInternalOperationFilters(SwaggerDocsConfig swaggerDocsConfig)

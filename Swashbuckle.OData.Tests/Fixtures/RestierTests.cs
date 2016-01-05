@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -11,8 +9,6 @@ using Microsoft.Owin.Hosting;
 using Microsoft.Restier.EntityFramework;
 using Microsoft.Restier.WebApi;
 using Microsoft.Restier.WebApi.Batch;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
 using NorthwindAPI.Models;
 using NUnit.Framework;
 using Owin;
@@ -43,6 +39,28 @@ namespace Swashbuckle.OData.Tests
                 restierPath.Should().NotBeNull();
                 restierPath.get.Should().NotBeNull();
                 restierPath.get.parameters.Single(parameter => parameter.name == "Id").type.Should().NotBeNullOrEmpty();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
+        public async Task It_provides_unique_operation_ids_for_restier()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, Configuration))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                swaggerDocument.paths.Values
+                    .Select(pathItem => pathItem.get)
+                    .GroupBy(operation => operation.operationId)
+                    .All(grouping => grouping.Count() == 1)
+                    .Should().BeTrue();
 
                 await ValidationUtils.ValidateSwaggerJson();
             }
