@@ -18,12 +18,15 @@ namespace SwashbuckleODataSample.ODataControllers
             Data = new ConcurrentDictionary<int, Product>();
             var rand = new Random();
 
+            var enumValues = Enum.GetValues(typeof(MyEnum));
+
             Enumerable.Range(0, 100).Select(i => new Product
             {
                 Id = i,
                 Name = "Product " + i,
-                Price = rand.NextDouble()*1000
-            }).ToList().ForEach(p => Data.TryAdd(p.Id, p));
+                Price = rand.NextDouble()*1000,
+                EnumValue = (MyEnum)enumValues.GetValue(rand.Next(enumValues.Length))
+        }).ToList().ForEach(p => Data.TryAdd(p.Id, p));
         }
 
         /// <summary>
@@ -33,6 +36,16 @@ namespace SwashbuckleODataSample.ODataControllers
         public IQueryable<Product> GetProducts()
         {
             return Data.Values.AsQueryable();
+        }
+
+        /// <summary>
+        /// Demonstrates a function that accepts an enum parameter from the OData URI.
+        /// </summary>
+        [HttpGet]
+        [ResponseType(typeof(List<Product>))]
+        public IHttpActionResult GetByEnumValue([FromODataUri]MyEnum EnumValue)
+        {
+            return Ok(Data.Values.Where(product => product.EnumValue == EnumValue));
         }
 
         /// <summary>

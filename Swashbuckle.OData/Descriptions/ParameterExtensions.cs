@@ -88,6 +88,10 @@ namespace Swashbuckle.OData.Descriptions
                     switch (type)
                     {
                         case "string":
+                            if (parameter.@enum != null && parameter.@enum.Any())
+                            {
+                                return parameter.@enum.First().ToString();
+                            }
                             return "\'SampleString\'";
                         case "boolean":
                             return "true";

@@ -17,6 +17,31 @@ namespace Swashbuckle.OData.Tests
     public class FunctionTests
     {
         [Test]
+        public async Task It_supports_functions_with_enum_parameters()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+                // Verify that the OData route in the test controller is valid
+                var products = await httpClient.GetJsonAsync<ODataResponse<Product1>>("/odata/v1/Products/Default.EnumParam(Id=3,EnumValue=SwashbuckleODataSample.Models.MyEnum'ValueOne')");
+                products.Should().NotBeNull();
+                products.Value.Count.Should().Be(2);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/v1/Products/Default.EnumParam(Id={Id},EnumValue=SwashbuckleODataSample.Models.MyEnum'{EnumValue}')", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
         public async Task It_supports_functions_with_multiple_parameters()
         {
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller))))
@@ -167,6 +192,12 @@ namespace Swashbuckle.OData.Tests
             builder.EntitySet<Product>("Products");
 
             var productType = builder.EntityType<Product>();
+
+            // Function bound to a collection that accepts an enum parameter
+            var enumParamFunction = productType.Collection.Function("EnumParam");
+            enumParamFunction.Parameter<int>("Id");
+            enumParamFunction.Parameter<MyEnum>("EnumValue");
+            enumParamFunction.ReturnsCollectionFromEntitySet<Product>("Products");
 
             // Function bound to a collection that accepts multiple parameters
             var multiParamFunction = productType.Collection.Function("MultipleParams");

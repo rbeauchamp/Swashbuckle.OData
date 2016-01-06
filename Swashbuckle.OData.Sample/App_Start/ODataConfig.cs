@@ -98,6 +98,11 @@ namespace SwashbuckleODataSample
 
             var productType = builder.EntityType<Product>();
 
+            // Function bound to a collection that accepts an enum parameter
+            var enumParamFunction = productType.Collection.Function("GetByEnumValue");
+            enumParamFunction.Parameter<MyEnum>("EnumValue");
+            enumParamFunction.ReturnsCollectionFromEntitySet<Product>("Products");
+
             // Function bound to an entity set
             // Returns the most expensive product, a single entity
             productType.Collection

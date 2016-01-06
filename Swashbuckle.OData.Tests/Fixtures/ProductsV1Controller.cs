@@ -34,6 +34,13 @@ namespace Swashbuckle.OData.Tests
             return Ok(Data.Values.Take(2));
         }
 
+        [HttpGet]
+        [ResponseType(typeof(List<Product>))]
+        public IHttpActionResult EnumParam([FromODataUri]int Id, [FromODataUri]MyEnum EnumValue)
+        {
+            return Ok(Data.Values.Take(2));
+        }
+
         /// <summary>
         /// Get the most expensive product. This is a function bound to a collection.
         /// </summary>

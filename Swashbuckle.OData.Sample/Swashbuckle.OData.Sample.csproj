@@ -144,6 +144,7 @@
     <Compile Include="App_Start\ODataConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="DocumentFilters\ApplyResourceDocumentation.cs" />
+    <Compile Include="Models\MyEnum.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="ODataControllers\ProductsController.cs" />
     <Compile Include="Repositories\RestierODataContext.cs" />

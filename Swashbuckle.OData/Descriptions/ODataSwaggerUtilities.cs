@@ -200,14 +200,10 @@ namespace Swashbuckle.OData.Descriptions
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
-            if (operation.ReturnType == null)
-            {
-                swaggerResponses.Response("204", "Empty response");
-            }
-            else
-            {
-                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
-            }
+
+            Contract.Assume(operation.ReturnType != null);
+
+            swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
 
             var swaggerOperation = new Operation()
                 .Summary("Call operation  " + operation.Name)
@@ -264,14 +260,10 @@ namespace Swashbuckle.OData.Descriptions
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
-            if (operation.ReturnType == null)
-            {
-                swaggerResponses.Response("204", "Empty response");
-            }
-            else
-            {
-                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
-            }
+
+            Contract.Assume(operation.ReturnType != null);
+
+            swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
 
             var swaggerOperation = new Operation()
                 .Summary("Call operation  " + operation.Name)
@@ -404,7 +396,7 @@ namespace Swashbuckle.OData.Descriptions
                 foreach (var parameter in edmOperationParameters.Skip(1))
                 {
                     Contract.Assume(parameter != null);
-                    swaggerOperationPath += parameter.Name + "=" + "{" + parameter.Name + "},";
+                    swaggerOperationPath += GetFunctionParameterAssignmentPath(parameter);
                 }
             }
             if (swaggerOperationPath.EndsWith(",", StringComparison.Ordinal))
@@ -414,6 +406,19 @@ namespace Swashbuckle.OData.Descriptions
             swaggerOperationPath += ")";
 
             return swaggerOperationPath;
+        }
+
+        private static string GetFunctionParameterAssignmentPath(IEdmOperationParameter parameter)
+        {
+            Contract.Requires(parameter != null);
+
+            switch (parameter.Type.Definition.TypeKind)
+            {
+                case EdmTypeKind.Enum:
+                    return parameter.Name + "=" + parameter.Type.FullName() + "\'{" + parameter.Name + "}\',";
+                default:
+                    return parameter.Name + "=" + "{" + parameter.Name + "},";
+            }
         }
 
         /// <summary>
@@ -456,14 +461,10 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(obj != null);
             Contract.Requires(edmType != null);
 
-            Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
+            Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType) edmType).ElementType != null);
 
             switch (edmType.TypeKind)
             {
-                case EdmTypeKind.Complex:
-                case EdmTypeKind.Entity:
-                    obj.@ref = "#/definitions/" + edmType.FullTypeName();
-                    break;
                 case EdmTypeKind.Primitive:
                     string format;
                     var type = GetPrimitiveTypeAndFormat((IEdmPrimitiveType) edmType, out format);
@@ -474,6 +475,7 @@ namespace Swashbuckle.OData.Descriptions
                     }
                     break;
                 case EdmTypeKind.Enum:
+                    obj.@enum = GetEnumValues((IEdmEnumType)edmType);
                     obj.type = "string";
                     break;
                 case EdmTypeKind.Collection:
@@ -483,15 +485,14 @@ namespace Swashbuckle.OData.Descriptions
                     obj.type = "array";
                     obj.items = nestedItem;
                     break;
-                case EdmTypeKind.None:
-                    break;
-                case EdmTypeKind.EntityReference:
-                    break;
-                case EdmTypeKind.TypeDefinition:
-                    break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(edmType.TypeKind));
             }
+        }
+
+        private static IList<object> GetEnumValues(IEdmEnumType edmEnumType)
+        {
+            return edmEnumType.Members.Select(edmEnumMember => edmEnumMember.Name).Cast<object>().ToList();
         }
 
         private static void SetSwaggerType(Schema obj, IEdmType edmType)
@@ -499,7 +500,7 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(obj != null);
             Contract.Requires(edmType != null);
 
-            Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType)edmType).ElementType != null);
+            Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType) edmType).ElementType != null);
 
             switch (edmType.TypeKind)
             {
@@ -526,14 +527,8 @@ namespace Swashbuckle.OData.Descriptions
                     obj.type = "array";
                     obj.items = nestedItem;
                     break;
-                case EdmTypeKind.None:
-                    break;
-                case EdmTypeKind.EntityReference:
-                    break;
-                case EdmTypeKind.TypeDefinition:
-                    break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(edmType.TypeKind));
             }
         }
 
@@ -735,8 +730,7 @@ namespace Swashbuckle.OData.Descriptions
         /// <typeparam name="T">The type of object being copied.</typeparam>
         /// <param name="source">The object instance to copy.</param>
         /// <returns>The copied object.</returns>
-        public static T DeepClone<T>(this T source)
-            where T : class
+        public static T DeepClone<T>(this T source) where T : class
         {
             Contract.Requires(source != null);
             Contract.Ensures(Contract.Result<T>() != null);
