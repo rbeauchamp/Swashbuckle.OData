@@ -92,5 +92,14 @@ namespace Swashbuckle.OData
 
             return nonNullSource.Concat(nonNullOther);
         }
+
+        public static IEnumerable<T> Concat<T>(this IEnumerable<T> source, T item)
+        {
+            var nonNullSource = source ?? new List<T>();
+
+            return item == null 
+                ? nonNullSource 
+                : nonNullSource.Concat(new List<T> {item});
+        }
     }
 }

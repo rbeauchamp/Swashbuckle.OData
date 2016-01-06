@@ -63,8 +63,7 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(swaggerDocsConfig != null);
 
-            AddInternalDocumentFilters(swaggerDocsConfig);
-            AddInternalOperationFilters(swaggerDocsConfig);
+            AddGlobalDocumentFilters(swaggerDocsConfig);
 
             return new SwaggerProviderOptions(
                 swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string, bool>>("_versionSupportResolver"),
@@ -80,25 +79,43 @@ namespace Swashbuckle.OData
                 swaggerDocsConfig.GetFieldValue<Func<Type, string>>("_schemaIdSelector"),
                 swaggerDocsConfig.GetFieldValue<bool>("_describeAllEnumsAsStrings"),
                 swaggerDocsConfig.GetFieldValue<bool>("_describeStringEnumsInCamelCase"),
-                swaggerDocsConfig.GetFieldValue<IList<Func<IOperationFilter>>>("_operationFilters", true).Select(factory => factory()),
-                swaggerDocsConfig.GetFieldValue<IList<Func<IDocumentFilter>>>("_documentFilters", true).Select(factory => factory()),
+                GetODataOperationFilters(swaggerDocsConfig),
+                GetODataDocumentFilters(swaggerDocsConfig),
                 swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver")
             );
         }
 
-        private static void AddInternalDocumentFilters(SwaggerDocsConfig swaggerDocsConfig)
+        /// <summary>
+        /// Gets operation filters that will only be applied to OData operations.
+        /// </summary>
+        /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
+        private static IEnumerable<IOperationFilter> GetODataOperationFilters(SwaggerDocsConfig swaggerDocsConfig)
         {
-            Contract.Requires(swaggerDocsConfig != null);
-
-            swaggerDocsConfig.DocumentFilter(() => new LimitSchemaGraphToTopLevelEntity());
-            swaggerDocsConfig.DocumentFilter(() => new EnsureUniqueOperationIdsFilter());
+            return swaggerDocsConfig.GetFieldValue<IList<Func<IOperationFilter>>>("_operationFilters", true)
+                .Select(factory => factory())
+                .Concat(new EnableQueryFilter());
         }
 
-        private static void AddInternalOperationFilters(SwaggerDocsConfig swaggerDocsConfig)
+        /// <summary>
+        /// Gets document filters that will only be applied to the SwaggerDocument built from the OData ApiExplorer.
+        /// </summary>
+        /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
+        private static IEnumerable<IDocumentFilter> GetODataDocumentFilters(SwaggerDocsConfig swaggerDocsConfig)
+        {
+            return swaggerDocsConfig.GetFieldValue<IList<Func<IDocumentFilter>>>("_documentFilters", true)
+                .Select(factory => factory())
+                .Concat(new LimitSchemaGraphToTopLevelEntity());
+        }
+
+        /// <summary>
+        /// Adds document filters that will be applied to SwaggerDocuments built from WebApi and OData ApiExplorers.
+        /// </summary>
+        /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
+        private static void AddGlobalDocumentFilters(SwaggerDocsConfig swaggerDocsConfig)
         {
             Contract.Requires(swaggerDocsConfig != null);
 
-            swaggerDocsConfig.OperationFilter(() => new EnableQueryFilter());
+            swaggerDocsConfig.DocumentFilter(() => new EnsureUniqueOperationIdsFilter());
         }
 
         /// <summary>

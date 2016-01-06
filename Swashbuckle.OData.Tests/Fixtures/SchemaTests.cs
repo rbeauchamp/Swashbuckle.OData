@@ -8,6 +8,8 @@ using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
 using Swashbuckle.Swagger;
+using SwashbuckleODataSample;
+using SwashbuckleODataSample.ApiControllers;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.ODataControllers;
 
@@ -17,7 +19,7 @@ namespace Swashbuckle.OData.Tests
     public class SchemaTests
     {
         [Test]
-        public async Task Schema_does_not_contain_nested_reference_types()
+        public async Task Schema_does_not_contain_nested_reference_types_for_odata_controllers()
         {
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(CustomersController))))
             {
@@ -35,9 +37,29 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
+        [Test]
+        public async Task Schema_contains_nested_reference_types_for_web_api_controllers()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, typeof(ClientsController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                swaggerDocument.definitions["Client"].properties.ContainsKey("Projects").Should().BeTrue();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         private static void Configuration(IAppBuilder appBuilder, Type targetController)
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
+
+            WebApiConfig.Register(config);
 
             config.MapODataServiceRoute("DefaultODataRoute", "odata", GetDefaultModel());
 
