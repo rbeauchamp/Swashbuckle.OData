@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Web.Http.Description;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
     internal static class ParameterExtensions
     {
-        public static ParameterSource MapSource(this Parameter parameter)
+        public static ParameterSource MapToSwaggerSource(this Parameter parameter)
         {
             Contract.Requires(parameter != null);
 
@@ -23,6 +24,27 @@ namespace Swashbuckle.OData.Descriptions
                     return ParameterSource.FormData;
                 case "body":
                     return ParameterSource.Body;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(parameter), parameter, null);
+            }
+        }
+
+        public static ApiParameterSource MapToApiParameterSource(this Parameter parameter)
+        {
+            Contract.Requires(parameter != null);
+
+            switch (parameter.@in)
+            {
+                case "query":
+                    return ApiParameterSource.FromUri;
+                case "header":
+                    return ApiParameterSource.Unknown;
+                case "path":
+                    return ApiParameterSource.FromUri;
+                case "formData":
+                    return ApiParameterSource.FromBody;
+                case "body":
+                    return ApiParameterSource.FromBody;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(parameter), parameter, null);
             }

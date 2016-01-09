@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Web.Http;
+using System.Web.Http.Description;
 using System.Web.OData;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
@@ -28,6 +29,7 @@ namespace Swashbuckle.OData.Tests.Containment
         }
 
         [EnableQuery]
+        [ResponseType(typeof(List<PaymentInstrument>))]
         public IHttpActionResult GetPayinPIs(int key)
         {
             var payinPIs = _accounts.Single(a => a.AccountID == key).PayinPIs;
@@ -36,6 +38,7 @@ namespace Swashbuckle.OData.Tests.Containment
 
         [EnableQuery]
         [ODataRoute("Accounts({accountId})/PayinPIs({paymentInstrumentId})")]
+        [ResponseType(typeof(PaymentInstrument))]
         public IHttpActionResult GetSinglePayinPI(int accountId, int paymentInstrumentId)
         {
             var payinPIs = _accounts.Single(a => a.AccountID == accountId).PayinPIs;
@@ -44,6 +47,7 @@ namespace Swashbuckle.OData.Tests.Containment
         }
 
         [EnableQuery]
+        [ResponseType(typeof(PaymentInstrument))]
         public IHttpActionResult GetPayoutPI(int key, int piKey)
         {
             var payoutPI = _accounts.Single(a => a.AccountID == key).PayoutPI;
@@ -51,6 +55,7 @@ namespace Swashbuckle.OData.Tests.Containment
         }
 
         // POST ~/Accounts(100)/PayinPIs
+        [ResponseType(typeof(PaymentInstrument))]
         public IHttpActionResult PostToPayinPIsFromAccount(int key, PaymentInstrument pi)
         {
             var account = _accounts.Single(a => a.AccountID == key);
@@ -61,6 +66,7 @@ namespace Swashbuckle.OData.Tests.Containment
 
         // PUT ~/Accounts(100)/PayoutPI
         [ODataRoute("Accounts({accountId})/PayoutPI")]
+        [ResponseType(typeof(PaymentInstrument))]
         public IHttpActionResult PutToPayoutPIFromAccount(int accountId, [FromBody] PaymentInstrument paymentInstrument)
         {
             var account = _accounts.Single(a => a.AccountID == accountId);
@@ -70,6 +76,7 @@ namespace Swashbuckle.OData.Tests.Containment
 
         // PUT ~/Accounts(100)/PayinPIs(101)
         [ODataRoute("Accounts({accountId})/PayinPIs({paymentInstrumentId})")]
+        [ResponseType(typeof(PaymentInstrument))]
         public IHttpActionResult PutToPayinPI(int accountId, int paymentInstrumentId, [FromBody] PaymentInstrument paymentInstrument)
         {
             var account = _accounts.Single(a => a.AccountID == accountId);

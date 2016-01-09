@@ -211,6 +211,7 @@
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
     <Compile Include="LimitSchemaGraphToTopLevelEntity.cs" />
+    <Compile Include="ODataResponse.cs" />
     <Compile Include="ODataSwaggerProviderOptions.cs" />
     <Compile Include="SwaggerDocsConfigExtensions.cs" />
     <Compile Include="SwaggerProviderOptions.cs" />

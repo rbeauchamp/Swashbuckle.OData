@@ -155,6 +155,7 @@
     <Compile Include="Fixtures\PutTests.cs" />
     <Compile Include="Fixtures\RestierTests.cs" />
     <Compile Include="Fixtures\SchemaTests.cs" />
+    <Compile Include="Fixtures\ResponseModelTests.cs" />
     <Compile Include="Fixtures\StringTypeUrlParamTests.cs" />
     <Compile Include="HttpClientUtils.cs" />
     <Compile Include="Fixtures\GetTests.cs" />
@@ -171,7 +172,6 @@
     <Compile Include="NorthwindAPI\Supplier.cs" />
     <Compile Include="NorthwindAPI\Territory.cs" />
     <Compile Include="ODataQueryOptions\ODataQueryOptionsTests.cs" />
-    <Compile Include="ODataResponse.cs" />
     <Compile Include="ODataVersionControllerSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpExtensions.cs" />

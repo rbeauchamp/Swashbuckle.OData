@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -33,11 +34,11 @@ namespace Swashbuckle.OData.Descriptions
             IEnumerable<MediaTypeFormatter> supportedResponseFormatters = new List<MediaTypeFormatter>();
             if (mediaTypeFormatterCollection != null)
             {
-                supportedRequestBodyFormatters = bodyParameter != null ? mediaTypeFormatterCollection.Where(f => f is ODataMediaTypeFormatter && f.CanReadType(bodyParameter.ParameterDescriptor.ParameterType)) : Enumerable.Empty<MediaTypeFormatter>();
+                supportedRequestBodyFormatters = bodyParameter != null ? mediaTypeFormatterCollection.Where(CanReadODataType(oDataActionDescriptor, bodyParameter)) : Enumerable.Empty<MediaTypeFormatter>();
 
                 // response formatters
                 var returnType = responseDescription.ResponseType ?? responseDescription.DeclaredType;
-                supportedResponseFormatters = returnType != null && returnType != typeof (void) ? mediaTypeFormatterCollection.Where(f => f is ODataMediaTypeFormatter && f.CanWriteType(returnType)) : Enumerable.Empty<MediaTypeFormatter>();
+                supportedResponseFormatters = returnType != null && returnType != typeof (void) ? mediaTypeFormatterCollection.Where(CanWriteODataType(oDataActionDescriptor, returnType)) : Enumerable.Empty<MediaTypeFormatter>();
 
 
                 // Replacing the formatter tracers with formatters if tracers are present.
@@ -82,6 +83,36 @@ namespace Swashbuckle.OData.Descriptions
 
                 apiDescriptions.Add(apiDescription);
             }
+        }
+
+        private static Func<MediaTypeFormatter, bool> CanWriteODataType(ODataActionDescriptor oDataActionDescriptor, Type returnType)
+        {
+            return mediaTypeFormatter =>
+            {
+                var oDataMediaTypeFormatter = mediaTypeFormatter as ODataMediaTypeFormatter;
+
+                if (oDataMediaTypeFormatter != null)
+                {
+                    oDataMediaTypeFormatter.SetInstanceProperty("Request", oDataActionDescriptor.Request);
+                    return mediaTypeFormatter.CanWriteType(returnType);
+                }
+                return false;
+            };
+        }
+
+        private static Func<MediaTypeFormatter, bool> CanReadODataType(ODataActionDescriptor oDataActionDescriptor, ApiParameterDescription bodyParameter)
+        {
+            return mediaTypeFormatter =>
+            {
+                var oDataMediaTypeFormatter = mediaTypeFormatter as ODataMediaTypeFormatter;
+
+                if (oDataMediaTypeFormatter != null)
+                {
+                    oDataMediaTypeFormatter.SetInstanceProperty("Request", oDataActionDescriptor.Request);
+                    return mediaTypeFormatter.CanReadType(bodyParameter.ParameterDescriptor.ParameterType);
+                }
+                return false;
+            };
         }
 
         /// <summary>

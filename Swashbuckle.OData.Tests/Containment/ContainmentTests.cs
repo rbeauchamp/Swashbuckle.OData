@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.OData.Extensions;
 using FluentAssertions;
@@ -47,6 +48,10 @@ namespace Swashbuckle.OData.Tests.Containment
                 PathItem pathItem;
                 swaggerDocument.paths.TryGetValue("/odata/Accounts({accountId})/PayinPIs({paymentInstrumentId})", out pathItem);
                 pathItem.Should().NotBeNull();
+                pathItem.get.Should().NotBeNull();
+                pathItem.get.produces.Should().NotBeNull();
+                pathItem.get.produces.Count.Should().Be(1);
+                pathItem.get.produces.First().Should().Be("application/json");
 
                 await ValidationUtils.ValidateSwaggerJson();
             }

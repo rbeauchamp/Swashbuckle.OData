@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
@@ -33,6 +34,30 @@ namespace Swashbuckle.OData.Tests
                 pathItem.Should().NotBeNull();
                 pathItem.post.Should().NotBeNull();
                 pathItem.post.summary.Should().NotBeNullOrWhiteSpace();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
+        public async Task It_consumes_application_json()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(CustomersController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/Customers", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.post.Should().NotBeNull();
+                pathItem.post.consumes.Should().NotBeNull();
+                pathItem.post.consumes.Count.Should().Be(1);
+                pathItem.post.consumes.First().Should().Be("application/json");
 
                 await ValidationUtils.ValidateSwaggerJson();
             }
