@@ -50,7 +50,8 @@ namespace Swashbuckle.OData.Descriptions
                 ParameterDescriptor = httpParameterDescriptor,
                 Name = httpParameterDescriptor.Prefix ?? httpParameterDescriptor.ParameterName,
                 Documentation = GetApiParameterDocumentation(parameter, httpParameterDescriptor),
-                SwaggerSource = parameter.MapSource()
+                SwaggerSource = parameter.MapToSwaggerSource(),
+                Source = parameter.MapToApiParameterSource()
             };
         }
 

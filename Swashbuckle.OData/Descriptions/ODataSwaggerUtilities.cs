@@ -57,7 +57,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameter("$orderby", "query", "Sorts the results.", "string", false)
                 .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
                 .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
-                .Parameter("$count", "query", "Includes a count of the matching results in the reponse.", "boolean", false);
+                .Parameter("$count", "query", "Includes a count of the matching results in the response.", "boolean", false);
         }
 
         /// <summary>

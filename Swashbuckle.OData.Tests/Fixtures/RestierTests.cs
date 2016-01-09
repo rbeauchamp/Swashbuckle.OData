@@ -144,9 +144,16 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/restier/Users", out pathItem);
                 var getUsersResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
                 getUsersResponse.Should().NotBeNull();
-                getUsersResponse.Value.schema.@ref.Should().BeNull();
-                getUsersResponse.Value.schema.items.@ref.Should().Be("#/definitions/User");
-                getUsersResponse.Value.schema.type.Should().Be("array");
+                getUsersResponse.Value.schema.@ref.Should().Be("#/definitions/ODataResponse[User]");
+                swaggerDocument.definitions.Should().ContainKey("ODataResponse[User]");
+                var responseSchema = swaggerDocument.definitions["ODataResponse[User]"];
+                responseSchema.Should().NotBeNull();
+                responseSchema.properties.Should().NotBeNull();
+                responseSchema.properties.Should().ContainKey("@odata.context");
+                responseSchema.properties["@odata.context"].type.Should().Be("string");
+                responseSchema.properties["value"].type.Should().Be("array");
+                responseSchema.properties["value"].items.Should().NotBeNull();
+                responseSchema.properties["value"].items.@ref.Should().Be("#/definitions/User");
 
                 await ValidationUtils.ValidateSwaggerJson();
             }

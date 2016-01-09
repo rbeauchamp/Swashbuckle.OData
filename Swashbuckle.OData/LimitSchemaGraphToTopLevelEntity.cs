@@ -15,17 +15,25 @@ namespace Swashbuckle.OData
         {
             foreach (var definition in swaggerDoc.definitions)
             {
-                var schema = definition.Value;
-                Contract.Assume(schema != null);
-
-                var properties = schema.properties.ToList();
-                foreach (var property in schema.properties)
+                if (IsEntityType(definition))
                 {
-                    RemoveCollectionTypeProperty(property, properties);
-                    RemoveReferenceTypeProperty(property, properties);
+                    var schema = definition.Value;
+                    Contract.Assume(schema != null);
+
+                    var properties = schema.properties.ToList();
+                    foreach (var property in schema.properties)
+                    {
+                        RemoveCollectionTypeProperty(property, properties);
+                        RemoveReferenceTypeProperty(property, properties);
+                    }
+                    schema.properties = properties.ToDictionary(property => property.Key, property => property.Value);
                 }
-                schema.properties = properties.ToDictionary(property => property.Key, property => property.Value);
             }
+        }
+
+        private static bool IsEntityType(KeyValuePair<string, Schema> definition)
+        {
+            return !definition.Key.StartsWith("ODataResponse[");
         }
 
         private static void RemoveCollectionTypeProperty(KeyValuePair<string, Schema> property, ICollection<KeyValuePair<string, Schema>> properties)

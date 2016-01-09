@@ -69,7 +69,7 @@ namespace Swashbuckle.OData.Descriptions
                 {
                     actionDescriptor = MapForRestierIfNecessary(actionDescriptor, potentialOperation);
 
-                    return new ODataActionDescriptor(actionDescriptor, oDataRoute, potentialPathTemplate, potentialOperation);
+                    return new ODataActionDescriptor(actionDescriptor, oDataRoute, potentialPathTemplate, request, potentialOperation);
                 }
             }
 
