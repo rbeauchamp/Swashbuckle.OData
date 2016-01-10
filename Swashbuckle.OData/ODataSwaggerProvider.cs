@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.ServiceModel.Description;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Swashbuckle.Application;
@@ -215,7 +216,7 @@ namespace Swashbuckle.OData
             if (responseType == null || responseType == typeof(void))
                 responses.Add("204", new Response { description = "No Content" });
             else
-                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegisterODataType(responseType) });
+                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegisterODataType(responseType, MessageDirection.Output) });
 
             var operation = new Operation
             {
@@ -288,7 +289,7 @@ namespace Swashbuckle.OData
 
             var parameterType = paramDesc.ParameterDescriptor.ParameterType;
             Contract.Assume(parameterType != null);
-            var schema = schemaRegistry.GetOrRegisterODataType(parameterType);
+            var schema = schemaRegistry.GetOrRegisterODataType(parameterType, MessageDirection.Input);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else

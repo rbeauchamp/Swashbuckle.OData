@@ -20,8 +20,6 @@ namespace Swashbuckle.OData.Descriptions
                     return ParameterSource.Header;
                 case "path":
                     return ParameterSource.Path;
-                case "formData":
-                    return ParameterSource.FormData;
                 case "body":
                     return ParameterSource.Body;
                 default:
@@ -41,8 +39,6 @@ namespace Swashbuckle.OData.Descriptions
                     return ApiParameterSource.Unknown;
                 case "path":
                     return ApiParameterSource.FromUri;
-                case "formData":
-                    return ApiParameterSource.FromBody;
                 case "body":
                     return ApiParameterSource.FromBody;
                 default:

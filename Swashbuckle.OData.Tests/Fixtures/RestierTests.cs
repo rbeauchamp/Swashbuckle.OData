@@ -144,9 +144,9 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/restier/Users", out pathItem);
                 var getUsersResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
                 getUsersResponse.Should().NotBeNull();
-                getUsersResponse.Value.schema.@ref.Should().Be("#/definitions/ODataResponse[User]");
-                swaggerDocument.definitions.Should().ContainKey("ODataResponse[User]");
-                var responseSchema = swaggerDocument.definitions["ODataResponse[User]"];
+                getUsersResponse.Value.schema.@ref.Should().Be("#/definitions/ODataResponse[List[User]]");
+                swaggerDocument.definitions.Should().ContainKey("ODataResponse[List[User]]");
+                var responseSchema = swaggerDocument.definitions["ODataResponse[List[User]]"];
                 responseSchema.Should().NotBeNull();
                 responseSchema.properties.Should().NotBeNull();
                 responseSchema.properties.Should().ContainKey("@odata.context");

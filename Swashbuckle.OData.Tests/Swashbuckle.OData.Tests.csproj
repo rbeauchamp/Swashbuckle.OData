@@ -149,10 +149,12 @@
     <Compile Include="Fixtures\FunctionTests.cs" />
     <Compile Include="Fixtures\GetHttpMethodNameTests.cs" />
     <Compile Include="Fixtures\ODataSwaggerProviderTests.cs" />
+    <Compile Include="Fixtures\ParameterTests\ByteParameterAndResponseTests.cs" />
     <Compile Include="Fixtures\PostTests.cs" />
     <Compile Include="Fixtures\PatchTests.cs" />
     <Compile Include="Fixtures\ProductsV1Controller.cs" />
     <Compile Include="Fixtures\PutTests.cs" />
+    <Compile Include="Fixtures\ParameterAndResponseTests.cs" />
     <Compile Include="Fixtures\RestierTests.cs" />
     <Compile Include="Fixtures\SchemaTests.cs" />
     <Compile Include="Fixtures\ResponseModelTests.cs" />
@@ -171,7 +173,7 @@
     <Compile Include="NorthwindAPI\Shipper.cs" />
     <Compile Include="NorthwindAPI\Supplier.cs" />
     <Compile Include="NorthwindAPI\Territory.cs" />
-    <Compile Include="ODataQueryOptions\ODataQueryOptionsTests.cs" />
+    <Compile Include="Fixtures\ODataQueryOptionsTests.cs" />
     <Compile Include="ODataVersionControllerSelector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpExtensions.cs" />

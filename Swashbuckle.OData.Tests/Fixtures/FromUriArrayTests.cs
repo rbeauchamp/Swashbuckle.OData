@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace Swashbuckle.OData.Tests
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
                 // Verify that the OData route in the test controller is valid
-                var products = await httpClient.GetJsonAsync<ODataResponse<Product2>>("/odata/ProductsWithIds(Ids=[0,1])");
+                var products = await httpClient.GetJsonAsync<ODataResponse<List<Product2>>>("/odata/ProductsWithIds(Ids=[0,1])");
                 products.Should().NotBeNull();
                 products.Value.Count.Should().Be(2);
 

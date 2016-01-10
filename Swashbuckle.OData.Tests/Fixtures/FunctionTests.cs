@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
@@ -24,7 +25,7 @@ namespace Swashbuckle.OData.Tests
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
                 // Verify that the OData route in the test controller is valid
-                var products = await httpClient.GetJsonAsync<ODataResponse<Product1>>("/odata/v1/Products/Default.EnumParam(Id=3,EnumValue=SwashbuckleODataSample.Models.MyEnum'ValueOne')");
+                var products = await httpClient.GetJsonAsync<ODataResponse<List<Product1>>>("/odata/v1/Products/Default.EnumParam(Id=3,EnumValue=SwashbuckleODataSample.Models.MyEnum'ValueOne')");
                 products.Should().NotBeNull();
                 products.Value.Count.Should().Be(2);
 
@@ -49,7 +50,7 @@ namespace Swashbuckle.OData.Tests
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
                 // Verify that the OData route in the test controller is valid
-                var products = await httpClient.GetJsonAsync<ODataResponse<Product1>>("/odata/v1/Products/Default.MultipleParams(Id=3,Year=2015)");
+                var products = await httpClient.GetJsonAsync<ODataResponse<List<Product1>>>("/odata/v1/Products/Default.MultipleParams(Id=3,Year=2015)");
                 products.Should().NotBeNull();
                 products.Value.Count.Should().Be(2);
 

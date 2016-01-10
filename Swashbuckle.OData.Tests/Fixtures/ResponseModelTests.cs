@@ -29,7 +29,7 @@ namespace Swashbuckle.OData.Tests
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
                 // Verify that the OData route in the test controller is valid
-                var oDataResponse = await httpClient.GetJsonAsync<ODataResponse<ProductResponse>>("/odata/ProductResponses");
+                var oDataResponse = await httpClient.GetJsonAsync<ODataResponse<List<ProductResponse>>>("/odata/ProductResponses");
                 oDataResponse.Value.Should().NotBeNull();
                 oDataResponse.Value.Count.Should().Be(20);
 
@@ -45,9 +45,9 @@ namespace Swashbuckle.OData.Tests
                 pathItem.get.produces.First().Should().Be("application/json");
                 var getResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
                 getResponse.Should().NotBeNull();
-                getResponse.Value.schema.@ref.Should().Be("#/definitions/ODataResponse[ProductResponse]");
-                swaggerDocument.definitions.Should().ContainKey("ODataResponse[ProductResponse]");
-                var responseSchema = swaggerDocument.definitions["ODataResponse[ProductResponse]"];
+                getResponse.Value.schema.@ref.Should().Be("#/definitions/ODataResponse[List[ProductResponse]]");
+                swaggerDocument.definitions.Should().ContainKey("ODataResponse[List[ProductResponse]]");
+                var responseSchema = swaggerDocument.definitions["ODataResponse[List[ProductResponse]]"];
                 responseSchema.Should().NotBeNull();
                 responseSchema.properties.Should().NotBeNull();
                 responseSchema.properties.Should().ContainKey("@odata.context");
@@ -68,7 +68,7 @@ namespace Swashbuckle.OData.Tests
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
                 // Verify that the OData route in the test controller is valid
-                var top10Response = await httpClient.GetJsonAsync<ODataResponse<Product5>>("/odata/ProductResponses/Default.Top10()");
+                var top10Response = await httpClient.GetJsonAsync<ODataResponse<List<Product5>>>("/odata/ProductResponses/Default.Top10()");
                 top10Response.Value.Should().NotBeNull();
                 top10Response.Value.Count.Should().Be(10);
 
@@ -80,9 +80,9 @@ namespace Swashbuckle.OData.Tests
                 swaggerDocument.paths.TryGetValue("/odata/ProductResponses/Default.Top10()", out pathItem);
                 var getResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
                 getResponse.Should().NotBeNull();
-                getResponse.Value.schema.@ref.Should().Be("#/definitions/ODataResponse[ProductResponse]");
-                swaggerDocument.definitions.Should().ContainKey("ODataResponse[ProductResponse]");
-                var responseSchema = swaggerDocument.definitions["ODataResponse[ProductResponse]"];
+                getResponse.Value.schema.@ref.Should().Be("#/definitions/ODataResponse[List[ProductResponse]]");
+                swaggerDocument.definitions.Should().ContainKey("ODataResponse[List[ProductResponse]]");
+                var responseSchema = swaggerDocument.definitions["ODataResponse[List[ProductResponse]]"];
                 responseSchema.Should().NotBeNull();
                 responseSchema.properties.Should().NotBeNull();
                 responseSchema.properties.Should().ContainKey("@odata.context");

@@ -29,7 +29,7 @@ namespace Swashbuckle.OData.Tests
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
                 // Verify that the OData route in the test controller is valid
-                var response = await httpClient.GetJsonAsync<ODataResponse<Product5>>("/odata/Product5s/Default.Top10()");
+                var response = await httpClient.GetJsonAsync<ODataResponse<List<Product5>>>("/odata/Product5s/Default.Top10()");
                 response.Value.Should().NotBeNull();
                 response.Value.Count.Should().Be(10);
 
