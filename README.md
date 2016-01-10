@@ -8,8 +8,9 @@ Swashbuckle.OData
 
 Extends Swashbuckle with OData v4 support!
 
+<!---
 ### <a href="http://swashbuckleodata.azurewebsites.net/swagger/" target="_blank">Try it out!</a> ###
-
+-->
 ## Getting Started ##
 
 Install [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle)
