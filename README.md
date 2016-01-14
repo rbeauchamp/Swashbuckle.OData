@@ -25,7 +25,7 @@ c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c)
 
 ### Custom Swagger Routes  ###
 
-The following snippet demonstrates how to configure a custom OData route such that it will appear in the Swagger UI:
+The following snippet demonstrates how to configure a custom swagger route such that it will appear in the Swagger UI:
 ```csharp
 // Let's say you map a custom OData route that doesn't follow the typical conventions
 var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: myCustomConventions);
@@ -45,6 +45,19 @@ public async Task<IHttpActionResult> Post([FromODataUri] int customerId, Order o
 {
   ...
 }
+```
+
+#### RESTier ####
+
+By default, Swashbuckle.OData only displays routes for top-level entity types. You can describe and display additional routes, for related types, in the Swagger UI by configuring custom swagger routes. For example from the Northwind model, to display a route that queries an Order for a Customer, configure the following:
+
+```csharp
+var restierRoute = await config.MapRestierRoute<DbApi<NorthwindContext>>("RESTierRoute", "restier", new RestierBatchHandler(server));
+
+config.AddCustomSwaggerRoute(restierRoute, "/Customers({CustomerId})/Orders({OrderId})")
+    .Operation(HttpMethod.Get)
+    .PathParameter<string>("CustomerId")
+    .PathParameter<int>("OrderId");
 ```
 
 ### OWIN  ###
