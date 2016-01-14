@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
@@ -182,6 +183,28 @@ namespace Swashbuckle.OData.Tests
         }
 
         [Test]
+        public async Task It_supports_custom_swagger_routes_against_restier()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, NorthwindConfiguration))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/restier/Customers('{CustomerId}')/Orders({OrderId})", out pathItem);
+                pathItem.Should().NotBeNull();
+                var getResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
+                getResponse.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
         public async Task It_generates_valid_swagger_2_0_json_for_the_northwind_model()
         {
             using (WebApp.Start(HttpClientUtils.BaseAddress, NorthwindConfiguration))
@@ -226,7 +249,12 @@ namespace Swashbuckle.OData.Tests
 
             config.Services.Replace(typeof(IHttpControllerSelector), new RestierControllerSelector(config));
 
-            await config.MapRestierRoute<DbApi<NorthwindContext>>("RESTierRoute", "restier", new RestierBatchHandler(server));
+            var customSwaggerRoute = await config.MapRestierRoute<DbApi<NorthwindContext>>("RESTierRoute", "restier", new RestierBatchHandler(server));
+
+            config.AddCustomSwaggerRoute(customSwaggerRoute, "/Customers({CustomerId})/Orders({OrderId})")
+                .Operation(HttpMethod.Get)
+                .PathParameter<string>("CustomerId")
+                .PathParameter<int>("OrderId");
 
             config.EnsureInitialized();
         }

@@ -152,29 +152,6 @@ namespace Swashbuckle.OData.Descriptions
             return FindType(fullTypeName);
         }
 
-        public static Type GetEntityType(this Schema schema)
-        {
-            Contract.Requires(schema != null);
-            Contract.Requires(!string.IsNullOrWhiteSpace(schema.@ref));
-
-            var fullTypeName = schema.@ref.Replace("#/definitions/", string.Empty);
-
-            return FindType(fullTypeName);
-        }
-
-        public static Type GetEntitySetType(this Schema schema)
-        {
-            Contract.Requires(schema != null);
-            Contract.Requires(schema.type == "array");
-            Contract.Requires(schema.items != null);
-            Contract.Requires(schema.items.@ref != null);
-
-            var queryableType = typeof(IQueryable<>);
-            var fullTypeName = schema.items.@ref.Replace("#/definitions/", string.Empty);
-            var entityType = FindType(fullTypeName);
-            return queryableType.MakeGenericType(entityType);
-        }
-
         /// <summary>
         /// Looks in all loaded assemblies for the given type.
         /// </summary>

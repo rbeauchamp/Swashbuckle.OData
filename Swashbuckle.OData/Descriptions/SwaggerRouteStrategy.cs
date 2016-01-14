@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.OData.Extensions;
+using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
 using Flurl;
+using Microsoft.OData.Edm;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
@@ -67,7 +70,7 @@ namespace Swashbuckle.OData.Descriptions
 
                 if (actionDescriptor != null)
                 {
-                    actionDescriptor = MapForRestierIfNecessary(actionDescriptor, potentialOperation);
+                    actionDescriptor = MapForRestierIfNecessary(request, actionDescriptor);
 
                     return new ODataActionDescriptor(actionDescriptor, oDataRoute, potentialPathTemplate, request, potentialOperation);
                 }
@@ -108,47 +111,44 @@ namespace Swashbuckle.OData.Descriptions
             return httpRequestMessage;
         }
 
-        private static HttpActionDescriptor MapForRestierIfNecessary(HttpActionDescriptor actionDescriptor, Operation operation)
+        private static HttpActionDescriptor MapForRestierIfNecessary(HttpRequestMessage request, HttpActionDescriptor actionDescriptor)
         {
+            Contract.Requires(request != null);
             Contract.Requires(actionDescriptor != null);
-            Contract.Requires(operation != null);
             Contract.Requires(actionDescriptor.ControllerDescriptor != null);
-
-            Contract.Assume(actionDescriptor.ControllerDescriptor.ControllerName != @"Restier" || operation.responses != null);
 
             if (actionDescriptor.ControllerDescriptor.ControllerName == "Restier")
             {
-                Contract.Assume(operation.tags != null);
-                Contract.Assume(operation.tags.Any());
-                var entitySetName = operation.tags.First();
-                Contract.Assume(!string.IsNullOrWhiteSpace(entitySetName));
-                Response response;
-                operation.responses.TryGetValue("200", out response);
-                if (!string.IsNullOrWhiteSpace(response?.schema?.@ref))
+                var odataPath = request.ODataProperties().Path;
+                var entitySetName = odataPath.NavigationSource.Name;
+                Type returnType = null;
+                if (ReturnsValue(request))
                 {
-                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntityType(), actionDescriptor.SupportedHttpMethods, entitySetName)
+                    if (odataPath.EdmType.TypeKind == EdmTypeKind.Collection)
                     {
-                        Configuration = actionDescriptor.Configuration,
-                        ControllerDescriptor = actionDescriptor.ControllerDescriptor
-                    };
-                }
-                if (response?.schema?.type == "array")
-                {
-                    Contract.Assume(response.schema.items != null);
-                    Contract.Assume(response.schema.items.@ref != null);
-                    return new RestierHttpActionDescriptor(actionDescriptor.ActionName, response.schema.GetEntitySetType(), actionDescriptor.SupportedHttpMethods, entitySetName)
+                        var edmElementType = ((IEdmCollectionType) odataPath.EdmType).ElementType;
+                        var elementType = EdmLibHelpers.GetClrType(edmElementType, request.ODataProperties().Model);
+                        var queryableType = typeof (IQueryable<>);
+                        returnType = queryableType.MakeGenericType(elementType);
+                    }
+                    else
                     {
-                        Configuration = actionDescriptor.Configuration,
-                        ControllerDescriptor = actionDescriptor.ControllerDescriptor
-                    };
+                        returnType = EdmLibHelpers.GetClrType(odataPath.EdmType.ToEdmTypeReference(false), request.ODataProperties().Model);
+                    }
                 }
-                return new RestierHttpActionDescriptor(actionDescriptor.ActionName, null, actionDescriptor.SupportedHttpMethods, entitySetName)
+
+                return new RestierHttpActionDescriptor(actionDescriptor.ActionName, returnType, actionDescriptor.SupportedHttpMethods, entitySetName)
                 {
                     Configuration = actionDescriptor.Configuration,
                     ControllerDescriptor = actionDescriptor.ControllerDescriptor
                 };
             }
             return actionDescriptor;
+        }
+
+        private static bool ReturnsValue(HttpRequestMessage request)
+        {
+            return request.Method == HttpMethod.Get || request.Method == HttpMethod.Post;
         }
 
         private static ODataPath GenerateSampleODataPath(ODataRoute oDataRoute, string sampleODataAbsoluteUri)

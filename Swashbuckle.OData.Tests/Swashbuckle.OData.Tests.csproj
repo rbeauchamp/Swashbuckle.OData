@@ -143,9 +143,9 @@
     <Compile Include="Containment\ODataModels.cs" />
     <Compile Include="Containment\Program.cs" />
     <Compile Include="ContentType.cs" />
+    <Compile Include="Fixtures\CustomSwaggerRouteTests.cs" />
     <Compile Include="Fixtures\EnableQueryTests.cs" />
     <Compile Include="Fixtures\FromUriArrayTests.cs" />
-    <Compile Include="Fixtures\CustomRouteTests.cs" />
     <Compile Include="Fixtures\FunctionTests.cs" />
     <Compile Include="Fixtures\GetHttpMethodNameTests.cs" />
     <Compile Include="Fixtures\ODataSwaggerProviderTests.cs" />

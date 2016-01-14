@@ -18,7 +18,7 @@ using SwashbuckleODataSample.ODataControllers;
 namespace Swashbuckle.OData.Tests
 {
     [TestFixture]
-    public class CustomRouteTests
+    public class CustomSwaggerRouteTests
     {
         [Test]
         public async Task It_allows_definition_of_custom_routes()
