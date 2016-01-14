@@ -23,7 +23,7 @@ In `SwaggerConfig` configure the custom provider:
 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
 ```
 
-### Custom Routes  ###
+### Custom Swagger Routes  ###
 
 The following snippet demonstrates how to configure a custom OData route such that it will appear in the Swagger UI:
 ```csharp
