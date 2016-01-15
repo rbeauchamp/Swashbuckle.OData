@@ -49,7 +49,7 @@ public async Task<IHttpActionResult> Post([FromODataUri] int customerId, Order o
 
 #### RESTier ####
 
-By default, Swashbuckle.OData only displays routes for top-level entity types. You can describe and display additional routes, for related types, in the Swagger UI by configuring custom swagger routes. For example from the Northwind model, to display a route that queries an Order for a Customer, configure the following:
+By default, Swashbuckle.OData only displays RESTier routes for top-level entity types. You can describe and display additional routes, for related types, in the Swagger UI by configuring custom swagger routes. For example from the Northwind model, to display a route that queries an Order for a Customer, configure the following:
 
 ```csharp
 var restierRoute = await config.MapRestierRoute<DbApi<NorthwindContext>>("RESTierRoute", "restier", new RestierBatchHandler(server));
