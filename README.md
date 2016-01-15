@@ -28,7 +28,7 @@ c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c)
 The following snippet demonstrates how to configure a custom swagger route such that it will appear in the Swagger UI:
 ```csharp
 // Let's say you map a custom OData route that doesn't follow the OData conventions 
-// and where the target controller action does not have an [ODataRoute] attribute
+// and where the target controller action doesn't have an [ODataRoute] attribute
 var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: myCustomConventions);
 
 // Then describe your route to Swashbuckle.OData so that it will appear in the Swagger UI
