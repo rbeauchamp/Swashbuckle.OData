@@ -89,9 +89,8 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Returns the entity with the key from " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
-                .Parameter("$expand", "query", "Expands related entities inline.", "string", false))
-                .Parameters(keyParameters.DeepClone()
-                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
+                  .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
+                  .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse()),
 
                 patch = new Operation()
