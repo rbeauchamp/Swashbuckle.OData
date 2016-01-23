@@ -11,7 +11,7 @@ namespace Swashbuckle.OData.Descriptions
             if (swaggerParameter.@in != "query" && parameterIndex < actionDescriptor.GetParameters().Count)
             {
                 var parameterDescriptor = actionDescriptor.GetParameters()[parameterIndex];
-                if (parameterDescriptor != null && !parameterDescriptor.IsODataQueryOptions())
+                if (parameterDescriptor != null && !parameterDescriptor.IsODataLibraryType())
                 {
                     var httpControllerDescriptor = actionDescriptor.ControllerDescriptor;
                     Contract.Assume(httpControllerDescriptor != null);

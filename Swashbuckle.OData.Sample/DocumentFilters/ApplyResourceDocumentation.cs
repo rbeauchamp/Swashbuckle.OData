@@ -18,7 +18,7 @@ namespace SwashbuckleODataSample.DocumentFilters
                 new Tag { name = "Orders", description = "an ODataController resource" },
                 new Tag { name = "CustomersV1", description = "a versioned ODataController resource" },
                 new Tag { name = "Users", description = "a RESTier resource" },
-                new Tag { name = "Products", description = "demonstrates functions" }
+                new Tag { name = "Products", description = "demonstrates OData functions and actions" }
             };
         }
     }

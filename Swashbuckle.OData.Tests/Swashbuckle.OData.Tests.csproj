@@ -149,6 +149,7 @@
     <Compile Include="Fixtures\FunctionTests.cs" />
     <Compile Include="Fixtures\GetHttpMethodNameTests.cs" />
     <Compile Include="Fixtures\ODataSwaggerProviderTests.cs" />
+    <Compile Include="Fixtures\ActionTests.cs" />
     <Compile Include="Fixtures\ParameterTests\ByteParameterAndResponseTests.cs" />
     <Compile Include="Fixtures\PostTests.cs" />
     <Compile Include="Fixtures\PatchTests.cs" />

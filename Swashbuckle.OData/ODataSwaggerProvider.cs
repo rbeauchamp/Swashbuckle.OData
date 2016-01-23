@@ -216,7 +216,7 @@ namespace Swashbuckle.OData
             if (responseType == null || responseType == typeof(void))
                 responses.Add("204", new Response { description = "No Content" });
             else
-                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegisterODataType(responseType, MessageDirection.Output) });
+                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegisterResponseType(responseType) });
 
             var operation = new Operation
             {
@@ -252,13 +252,12 @@ namespace Swashbuckle.OData
             var parameter = new Parameter
             {
                 name = paramDesc.Name,
-                @in = @in
+                @in = @in,
+                required = inPath || !paramDesc.ParameterDescriptor.IsOptional,
+                @default = paramDesc.ParameterDescriptor.DefaultValue
             };
 
-            parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
-            parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
-
-            var schema = schemaRegistry.GetOrRegister(paramDesc.ParameterDescriptor.ParameterType);
+            var schema = schemaRegistry.GetOrRegisterParameterType(paramDesc.ParameterDescriptor);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else
@@ -281,15 +280,15 @@ namespace Swashbuckle.OData
             {
                 name = paramDesc.Name,
                 description = paramDesc.Documentation,
-                @in = @in
+                @in = @in,
+                required = inPath || !paramDesc.ParameterDescriptor.IsOptional,
+                @default = paramDesc.ParameterDescriptor.DefaultValue
             };
 
-            parameter.required = inPath || !paramDesc.ParameterDescriptor.IsOptional;
-            parameter.@default = paramDesc.ParameterDescriptor.DefaultValue;
 
             var parameterType = paramDesc.ParameterDescriptor.ParameterType;
             Contract.Assume(parameterType != null);
-            var schema = schemaRegistry.GetOrRegisterODataType(parameterType, MessageDirection.Input);
+            var schema = schemaRegistry.GetOrRegisterParameterType(paramDesc.ParameterDescriptor);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else

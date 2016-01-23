@@ -29,7 +29,7 @@ namespace Swashbuckle.OData.Descriptions
 
             var edmType = GetEdmModel().GetEdmType(typeof (T));
             Contract.Assume(edmType != null);
-            _operation.Parameters().Parameter(parameterName, ParameterSource.Path.ToString().ToLower(), null, edmType);
+            _operation.Parameters().Parameter(parameterName, ParameterSource.Path.ToString().ToLower(), null, edmType, true);
 
             return this;
         }
@@ -46,7 +46,7 @@ namespace Swashbuckle.OData.Descriptions
 
             var edmType = GetEdmModel().GetEdmType(typeof(T));
             Contract.Assume(edmType != null);
-            _operation.Parameters().Parameter(parameterName, ParameterSource.Body.ToString().ToLower(), null, edmType);
+            _operation.Parameters().Parameter(parameterName, ParameterSource.Body.ToString().ToLower(), null, edmType, true);
 
             return this;
         }

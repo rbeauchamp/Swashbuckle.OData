@@ -13,7 +13,7 @@ namespace Swashbuckle.OData.Descriptions
             if (swaggerParameter.description != null && swaggerParameter.description.StartsWith("key:"))
             {
                 var parameterDescriptor = actionDescriptor.GetParameters()?.SingleOrDefault(descriptor => descriptor.ParameterName == "key");
-                if (parameterDescriptor != null && !parameterDescriptor.IsODataQueryOptions())
+                if (parameterDescriptor != null && !parameterDescriptor.IsODataLibraryType())
                 {
                     var httpControllerDescriptor = actionDescriptor.ControllerDescriptor;
                     Contract.Assume(httpControllerDescriptor != null);

@@ -177,6 +177,7 @@
     <Compile Include="Descriptions\HttpParameterDescriptorExtensions.cs" />
     <Compile Include="Descriptions\IODataActionDescriptorMapper.cs" />
     <Compile Include="Descriptions\IODataActionDescriptorExplorer.cs" />
+    <Compile Include="Descriptions\MapToODataActionParameter.cs" />
     <Compile Include="Descriptions\ODataActionDescriptor.cs" />
     <Compile Include="Descriptions\ApiDescriptionEqualityComparer.cs" />
     <Compile Include="Descriptions\HttpParameterBindingExtensions.cs" />

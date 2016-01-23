@@ -51,6 +51,7 @@ namespace Swashbuckle.OData
         {
             return new List<IParameterMapper>
             {
+                new MapToODataActionParameter(),
                 new MapRestierParameter(),
                 new MapByParameterName(),
                 new MapByDescription(),

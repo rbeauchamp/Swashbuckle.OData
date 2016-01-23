@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics.Contracts;
 using System.Web.Http.Controllers;
+using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
 {
@@ -19,5 +21,17 @@ namespace Swashbuckle.OData.Descriptions
         public override bool IsOptional { get; }
 
 
+    }
+
+    internal class ODataActionParameterDescriptor : ODataParameterDescriptor
+    {
+        public ODataActionParameterDescriptor(string parameterName, Type parameterType, bool isOptional, Schema schema) : base(parameterName, parameterType, isOptional)
+        {
+            Contract.Requires(schema != null);
+
+            Schema = schema;
+        }
+
+        public Schema Schema { get; private set; }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.OData;
@@ -121,6 +122,37 @@ namespace SwashbuckleODataSample.ODataControllers
         public IQueryable<Product> ProductsWithIds([FromODataUri]int[] Ids)
         {
             return Data.Values.Where(p => Ids.Contains(p.Id)).AsQueryable();
+        }
+
+        /// <summary>
+        /// Creates a product. This action accepts parameters via an ODataActionParameters object.
+        /// </summary>
+        /// <param name="parameters">The OData action parameters.</param>
+        [HttpPost]
+        [ResponseType(typeof(Product))]
+        public IHttpActionResult Create(ODataActionParameters parameters)
+        {
+            var product = new Product
+            {
+                Id = Data.Values.Max(existingProduct => existingProduct.Id) + 1,
+                Name = (string)parameters["name"],
+                Price = (double)parameters["price"],
+                EnumValue = (MyEnum)parameters["enumValue"]
+            };
+            Data.TryAdd(product.Id, product);
+            return Created(product);
+        }
+
+        /// <summary>
+        /// Rates a product. This action targets a specific entity by id.
+        /// </summary>
+        /// <param name="key">The product id.</param>
+        /// <param name="parameters">The OData action parameters.</param>
+        [HttpPost]
+        [ResponseType(typeof(void))]
+        public IHttpActionResult Rate([FromODataUri] int key, ODataActionParameters parameters)
+        {
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
         private static double GetRate(string state)

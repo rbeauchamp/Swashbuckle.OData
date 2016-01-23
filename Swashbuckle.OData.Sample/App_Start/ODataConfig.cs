@@ -137,6 +137,18 @@ namespace SwashbuckleODataSample
                 .ReturnsCollectionFromEntitySet<Product>("Products")
                 .CollectionParameter<int>("Ids");
 
+            // An action bound to an entity set
+            // Accepts multiple action parameters
+            var action = productType.Collection.Action("Create");
+                action.ReturnsFromEntitySet<Product>("Products");
+                action.Parameter<string>("Name").OptionalParameter = false;
+                action.Parameter<double>("Price").OptionalParameter = false;
+                action.Parameter<MyEnum>("EnumValue").OptionalParameter = false;
+
+            // An action bound to an entity
+            productType.Action("Rate")
+                .Parameter<int>("Rating");
+
             return builder.GetEdmModel();
         }
     }

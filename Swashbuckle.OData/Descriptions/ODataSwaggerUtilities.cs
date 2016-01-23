@@ -43,7 +43,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Post a new entity to EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(new List<Parameter>()
-                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to post", entitySet.GetEntityType()))
+                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to post", entitySet.GetEntityType(), true))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse())
             };
         }
@@ -99,7 +99,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Update entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
-                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to patch", entitySet.GetEntityType()))
+                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to patch", entitySet.GetEntityType(), true))
                 .Responses(new Dictionary<string, Response>()
                 .Response("204", "Empty response").DefaultErrorResponse()),
 
@@ -109,7 +109,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Replace entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
-                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to put", entitySet.GetEntityType()))
+                .Parameter(entitySet.GetEntityType().Name, "body", "The entity to put", entitySet.GetEntityType(), true))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
 
                 delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
@@ -141,7 +141,7 @@ namespace Swashbuckle.OData.Descriptions
 
                 var edmType = parameter.GetOperationType().GetDefinition();
 
-                swaggerParameters.Parameter(parameter.Name, isFunctionImport ? "path" : "body", "parameter: " + parameter.Name, edmType);
+                swaggerParameters.Parameter(parameter.Name, isFunctionImport ? "path" : "body", "parameter: " + parameter.Name, edmType, !parameter.Type.IsNullable);
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
@@ -189,20 +189,21 @@ namespace Swashbuckle.OData.Descriptions
 
             var isFunction = operation is IEdmFunction;
             var swaggerParameters = new List<Parameter>();
-            foreach (var parameter in operation.Parameters.Skip(1))
+            if (isFunction)
             {
-                Contract.Assume(parameter != null);
-
-                var edmType = parameter.GetOperationType().GetDefinition();
-
-                swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, edmType);
+                AddSwaggerParametersForFunction(swaggerParameters, operation);
+            }
+            else
+            {
+                AddSwaggerParametersForAction(swaggerParameters, operation);
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
 
-            Contract.Assume(operation.ReturnType != null);
-
-            swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
+            if (operation.ReturnType != null)
+            {
+                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
+            }
 
             var swaggerOperation = new Operation()
                 .Summary("Call operation  " + operation.Name)
@@ -224,6 +225,57 @@ namespace Swashbuckle.OData.Descriptions
             {
                 post = swaggerOperation
             };
+        }
+
+        private static void AddSwaggerParametersForFunction(List<Parameter> swaggerParameters, IEdmOperation operation)
+        {
+            Contract.Requires(swaggerParameters != null);
+            Contract.Requires(operation != null);
+
+            foreach (var parameter in operation.Parameters.Skip(1))
+            {
+                Contract.Assume(parameter != null);
+
+                var edmType = parameter.GetOperationType().GetDefinition();
+
+                swaggerParameters.Parameter(parameter.Name, "path", "parameter: " + parameter.Name, edmType, !parameter.Type.IsNullable);
+            }
+        }
+
+        private static void AddSwaggerParametersForAction(List<Parameter> swaggerParameters, IEdmOperation operation)
+        {
+            Contract.Requires(swaggerParameters != null);
+            Contract.Requires(operation != null);
+
+            var bodyParameter = new Parameter
+            {
+                name = operation.Name + "ActionParameters",
+                @in = "body",
+                description = operation.Name + " action parameters",
+                required = operation.Parameters.Any(parameter => !parameter.Type.IsNullable)
+            };
+            var bodySchema = new Schema
+            {
+                type = "object",
+                properties = new Dictionary<string, Schema>()
+            };
+            foreach (var parameter in operation.Parameters.Skip(1))
+            {
+                Contract.Assume(parameter != null);
+                var propertySchema = new Schema();
+                SetSwaggerType(propertySchema, parameter.Type.Definition);
+                bodySchema.properties.Add(parameter.Name, propertySchema);
+                if (!parameter.Type.IsNullable)
+                {
+                    if (bodySchema.required == null)
+                    {
+                        bodySchema.required = new List<string>();
+                    }
+                    bodySchema.required.Add(parameter.Name);
+                }
+            }
+            bodyParameter.schema = bodySchema;
+            swaggerParameters.Add(bodyParameter);
         }
 
         /// <summary>
@@ -252,17 +304,22 @@ namespace Swashbuckle.OData.Descriptions
 
             var edmOperationParameters = operation.Parameters;
             Contract.Assume(edmOperationParameters != null);
-            foreach (var parameter in edmOperationParameters.Skip(1))
+
+            if (isFunction)
             {
-                Contract.Assume(parameter != null);
-                swaggerParameters.Parameter(parameter.Name, isFunction ? "path" : "body", "parameter: " + parameter.Name, parameter.GetOperationType().GetDefinition());
+                AddSwaggerParametersForFunction(swaggerParameters, operation);
+            }
+            else
+            {
+                AddSwaggerParametersForAction(swaggerParameters, operation);
             }
 
             var swaggerResponses = new Dictionary<string, Response>();
 
-            Contract.Assume(operation.ReturnType != null);
-
-            swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
+            if (operation.ReturnType != null)
+            {
+                swaggerResponses.Response("200", "Response from " + operation.Name, operation.ReturnType.GetDefinition());
+            }
 
             var swaggerOperation = new Operation()
                 .Summary("Call operation  " + operation.Name)
@@ -357,9 +414,10 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(routePrefix != null);
             Contract.Requires(operationImport != null);
 
-            var swaggerOperationImportPath = routePrefix.AppendPathSegment(operationImport.Name) + "(";
+            var swaggerOperationImportPath = routePrefix.AppendPathSegment(operationImport.Name).ToString();
             if (operationImport.IsFunctionImport())
             {
+                swaggerOperationImportPath += "(";
                 swaggerOperationImportPath = operationImport.Operation?.Parameters?.Aggregate(swaggerOperationImportPath, (current, parameter) => current + parameter.Name + "=" + "{" + parameter.Name + "},");
             }
             Contract.Assume(swaggerOperationImportPath != null);
@@ -367,7 +425,10 @@ namespace Swashbuckle.OData.Descriptions
             {
                 swaggerOperationImportPath = swaggerOperationImportPath.Substring(0, swaggerOperationImportPath.Length - 1);
             }
-            swaggerOperationImportPath += ")";
+            if (operationImport.IsFunctionImport())
+            {
+                swaggerOperationImportPath += ")";
+            }
 
             return swaggerOperationImportPath;
         }
@@ -387,9 +448,10 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(entitySet != null);
             Contract.Requires(routePrefix != null);
 
-            var swaggerOperationPath = GetPathForEntitySet(routePrefix, entitySet) + "/" + operation.FullName() + "(";
+            var swaggerOperationPath = GetPathForEntitySet(routePrefix, entitySet) + "/" + operation.FullName();
             if (operation.IsFunction())
             {
+                swaggerOperationPath += "(";
                 var edmOperationParameters = operation.Parameters;
                 Contract.Assume(edmOperationParameters != null);
                 foreach (var parameter in edmOperationParameters.Skip(1))
@@ -402,7 +464,10 @@ namespace Swashbuckle.OData.Descriptions
             {
                 swaggerOperationPath = swaggerOperationPath.Substring(0, swaggerOperationPath.Length - 1);
             }
-            swaggerOperationPath += ")";
+            if (operation.IsFunction())
+            {
+                swaggerOperationPath += ")";
+            }
 
             return swaggerOperationPath;
         }
@@ -435,9 +500,10 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(entitySet != null);
             Contract.Requires(routePrefix != null);
 
-            var swaggerOperationPath = GetPathForEntity(routePrefix, entitySet) + "/" + operation.FullName() + "(";
+            var swaggerOperationPath = GetPathForEntity(routePrefix, entitySet) + "/" + operation.FullName();
             if (operation.IsFunction())
             {
+                swaggerOperationPath += "(";
                 var edmOperationParameters = operation.Parameters;
                 Contract.Assume(edmOperationParameters != null);
                 foreach (var parameter in edmOperationParameters.Skip(1))
@@ -450,14 +516,17 @@ namespace Swashbuckle.OData.Descriptions
             {
                 swaggerOperationPath = swaggerOperationPath.Substring(0, swaggerOperationPath.Length - 1);
             }
-            swaggerOperationPath += ")";
+            if (operation.IsFunction())
+            {
+                swaggerOperationPath += ")";
+            }
 
             return swaggerOperationPath;
         }
 
-        private static void SetSwaggerType(Parameter obj, IEdmType edmType)
+        private static void SetSwaggerType(Parameter parameter, IEdmType edmType)
         {
-            Contract.Requires(obj != null);
+            Contract.Requires(parameter != null);
             Contract.Requires(edmType != null);
 
             Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType) edmType).ElementType != null);
@@ -467,22 +536,22 @@ namespace Swashbuckle.OData.Descriptions
                 case EdmTypeKind.Primitive:
                     string format;
                     var type = GetPrimitiveTypeAndFormat((IEdmPrimitiveType) edmType, out format);
-                    obj.type = type;
+                    parameter.type = type;
                     if (format != null)
                     {
-                        obj.format = format;
+                        parameter.format = format;
                     }
                     break;
                 case EdmTypeKind.Enum:
-                    obj.@enum = GetEnumValues((IEdmEnumType)edmType);
-                    obj.type = "string";
+                    parameter.@enum = GetEnumValues((IEdmEnumType)edmType);
+                    parameter.type = "string";
                     break;
                 case EdmTypeKind.Collection:
                     var itemEdmType = ((IEdmCollectionType) edmType).ElementType.GetDefinition();
                     var nestedItem = new Parameter();
                     SetSwaggerType(nestedItem, itemEdmType);
-                    obj.type = "array";
-                    obj.items = nestedItem;
+                    parameter.type = "array";
+                    parameter.items = nestedItem;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(edmType.TypeKind));
@@ -494,9 +563,9 @@ namespace Swashbuckle.OData.Descriptions
             return edmEnumType.Members.Select(edmEnumMember => edmEnumMember.Name).Cast<object>().ToList();
         }
 
-        private static void SetSwaggerType(Schema obj, IEdmType edmType)
+        private static void SetSwaggerType(Schema schema, IEdmType edmType)
         {
-            Contract.Requires(obj != null);
+            Contract.Requires(schema != null);
             Contract.Requires(edmType != null);
 
             Contract.Assume(edmType.TypeKind != EdmTypeKind.Collection || ((IEdmCollectionType) edmType).ElementType != null);
@@ -505,26 +574,27 @@ namespace Swashbuckle.OData.Descriptions
             {
                 case EdmTypeKind.Complex:
                 case EdmTypeKind.Entity:
-                    obj.@ref = "#/definitions/" + edmType.FullTypeName();
+                    schema.@ref = "#/definitions/" + edmType.FullTypeName();
                     break;
                 case EdmTypeKind.Primitive:
                     string format;
                     var type = GetPrimitiveTypeAndFormat((IEdmPrimitiveType) edmType, out format);
-                    obj.type = type;
+                    schema.type = type;
                     if (format != null)
                     {
-                        obj.format = format;
+                        schema.format = format;
                     }
                     break;
                 case EdmTypeKind.Enum:
-                    obj.type = "string";
+                    schema.@enum = GetEnumValues((IEdmEnumType)edmType);
+                    schema.type = "string";
                     break;
                 case EdmTypeKind.Collection:
                     var itemEdmType = ((IEdmCollectionType) edmType).ElementType.GetDefinition();
                     var nestedItem = new Schema();
                     SetSwaggerType(nestedItem, itemEdmType);
-                    obj.type = "array";
-                    obj.items = nestedItem;
+                    schema.type = "array";
+                    schema.items = nestedItem;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(edmType.TypeKind));
@@ -663,7 +733,7 @@ namespace Swashbuckle.OData.Descriptions
             return parameters;
         }
 
-        internal static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, IEdmType type)
+        internal static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, IEdmType type, bool isRequired)
         {
             Contract.Requires(parameters != null);
             Contract.Requires(type != null);
@@ -673,7 +743,7 @@ namespace Swashbuckle.OData.Descriptions
                 name = name,
                 @in = kind,
                 description = description,
-                required = true
+                required = isRequired
             };
 
             if (kind != "body")

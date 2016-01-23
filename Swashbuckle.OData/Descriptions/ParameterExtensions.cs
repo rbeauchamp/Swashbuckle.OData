@@ -60,8 +60,7 @@ namespace Swashbuckle.OData.Descriptions
                     {
                         case null:
                             Contract.Assume(parameter.@in.Equals(@"body"));
-                            Contract.Assume(!string.IsNullOrWhiteSpace(parameter.schema?.@ref));
-                            return GetEntityTypeForBodyParameter(parameter);
+                            return !string.IsNullOrWhiteSpace(parameter.schema?.@ref) ? GetEntityTypeForBodyParameter(parameter) : typeof (object);
                         case "string":
                             return typeof(string);
                         case "boolean":
