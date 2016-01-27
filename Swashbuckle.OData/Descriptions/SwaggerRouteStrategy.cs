@@ -163,7 +163,7 @@ namespace Swashbuckle.OData.Descriptions
 
             Contract.Assume(oDataPathRouteConstraint.PathHandler != null);
 
-            var result = oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot.AppendPathSegment(oDataRoute.RoutePrefix), sampleODataAbsoluteUri);
+            var result = oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot.AppendPathSegment(oDataRoute.GetRoutePrefix()), sampleODataAbsoluteUri);
             Contract.Assume(result != null);
             return result;
         }

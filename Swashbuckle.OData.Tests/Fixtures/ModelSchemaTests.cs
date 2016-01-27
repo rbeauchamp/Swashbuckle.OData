@@ -49,7 +49,6 @@ namespace Swashbuckle.OData.Tests
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
 
-            // Define a route to a controller class that contains functions
             config.MapODataServiceRoute("ODataRoute", "odata", GetEdmModel());
 
             config.EnsureInitialized();

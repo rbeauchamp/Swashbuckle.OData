@@ -144,6 +144,7 @@
     <Compile Include="Containment\ODataModels.cs" />
     <Compile Include="Containment\Program.cs" />
     <Compile Include="ContentType.cs" />
+    <Compile Include="Fixtures\RoutePrefixTests.cs" />
     <Compile Include="Fixtures\ModelSchemaTests.cs" />
     <Compile Include="Fixtures\CustomSwaggerRouteTests.cs" />
     <Compile Include="Fixtures\EnableQueryTests.cs" />

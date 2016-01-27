@@ -59,7 +59,7 @@ namespace Swashbuckle.OData
             Contract.Requires(httpConfig.Properties != null);
             Contract.Ensures(Contract.Result<SwaggerRouteBuilder>() != null);
 
-            var fullRouteTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(routeTemplate));
+            var fullRouteTemplate = HttpUtility.UrlDecode(oDataRoute.GetRoutePrefix().AppendPathSegment(routeTemplate));
             Contract.Assume(!string.IsNullOrWhiteSpace(fullRouteTemplate));
 
             var swaggerRoute = new SwaggerRoute(fullRouteTemplate, oDataRoute);

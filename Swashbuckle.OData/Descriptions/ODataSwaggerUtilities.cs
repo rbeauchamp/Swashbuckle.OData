@@ -350,6 +350,7 @@ namespace Swashbuckle.OData.Descriptions
         public static Url GetPathForEntitySet(string routePrefix, IEdmEntitySet entitySet)
         {
             Contract.Requires(entitySet != null);
+            Contract.Requires(routePrefix != null);
 
             return routePrefix.AppendPathSegment(entitySet.Name);
         }
