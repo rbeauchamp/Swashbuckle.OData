@@ -7,6 +7,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
+using Swashbuckle.Application;
 using Swashbuckle.Swagger;
 using SwashbuckleODataSample;
 using SwashbuckleODataSample.ApiControllers;
@@ -18,6 +19,25 @@ namespace Swashbuckle.OData.Tests
     [TestFixture]
     public class SchemaTests
     {
+        [Test]
+        public async Task LimitSchemaGraphToTopLevelEntity_can_be_disabled()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(CustomersController), config => config.DisplayFullODataEntityGraph())))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                swaggerDocument.definitions["Customer"].properties.ContainsKey("Orders").Should().BeFalse();
+                swaggerDocument.definitions["Order"].properties.ContainsKey("Customer").Should().BeFalse();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         [Test]
         public async Task Schema_does_not_contain_nested_reference_types_for_odata_controllers()
         {
@@ -55,9 +75,9 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
-        private static void Configuration(IAppBuilder appBuilder, Type targetController)
+        private static void Configuration(IAppBuilder appBuilder, Type targetController, Action<SwaggerDocsConfig> unitTestConfigs = null)
         {
-            var config = appBuilder.GetStandardHttpConfig(targetController);
+            var config = appBuilder.GetStandardHttpConfig(targetController, unitTestConfigs);
 
             WebApiConfig.Register(config);
 
