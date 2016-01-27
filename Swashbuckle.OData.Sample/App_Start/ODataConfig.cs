@@ -63,36 +63,49 @@ namespace SwashbuckleODataSample
         private static IEdmModel GetDefaultModel()
         {
             var builder = new ODataConventionModelBuilder();
+            builder.EnableLowerCamelCase();
+
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
+
             return builder.GetEdmModel();
         }
 
         private static IEdmModel GetCustomRouteModel()
         {
             var builder = new ODataConventionModelBuilder();
+            builder.EnableLowerCamelCase();
+
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
+
             return builder.GetEdmModel();
         }
 
         private static IEdmModel GetVersionedModel()
         {
             var builder = new ODataConventionModelBuilder();
+            builder.EnableLowerCamelCase();
+
             builder.EntitySet<Customer>("Customers");
+
             return builder.GetEdmModel();
         }
 
         private static IEdmModel GetFakeModel()
         {
             var builder = new ODataConventionModelBuilder();
+            builder.EnableLowerCamelCase();
+
             builder.EntitySet<Customer>("FakeCustomers");
+
             return builder.GetEdmModel();
         }
 
         private static IEdmModel GetFunctionsEdmModel()
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            var builder = new ODataConventionModelBuilder();
+            builder.EnableLowerCamelCase();
 
             builder.EntitySet<Product>("Products");
 

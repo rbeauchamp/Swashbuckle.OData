@@ -49,7 +49,7 @@ namespace Swashbuckle.OData.Tests
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
 
                 // Assert
-                swaggerDocument.definitions["Client"].properties.ContainsKey("Projects").Should().BeTrue();
+                swaggerDocument.definitions["Client"].properties.ContainsKey("projects").Should().BeTrue();
 
                 await ValidationUtils.ValidateSwaggerJson();
             }

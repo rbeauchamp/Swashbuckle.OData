@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.ServiceModel.Description;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Web.OData.Routing;
+using Microsoft.OData.Edm;
 using Swashbuckle.Application;
 using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
@@ -90,7 +91,7 @@ namespace Swashbuckle.OData
                 .Where(apiDesc => !(_options.IgnoreObsoleteActions && apiDesc.IsObsolete()))
                 .OrderBy(_options.GroupingKeySelector, _options.GroupingKeyComparer)
                 .GroupBy(apiDesc => apiDesc.RelativePathSansQueryString())
-                .ToDictionary(group => "/" + group.Key, group => CreatePathItem(group, schemaRegistry));
+                .ToDictionary(group => "/" + group.Key, group => CreatePathItem(@group, schemaRegistry));
 
             var rootUri = new Uri(rootUrl);
             var port = !rootUri.IsDefaultPort ? ":" + rootUri.Port : string.Empty;
@@ -200,23 +201,25 @@ namespace Swashbuckle.OData
             Contract.Requires(schemaRegistry != null);
             Contract.Requires(apiDescription.ParameterDescriptions != null);
 
+
+            var edmModel = ((ODataRoute)apiDescription.Route).GetEdmModel();
+
             var parameters = apiDescription.ParameterDescriptions
                 .Select(paramDesc =>
                 {
                     var inPath = apiDescription.RelativePathSansQueryString().Contains("{" + paramDesc.Name + "}");
                     var swaggerApiParameterDescription = paramDesc as SwaggerApiParameterDescription;
                     return swaggerApiParameterDescription != null 
-                    ? CreateParameter(swaggerApiParameterDescription, inPath, schemaRegistry) 
-                    : CreateParameter(paramDesc, inPath, schemaRegistry);
+                    ? CreateParameter(swaggerApiParameterDescription, inPath, schemaRegistry, edmModel) 
+                    : CreateParameter(paramDesc, inPath, schemaRegistry, edmModel);
                 })
                  .ToList();
-
             var responses = new Dictionary<string, Response>();
             var responseType = apiDescription.ResponseType();
             if (responseType == null || responseType == typeof(void))
                 responses.Add("204", new Response { description = "No Content" });
             else
-                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegisterResponseType(responseType) });
+                responses.Add("200", new Response { description = "OK", schema = schemaRegistry.GetOrRegisterResponseType(edmModel, responseType) });
 
             var operation = new Operation
             {
@@ -239,7 +242,7 @@ namespace Swashbuckle.OData
             return operation;
         }
 
-        private static Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
+        private static Parameter CreateParameter(ApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry, IEdmModel edmModel)
         {
             Contract.Requires(paramDesc != null);
             Contract.Requires(schemaRegistry != null);
@@ -257,7 +260,7 @@ namespace Swashbuckle.OData
                 @default = paramDesc.ParameterDescriptor.DefaultValue
             };
 
-            var schema = schemaRegistry.GetOrRegisterParameterType(paramDesc.ParameterDescriptor);
+            var schema = schemaRegistry.GetOrRegisterParameterType(edmModel, paramDesc.ParameterDescriptor);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else
@@ -266,7 +269,7 @@ namespace Swashbuckle.OData
             return parameter;
         }
 
-        private static Parameter CreateParameter(SwaggerApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry)
+        private static Parameter CreateParameter(SwaggerApiParameterDescription paramDesc, bool inPath, SchemaRegistry schemaRegistry, IEdmModel edmModel)
         {
             Contract.Requires(paramDesc != null);
             Contract.Requires(schemaRegistry != null);
@@ -288,7 +291,7 @@ namespace Swashbuckle.OData
 
             var parameterType = paramDesc.ParameterDescriptor.ParameterType;
             Contract.Assume(parameterType != null);
-            var schema = schemaRegistry.GetOrRegisterParameterType(paramDesc.ParameterDescriptor);
+            var schema = schemaRegistry.GetOrRegisterParameterType(edmModel, paramDesc.ParameterDescriptor);
             if (parameter.@in == "body")
                 parameter.schema = schema;
             else
