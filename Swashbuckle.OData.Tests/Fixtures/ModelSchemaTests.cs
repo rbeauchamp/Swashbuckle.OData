@@ -38,7 +38,8 @@ namespace Swashbuckle.OData.Tests
 
                 brandSchema.properties.Should().ContainKey("id");
                 brandSchema.properties.Should().ContainKey("code");
-                brandSchema.properties.Should().ContainKey("name");
+                brandSchema.properties.Should().NotContainKey("name");
+                brandSchema.properties.Should().NotContainKey("Name");
                 brandSchema.properties.Should().ContainKey("Something");
 
                 await ValidationUtils.ValidateSwaggerJson();
@@ -62,6 +63,8 @@ namespace Swashbuckle.OData.Tests
 
             builder.EnableLowerCamelCase(NameResolverOptions.ProcessReflectedPropertyNames | NameResolverOptions.ProcessExplicitPropertyNames);
 
+            builder.EntityType<Brand>().Ignore(brand => brand.Name);
+
             return builder.GetEdmModel();
         }
     }
@@ -71,6 +74,7 @@ namespace Swashbuckle.OData.Tests
         [Key]
         public long Id { get; set; }
         public string Code { get; set; }
+
         public string Name { get; set; }
 
         [DataMember(Name = "Something")]

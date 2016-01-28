@@ -88,29 +88,39 @@ namespace Swashbuckle.OData
                 var edmType = edmModel.GetEdmType(type) as IEdmStructuredType;
                 if (edmType != null)
                 {
-                    schemaDefinition.properties = schemaDefinition.properties.ToDictionary(property =>
+                    var edmProperties = new Dictionary<string, Schema>();
+                    foreach (var property in schemaDefinition.properties)
                     {
                         var currentProperty = type.GetProperty(property.Key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                        return GetEdmPropertyName(currentProperty, edmType);
-                    }, property => property.Value);
+                        var edmPropertyName = GetEdmPropertyName(currentProperty, edmType);
+                        if (edmPropertyName != null)
+                        {
+                            edmProperties.Add(edmPropertyName, property.Value);
+                        }
+                    }
+                    schemaDefinition.properties = edmProperties;
                 }
             }
         }
 
         private static string GetEdmPropertyName(MemberInfo currentProperty, IEdmStructuredType edmType)
         {
-            var currentPropertyName = GetPropertyNameForEdmModel(currentProperty);
+            Contract.Requires(currentProperty != null);
+            Contract.Requires(edmType != null);
 
-            var edmProperty = edmType.Properties().SingleOrDefault(property => property.Name.Equals(currentPropertyName, StringComparison.CurrentCultureIgnoreCase));
+            var edmProperty = edmType.Properties().SingleOrDefault(property => property.Name.Equals(currentProperty.Name, StringComparison.CurrentCultureIgnoreCase));
 
-            return edmProperty != null ? edmProperty.Name : currentPropertyName;
+            return edmProperty != null ? GetPropertyNameForEdmModel(currentProperty, edmProperty) : null;
         }
 
-        private static string GetPropertyNameForEdmModel(MemberInfo currentProperty)
+        private static string GetPropertyNameForEdmModel(MemberInfo currentProperty, IEdmNamedElement edmProperty)
         {
+            Contract.Requires(currentProperty != null);
+            Contract.Requires(edmProperty != null);
+
             var dataMemberAttribute = currentProperty.GetCustomAttributes<DataMemberAttribute>()?.SingleOrDefault();
 
-            return !string.IsNullOrWhiteSpace(dataMemberAttribute?.Name) ? dataMemberAttribute.Name : currentProperty.Name;
+            return !string.IsNullOrWhiteSpace(dataMemberAttribute?.Name) ? dataMemberAttribute.Name : edmProperty.Name;
         }
 
         private static bool IsResponseWithPrimiveTypeNotSupportedByJson(Type type, MessageDirection messageDirection)
