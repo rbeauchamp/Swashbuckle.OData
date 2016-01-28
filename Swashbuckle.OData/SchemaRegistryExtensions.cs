@@ -48,8 +48,8 @@ namespace Swashbuckle.OData
                 if (referencedType != null)
                 {
                     registry.GetOrRegister(referencedType);
-                    ApplyEdmModelPropertyNamesToSchema(registry, edmModel, referencedType);
                     FixSchemaReference(registry, schema, referencedType);
+                    ApplyEdmModelPropertyNamesToSchema(registry, edmModel, referencedType);
                     return;
                 }
 
