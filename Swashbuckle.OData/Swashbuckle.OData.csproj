@@ -215,6 +215,7 @@
     <Compile Include="LimitSchemaGraphToTopLevelEntity.cs" />
     <Compile Include="ODataResponse.cs" />
     <Compile Include="ODataSwaggerProviderOptions.cs" />
+    <Compile Include="SchemaExtensions.cs" />
     <Compile Include="SwaggerDocsConfigExtensions.cs" />
     <Compile Include="SwaggerProviderOptions.cs" />
     <Compile Include="Descriptions\EntityDataModelRouteGenerator.cs" />

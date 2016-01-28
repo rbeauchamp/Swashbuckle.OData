@@ -13,4 +13,13 @@ namespace SwashbuckleODataSample.Models
 
         public MyEnum EnumValue { get; set; }
     }
+
+    public class ProductDto
+    {
+        public string Name { get; set; }
+
+        public double Price { get; set; }
+
+        public MyEnum EnumValue { get; set; }
+    }
 }

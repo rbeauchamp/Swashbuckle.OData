@@ -21,7 +21,9 @@ namespace Swashbuckle.OData
         {
             if (IsODataActionParameter(parameterDescriptor))
             {
-                return ((ODataActionParameterDescriptor) parameterDescriptor).Schema;
+                var schema = ((ODataActionParameterDescriptor) parameterDescriptor).Schema;
+                RegisterReferencedTypes(registry, edmModel, schema);
+                return schema;
             }
             if (IsAGenericODataTypeThatShouldBeUnwrapped(parameterDescriptor.ParameterType, MessageDirection.Input))
             {
@@ -30,6 +32,52 @@ namespace Swashbuckle.OData
             var schema1 = registry.GetOrRegister(parameterDescriptor.ParameterType);
             ApplyEdmModelPropertyNamesToSchema(registry, edmModel, parameterDescriptor.ParameterType);
             return schema1;
+        }
+
+        private static void RegisterReferencedTypes(SchemaRegistry registry, IEdmModel edmModel, Schema schema)
+        {
+            Contract.Requires(registry != null);
+            Contract.Requires(schema != null);
+
+            while (true)
+            {
+                Contract.Assume(schema != null);
+
+                var referencedType = schema.GetReferencedType();
+
+                if (referencedType != null)
+                {
+                    registry.GetOrRegister(referencedType);
+                    ApplyEdmModelPropertyNamesToSchema(registry, edmModel, referencedType);
+                    FixSchemaReference(registry, schema, referencedType);
+                    return;
+                }
+
+                if (schema.properties != null && schema.properties.Any())
+                {
+                    foreach (var property in schema.properties)
+                    {
+                        RegisterReferencedTypes(registry, edmModel, property.Value);
+                    }
+                    return;
+                }
+
+                if (schema.items != null)
+                {
+                    schema = schema.items;
+                    continue;
+                }
+                break;
+            }
+        }
+
+        private static void FixSchemaReference(SchemaRegistry registry, Schema schema, Type referencedType)
+        {
+            Contract.Requires(schema.@ref != null);
+
+            var schemaIdSelector = registry.GetInstanceField<Func<Type, string>>("_schemaIdSelector", true);
+
+            schema.@ref = "#/definitions/" + schemaIdSelector(referencedType);
         }
 
         private static Schema HandleGenericODataTypeThatShouldBeUnwrapped(SchemaRegistry registry, IEdmModel edmModel, Type type)

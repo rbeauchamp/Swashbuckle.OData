@@ -152,11 +152,17 @@ namespace SwashbuckleODataSample
 
             // An action bound to an entity set
             // Accepts multiple action parameters
-            var action = productType.Collection.Action("Create");
-                action.ReturnsFromEntitySet<Product>("Products");
-                action.Parameter<string>("Name").OptionalParameter = false;
-                action.Parameter<double>("Price").OptionalParameter = false;
-                action.Parameter<MyEnum>("EnumValue").OptionalParameter = false;
+            var createAction = productType.Collection.Action("Create");
+                createAction.ReturnsFromEntitySet<Product>("Products");
+                createAction.Parameter<string>("Name").OptionalParameter = false;
+                createAction.Parameter<double>("Price").OptionalParameter = false;
+                createAction.Parameter<MyEnum>("EnumValue").OptionalParameter = false;
+
+            // An action bound to an entity set
+            // Accepts an array of complex types
+            var postArrayAction = productType.Collection.Action("PostArray");
+            postArrayAction.ReturnsFromEntitySet<Product>("Products");
+            postArrayAction.CollectionParameter<ProductDto>("products").OptionalParameter = false;
 
             // An action bound to an entity
             productType.Action("Rate")
