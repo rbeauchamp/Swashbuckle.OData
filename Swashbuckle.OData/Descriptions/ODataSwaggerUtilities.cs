@@ -633,6 +633,9 @@ namespace Swashbuckle.OData.Descriptions
                 case EdmPrimitiveTypeKind.Double:
                     format = "double";
                     return "number";
+                case EdmPrimitiveTypeKind.Decimal:
+                    format = "decimal";
+                    return "number";
                 case EdmPrimitiveTypeKind.Single:
                     format = "float";
                     return "number";
