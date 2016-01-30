@@ -17,7 +17,7 @@ namespace Swashbuckle.OData.Descriptions
                 {
                     var httpControllerDescriptor = actionDescriptor.ControllerDescriptor;
                     Contract.Assume(httpControllerDescriptor != null);
-                    return new ODataParameterDescriptor(swaggerParameter.name, parameterDescriptor.ParameterType, parameterDescriptor.IsOptional)
+                    return new ODataParameterDescriptor(swaggerParameter.name, parameterDescriptor.ParameterType, parameterDescriptor.IsOptional, parameterDescriptor)
                     {
                         Configuration = httpControllerDescriptor.Configuration,
                         ActionDescriptor = actionDescriptor,

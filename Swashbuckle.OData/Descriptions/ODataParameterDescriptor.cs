@@ -7,11 +7,12 @@ namespace Swashbuckle.OData.Descriptions
 {
     internal class ODataParameterDescriptor : HttpParameterDescriptor
     {
-        public ODataParameterDescriptor(string parameterName, Type parameterType, bool isOptional)
+        public ODataParameterDescriptor(string parameterName, Type parameterType, bool isOptional, HttpParameterDescriptor reflectedHttpParameterDescriptor)
         {
             ParameterName = parameterName;
             ParameterType = parameterType;
             IsOptional = isOptional;
+            ReflectedHttpParameterDescriptor = reflectedHttpParameterDescriptor;
         }
 
         public override string ParameterName { get; }
@@ -20,12 +21,12 @@ namespace Swashbuckle.OData.Descriptions
 
         public override bool IsOptional { get; }
 
-
+        public HttpParameterDescriptor ReflectedHttpParameterDescriptor { get; }
     }
 
     internal class ODataActionParameterDescriptor : ODataParameterDescriptor
     {
-        public ODataActionParameterDescriptor(string parameterName, Type parameterType, bool isOptional, Schema schema) : base(parameterName, parameterType, isOptional)
+        public ODataActionParameterDescriptor(string parameterName, Type parameterType, bool isOptional, Schema schema, HttpParameterDescriptor reflectedHttpParameterDescriptor) : base(parameterName, parameterType, isOptional, reflectedHttpParameterDescriptor)
         {
             Contract.Requires(schema != null);
 

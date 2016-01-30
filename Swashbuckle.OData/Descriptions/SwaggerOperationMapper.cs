@@ -37,8 +37,15 @@ namespace Swashbuckle.OData.Descriptions
         private List<ApiParameterDescription> CreateParameterDescriptions(Operation operation, HttpActionDescriptor actionDescriptor)
         {
             Contract.Requires(operation != null);
+            Contract.Requires(actionDescriptor != null);
 
-            return operation.parameters?.Select((parameter, index) => GetParameterDescription(parameter, index, actionDescriptor)).ToList();
+            return operation.parameters?
+                .Select((parameter, index) => GetParameterDescription(parameter, index, actionDescriptor))
+                // Concat reflected parameter descriptors to ensure that parameters are not missed
+                // e.g., parameters not described by or derived from the EDM model.
+                .Concat(CreateParameterDescriptions(actionDescriptor))
+                .Distinct(new ApiParameterDescriptionEqualityComparer())
+                .ToList();
         }
 
         private ApiParameterDescription GetParameterDescription(Parameter parameter, int index, HttpActionDescriptor actionDescriptor)

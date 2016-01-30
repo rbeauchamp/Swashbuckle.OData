@@ -11,7 +11,7 @@ namespace Swashbuckle.OData.Descriptions
             var required = swaggerParameter.required;
             Contract.Assume(required != null);
 
-            return new ODataParameterDescriptor(swaggerParameter.name, swaggerParameter.GetClrType(), !required.Value)
+            return new ODataParameterDescriptor(swaggerParameter.name, swaggerParameter.GetClrType(), !required.Value, null)
             {
                 Configuration = actionDescriptor.ControllerDescriptor.Configuration,
                 ActionDescriptor = actionDescriptor

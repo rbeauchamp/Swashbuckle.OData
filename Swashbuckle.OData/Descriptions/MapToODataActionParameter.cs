@@ -17,7 +17,7 @@ namespace Swashbuckle.OData.Descriptions
             {
                 var odataActionParametersDescriptor = actionDescriptor.GetParameters().SingleOrDefault(descriptor => descriptor.ParameterType == typeof (ODataActionParameters));
                 Contract.Assume(odataActionParametersDescriptor != null);
-                return new ODataActionParameterDescriptor(odataActionParametersDescriptor.ParameterName, typeof(ODataActionParameters), !required.Value, swaggerParameter.schema)
+                return new ODataActionParameterDescriptor(odataActionParametersDescriptor.ParameterName, typeof(ODataActionParameters), !required.Value, swaggerParameter.schema, odataActionParametersDescriptor)
                 {
                     Configuration = actionDescriptor.ControllerDescriptor.Configuration,
                     ActionDescriptor = actionDescriptor
