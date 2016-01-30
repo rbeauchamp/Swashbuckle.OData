@@ -179,6 +179,10 @@ namespace Swashbuckle.OData
                 {
                     return true;
                 }
+                if (type == typeof(decimal))
+                {
+                    return true;
+                }
             }
             return false;
         }

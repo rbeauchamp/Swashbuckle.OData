@@ -1,4 +1,4 @@
-version: 2.12.5.{build}
+version: 2.13.0.{build}
 
 before_build:
 - cmd: nuget restore
