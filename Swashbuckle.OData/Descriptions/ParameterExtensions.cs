@@ -80,6 +80,8 @@ namespace Swashbuckle.OData.Descriptions
                     return typeof(DateTimeOffset);
                 case "double":
                     return typeof(double);
+                case "decimal":
+                    return typeof(decimal);
                 case "float":
                     return typeof(float);
                 case "guid":
@@ -128,6 +130,8 @@ namespace Swashbuckle.OData.Descriptions
                     return "2015-10-10T17:00:00Z";
                 case "double":
                     return "2.34d";
+                case "decimal":
+                    return "1.12m";
                 case "float":
                     return "2.0f";
                 case "guid":
