@@ -147,7 +147,7 @@ namespace Swashbuckle.OData.Tests
 
         private static void Configuration(IAppBuilder appBuilder, Type targetController = null, Action<SwaggerDocsConfig> unitTestConfigs = null)
         {
-            var config = appBuilder.GetStandardHttpConfig(targetController, unitTestConfigs);
+            var config = appBuilder.GetStandardHttpConfig(unitTestConfigs, targetController);
 
             var controllerSelector = new UnitTestODataVersionControllerSelector(config, targetController);
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);

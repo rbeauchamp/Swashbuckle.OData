@@ -12,8 +12,8 @@ namespace Swashbuckle.OData.Tests
     /// </summary>
     public class UnitTestODataVersionControllerSelector : UnitTestControllerSelector
     {
-        public UnitTestODataVersionControllerSelector(HttpConfiguration configuration, Type targetController)
-            : base(configuration, targetController)
+        public UnitTestODataVersionControllerSelector(HttpConfiguration configuration, params Type[] targetControllers)
+            : base(configuration, targetControllers)
         {
         }
 
