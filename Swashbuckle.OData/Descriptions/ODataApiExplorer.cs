@@ -43,12 +43,11 @@ namespace Swashbuckle.OData.Descriptions
             return _actionDescriptorExplorers
                 // Gather ODataActionDescriptors from the API
                 .SelectMany(explorer => explorer.Generate(_httpConfig))
+                // Remove Duplicates
                 .Distinct(new ODataActionDescriptorEqualityComparer())
                 // Map them to ApiDescriptors
                 .SelectMany(oDataActionDescriptor => _actionDescriptorMappers.Select(mapper => mapper.Map(oDataActionDescriptor))
                                                                              .FirstOrDefault(apiDescriptions => apiDescriptions.Any()) ?? new List<ApiDescription>())
-                // Remove Duplicates
-                .Distinct(new ApiDescriptionEqualityComparer())
                 .ToCollection();
         }
     }

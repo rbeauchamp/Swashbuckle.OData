@@ -181,7 +181,6 @@
     <Compile Include="Descriptions\IODataActionDescriptorExplorer.cs" />
     <Compile Include="Descriptions\MapToODataActionParameter.cs" />
     <Compile Include="Descriptions\ODataActionDescriptor.cs" />
-    <Compile Include="Descriptions\ApiDescriptionEqualityComparer.cs" />
     <Compile Include="Descriptions\HttpParameterBindingExtensions.cs" />
     <Compile Include="Descriptions\ODataActionDescriptorEqualityComparer.cs" />
     <Compile Include="Descriptions\SwaggerOperationMapper.cs" />
