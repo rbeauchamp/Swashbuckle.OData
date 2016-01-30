@@ -20,9 +20,9 @@ namespace Swashbuckle.OData
         public static Dictionary<string, SecurityScheme> GetSecurityDefinitions(this SwaggerDocsConfig swaggerDocsConfig)
         {
             var securitySchemeBuilders = swaggerDocsConfig.GetFieldValue<IDictionary<string, SecuritySchemeBuilder>>("_securitySchemeBuilders");
-            return securitySchemeBuilders != null && securitySchemeBuilders.Any()
-                ? securitySchemeBuilders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.InvokeFunction<SecurityScheme>("Build"))
-                : new Dictionary<string, SecurityScheme>();
+            Contract.Assume(securitySchemeBuilders != null);
+
+            return securitySchemeBuilders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.InvokeFunction<SecurityScheme>("Build"));
         }
     }
 }

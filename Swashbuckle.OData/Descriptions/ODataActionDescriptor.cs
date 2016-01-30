@@ -8,12 +8,6 @@ namespace Swashbuckle.OData.Descriptions
 {
     internal class ODataActionDescriptor
     {
-        private readonly string _relativePathTemplate;
-        private readonly HttpRequestMessage _request;
-        private readonly ODataRoute _route;
-        private readonly HttpActionDescriptor _actionDescriptor;
-        private readonly Operation _operation;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionDescriptor" /> class.
         /// </summary>
@@ -29,45 +23,21 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(relativePathTemplate != null);
             Contract.Requires(request != null);
 
-            _actionDescriptor = actionDescriptor;
-            _route = route;
-            _relativePathTemplate = relativePathTemplate;
-            _request = request;
-            _operation = operation;
+            ActionDescriptor = actionDescriptor;
+            Route = route;
+            RelativePathTemplate = relativePathTemplate;
+            Request = request;
+            Operation = operation;
         }
 
-        public HttpActionDescriptor ActionDescriptor
-        {
-            get { return _actionDescriptor; }
-        }
+        public HttpActionDescriptor ActionDescriptor { get; }
 
-        public ODataRoute Route
-        {
-            get { return _route; }
-        }
+        public ODataRoute Route { get; }
 
-        public string RelativePathTemplate
-        {
-            get { return _relativePathTemplate; }
-        }
+        public string RelativePathTemplate { get; }
 
-        public Operation Operation
-        {
-            get { return _operation; }
-        }
+        public Operation Operation { get; }
 
-        public HttpRequestMessage Request
-        {
-            get { return _request; }
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariants()
-        {
-            Contract.Invariant(ActionDescriptor != null);
-            Contract.Invariant(Route != null);
-            Contract.Invariant(RelativePathTemplate != null);
-            Contract.Invariant(Request != null);
-        }
+        public HttpRequestMessage Request { get; }
     }
 }

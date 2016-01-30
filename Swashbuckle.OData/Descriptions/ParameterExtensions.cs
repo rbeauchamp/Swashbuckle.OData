@@ -72,8 +72,6 @@ namespace Swashbuckle.OData.Descriptions
                     return typeof(int);
                 case "int64":
                     return typeof(long);
-                case "byte":
-                    return typeof(byte);
                 case "date":
                     return typeof(DateTime);
                 case "date-time":
@@ -122,8 +120,6 @@ namespace Swashbuckle.OData.Descriptions
                 case "int32":
                 case "int64":
                     return "42";
-                case "byte":
-                    return "1";
                 case "date":
                     return "2015-12-12T12:00";
                 case "date-time":

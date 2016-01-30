@@ -54,13 +54,5 @@ namespace Swashbuckle.OData.Descriptions
                 return _pathItem;
             }
         }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariants()
-        {
-            Contract.Invariant(!string.IsNullOrWhiteSpace(_template));
-            Contract.Invariant(_oDataRoute != null);
-            Contract.Invariant(_pathItem != null);
-        }
     }
 }

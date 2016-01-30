@@ -332,14 +332,5 @@ namespace Swashbuckle.OData
             Contract.Assume(result != null);
             return result;
         }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(_options != null);
-            Contract.Invariant(_apiVersions != null);
-            Contract.Invariant(_httpConfig != null);
-            Contract.Invariant(_odataApiExplorer != null);
-        }
     }
 }

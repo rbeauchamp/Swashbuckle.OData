@@ -167,11 +167,5 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Assume(result != null);
             return result;
         }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(_swaggerRouteGenerators != null);
-        }
     }
 }
