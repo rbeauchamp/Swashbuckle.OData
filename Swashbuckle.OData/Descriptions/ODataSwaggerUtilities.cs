@@ -35,7 +35,7 @@ namespace Swashbuckle.OData.Descriptions
                 .OperationId(entitySet.Name + "_Get")
                 .Description("Returns the EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(AddQueryOptionParameters(new List<Parameter>()))
+                .Parameters(AddQueryOptionParametersForEntitySet(new List<Parameter>()))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.Type).DefaultErrorResponse()),
                 post = new Operation()
                 .Summary("Post a new entity to EntitySet " + entitySet.Name)
@@ -48,7 +48,7 @@ namespace Swashbuckle.OData.Descriptions
             };
         }
 
-        public static IList<Parameter> AddQueryOptionParameters(IList<Parameter> parameterList)
+        public static IList<Parameter> AddQueryOptionParametersForEntitySet(IList<Parameter> parameterList)
         {
             return parameterList
                 .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
@@ -60,12 +60,19 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameter("$count", "query", "Includes a count of the matching results in the response.", "boolean", false);
         }
 
-        /// <summary>
-        /// Create the Swagger path for the Edm entity.
-        /// </summary>
-        /// <param name="entitySet">The entity set.</param>
-        /// <returns></returns>
-        public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet)
+        public static IList<Parameter> AddQueryOptionParametersForEntity(IList<Parameter> parameterList)
+        {
+            return parameterList
+                .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
+                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false);
+        }
+
+    /// <summary>
+    /// Create the Swagger path for the Edm entity.
+    /// </summary>
+    /// <param name="entitySet">The entity set.</param>
+    /// <returns></returns>
+    public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet)
         {
             Contract.Requires(entitySet != null);
             Contract.Ensures(Contract.Result<PathItem>() != null);

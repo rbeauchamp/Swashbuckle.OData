@@ -5,6 +5,8 @@ using System.Web.Http.Description;
 using System.Web.OData;
 using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
+using System.Web.Http;
+using System;
 
 namespace Swashbuckle.OData
 {
@@ -21,7 +23,9 @@ namespace Swashbuckle.OData
 
             if (HasEnableQueryAttribute(apiDescription) && !HasAnyQueryOptionParameters(operation))
             {
-                operation.parameters = ODataSwaggerUtilities.AddQueryOptionParameters(operation.parameters ?? new List<Parameter>());
+                operation.parameters = ReturnsCollection(apiDescription) 
+                    ? ODataSwaggerUtilities.AddQueryOptionParametersForEntitySet(operation.parameters ?? new List<Parameter>())
+                    : ODataSwaggerUtilities.AddQueryOptionParametersForEntity(operation.parameters ?? new List<Parameter>()); 
             }
         }
 
@@ -36,5 +40,21 @@ namespace Swashbuckle.OData
             Contract.Assume(httpActionDescriptor != null);
             return httpActionDescriptor.GetCustomAttributes<EnableQueryAttribute>().Any();
         }
+
+        private static bool ReturnsCollection(ApiDescription apiDescription)
+        {
+            var httpActionDescriptor = apiDescription.ActionDescriptor;
+            Contract.Assume(httpActionDescriptor != null);
+
+            Type returnType = httpActionDescriptor.ReturnType;
+
+            var responseTypeAttr = httpActionDescriptor.GetCustomAttributes<ResponseTypeAttribute>().FirstOrDefault();
+            if (responseTypeAttr != null)
+                returnType = responseTypeAttr.ResponseType;
+
+            return returnType.IsCollection();
+        }
+
+
     }
 }
