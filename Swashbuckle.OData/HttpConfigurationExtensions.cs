@@ -5,7 +5,6 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Routing;
-using Flurl;
 using Newtonsoft.Json;
 using Swashbuckle.OData.Descriptions;
 
@@ -59,10 +58,10 @@ namespace Swashbuckle.OData
             Contract.Requires(httpConfig.Properties != null);
             Contract.Ensures(Contract.Result<SwaggerRouteBuilder>() != null);
 
-            var fullRouteTemplate = HttpUtility.UrlDecode(oDataRoute.GetRoutePrefix().AppendPathSegment(routeTemplate));
-            Contract.Assume(!string.IsNullOrWhiteSpace(fullRouteTemplate));
+            var urlDecodedTemplate = HttpUtility.UrlDecode(routeTemplate);
+            Contract.Assume(!string.IsNullOrWhiteSpace(urlDecodedTemplate));
 
-            var swaggerRoute = new SwaggerRoute(fullRouteTemplate, oDataRoute);
+            var swaggerRoute = new SwaggerRoute(urlDecodedTemplate, oDataRoute);
 
             var swaggerRouteBuilder = new SwaggerRouteBuilder(swaggerRoute);
 

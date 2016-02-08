@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Web.Http.Routing;
+using System.Web.Http.Routing.Constraints;
 using System.Web.OData.Formatter;
-using Flurl;
+using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -23,7 +25,8 @@ namespace Swashbuckle.OData.Descriptions
         /// Create the Swagger path for the Edm entity set.
         /// </summary>
         /// <param name="entitySet">The entity set.</param>
-        public static PathItem CreateSwaggerPathForEntitySet(IEdmEntitySet entitySet)
+        /// <param name="oDataRoute"></param>
+        public static PathItem CreateSwaggerPathForEntitySet(IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
             Contract.Requires(entitySet != null);
             Contract.Ensures(Contract.Result<PathItem>() != null);
@@ -36,6 +39,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Description("Returns the EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)
                 .Parameters(AddQueryOptionParameters(new List<Parameter>()))
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.Type).DefaultErrorResponse()),
                 post = new Operation()
                 .Summary("Post a new entity to EntitySet " + entitySet.Name)
@@ -44,8 +48,86 @@ namespace Swashbuckle.OData.Descriptions
                 .Tags(entitySet.Name)
                 .Parameters(new List<Parameter>()
                 .Parameter(entitySet.GetEntityType().Name, "body", "The entity to post", entitySet.GetEntityType(), true))
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse())
             };
+        }
+
+        private static IList<Parameter> AddRoutePrefixParameters(ODataRoute oDataRoute)
+        {
+            Contract.Requires(oDataRoute != null);
+            var routePrefixParameters = new List<Parameter>();
+            var routePrefixTemplate = new UriTemplate(oDataRoute.GetRoutePrefix());
+            if (routePrefixTemplate.PathSegmentVariableNames.Any())
+            {
+                routePrefixParameters.AddRange(routePrefixTemplate.PathSegmentVariableNames.Select(pathSegmentVariableName => CreateParameter(pathSegmentVariableName, oDataRoute)));
+            }
+            return routePrefixParameters;
+        }
+
+        private static Parameter CreateParameter(string pathSegmentVariableName, ODataRoute oDataRoute)
+        {
+            var parameter = new Parameter
+            {
+                name = GetOriginalParameterNameFromRoutePrefix(pathSegmentVariableName, oDataRoute),
+                @in = "path",
+                required = true
+            };
+            object routeConstraint;
+            if (oDataRoute.Constraints.TryGetValue(pathSegmentVariableName, out routeConstraint) && routeConstraint is IHttpRouteConstraint)
+            {
+                SetSwaggerType(parameter, (IHttpRouteConstraint)routeConstraint);
+            }
+            else
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(string)));
+            }
+            return parameter;
+        }
+
+        private static string GetOriginalParameterNameFromRoutePrefix(string pathSegmentVariableName, ODataRoute oDataRoute)
+        {
+            return oDataRoute.GetRoutePrefix().Substring(oDataRoute.GetRoutePrefix().IndexOf(pathSegmentVariableName, StringComparison.CurrentCultureIgnoreCase), pathSegmentVariableName.Length);
+        }
+
+        private static void SetSwaggerType(Parameter parameter, IHttpRouteConstraint routeConstraint)
+        {
+            if (routeConstraint is BoolRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(bool)));
+            }
+            else if (routeConstraint is DateTimeRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(DateTime)));
+            }
+            else if (routeConstraint is DecimalRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(decimal)));
+            }
+            else if (routeConstraint is DoubleRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(double)));
+            }
+            else if (routeConstraint is FloatRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(float)));
+            }
+            else if (routeConstraint is GuidRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(Guid)));
+            }
+            else if (routeConstraint is IntRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(int)));
+            }
+            else if (routeConstraint is LongRouteConstraint)
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof (long)));
+            }
+            else
+            {
+                SetSwaggerType(parameter, EdmLibHelpers.GetEdmPrimitiveTypeOrNull(typeof(string)));
+            }
         }
 
         public static IList<Parameter> AddQueryOptionParameters(IList<Parameter> parameterList)
@@ -64,8 +146,9 @@ namespace Swashbuckle.OData.Descriptions
         /// Create the Swagger path for the Edm entity.
         /// </summary>
         /// <param name="entitySet">The entity set.</param>
+        /// <param name="oDataRoute"></param>
         /// <returns></returns>
-        public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet)
+        public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
             Contract.Requires(entitySet != null);
             Contract.Ensures(Contract.Result<PathItem>() != null);
@@ -91,6 +174,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameters(keyParameters.DeepClone()
                   .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
                   .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse()),
 
                 patch = new Operation()
@@ -100,6 +184,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
                 .Parameter(entitySet.GetEntityType().Name, "body", "The entity to patch", entitySet.GetEntityType(), true))
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>()
                 .Response("204", "Empty response").DefaultErrorResponse()),
 
@@ -110,6 +195,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
                 .Parameter(entitySet.GetEntityType().Name, "body", "The entity to put", entitySet.GetEntityType(), true))
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
 
                 delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
@@ -118,6 +204,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Tags(entitySet.Name)
                 .Parameters(keyParameters.DeepClone()
                 .Parameter("If-Match", "header", "If-Match header", "string", false))
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse())
             };
         }
@@ -126,8 +213,9 @@ namespace Swashbuckle.OData.Descriptions
         ///     Create the Swagger path for the Edm operation import.
         /// </summary>
         /// <param name="operationImport">The Edm operation import</param>
+        /// <param name="oDataRoute"></param>
         /// <returns>The <see cref="Newtonsoft.Json.Linq.JObject" /> represents the related Edm operation import.</returns>
-        public static PathItem CreateSwaggerPathForOperationImport(IEdmOperationImport operationImport)
+        public static PathItem CreateSwaggerPathForOperationImport(IEdmOperationImport operationImport, ODataRoute oDataRoute)
         {
             Contract.Requires(operationImport != null);
 
@@ -164,6 +252,9 @@ namespace Swashbuckle.OData.Descriptions
             {
                 swaggerOperationImport.Parameters(swaggerParameters);
             }
+
+            swaggerOperationImport.Parameters(AddRoutePrefixParameters(oDataRoute));
+
             swaggerOperationImport.Responses(swaggerResponses.DefaultErrorResponse());
 
             return isFunctionImport ? new PathItem
@@ -180,7 +271,8 @@ namespace Swashbuckle.OData.Descriptions
         /// </summary>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="entitySet">The entity set.</param>
-        public static PathItem CreateSwaggerPathForOperationOfEntitySet(IEdmOperation operation, IEdmEntitySet entitySet)
+        /// <param name="oDataRoute"></param>
+        public static PathItem CreateSwaggerPathForOperationOfEntitySet(IEdmOperation operation, IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
             Contract.Requires(operation != null);
             Contract.Requires(entitySet != null);
@@ -210,6 +302,7 @@ namespace Swashbuckle.OData.Descriptions
                 .OperationId(operation.Name + (isFunction ? "_FunctionGet" : "_ActionPost"))
                 .Description("Call operation  " + operation.Name)
                 .OperationId(operation.Name + (isFunction ? "_FunctionGetById" : "_ActionPostById"))
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
             if (swaggerParameters.Count > 0)
@@ -344,31 +437,27 @@ namespace Swashbuckle.OData.Descriptions
         /// <summary>
         /// Gets the path for entity set.
         /// </summary>
-        /// <param name="routePrefix">The route prefix.</param>
         /// <param name="entitySet">The entity set.</param>
         /// <returns></returns>
-        public static Url GetPathForEntitySet(string routePrefix, IEdmEntitySet entitySet)
+        public static string GetPathForEntitySet(IEdmEntitySet entitySet)
         {
             Contract.Requires(entitySet != null);
-            Contract.Requires(routePrefix != null);
 
-            return routePrefix.AppendPathSegment(entitySet.Name);
+            return entitySet.Name;
         }
 
         /// <summary>
         /// Get the Uri Swagger path for the Edm entity set.
         /// </summary>
-        /// <param name="routePrefix">The route prefix.</param>
         /// <param name="entitySet">The entity set.</param>
         /// <returns>
         /// The <see cref="System.String" /> path represents the related Edm entity set.
         /// </returns>
-        public static string GetPathForEntity(string routePrefix, IEdmEntitySet entitySet)
+        public static string GetPathForEntity(IEdmEntitySet entitySet)
         {
-            Contract.Requires(routePrefix != null);
             Contract.Requires(entitySet != null);
 
-            var singleEntityPath = GetPathForEntitySet(routePrefix, entitySet) + "(";
+            var singleEntityPath = GetPathForEntitySet(entitySet) + "(";
             singleEntityPath = entitySet.GetEntityType().GetKey().Count() == 1
                 ? AppendSingleColumnKeyTemplate(entitySet, singleEntityPath)
                 : AppendMultiColumnKeyTemplate(entitySet, singleEntityPath);
@@ -405,17 +494,15 @@ namespace Swashbuckle.OData.Descriptions
         /// <summary>
         /// Get the Uri Swagger path for Edm operation import.
         /// </summary>
-        /// <param name="routePrefix">The route prefix.</param>
         /// <param name="operationImport">The Edm operation import.</param>
         /// <returns>
         /// The <see cref="string" /> path represents the related Edm operation import.
         /// </returns>
-        public static string GetPathForOperationImport(string routePrefix, IEdmOperationImport operationImport)
+        public static string GetPathForOperationImport(IEdmOperationImport operationImport)
         {
-            Contract.Requires(routePrefix != null);
             Contract.Requires(operationImport != null);
 
-            var swaggerOperationImportPath = routePrefix.AppendPathSegment(operationImport.Name).ToString();
+            var swaggerOperationImportPath = operationImport.Name;
             if (operationImport.IsFunctionImport())
             {
                 swaggerOperationImportPath += "(";
@@ -439,17 +526,15 @@ namespace Swashbuckle.OData.Descriptions
         /// </summary>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="entitySet">The entity set.</param>
-        /// <param name="routePrefix">The route prefix.</param>
         /// <returns>
         /// The <see cref="System.String" /> path represents the related Edm operation.
         /// </returns>
-        public static string GetPathForOperationOfEntitySet(IEdmOperation operation, IEdmEntitySet entitySet, string routePrefix)
+        public static string GetPathForOperationOfEntitySet(IEdmOperation operation, IEdmEntitySet entitySet)
         {
             Contract.Requires(operation != null);
             Contract.Requires(entitySet != null);
-            Contract.Requires(routePrefix != null);
 
-            var swaggerOperationPath = GetPathForEntitySet(routePrefix, entitySet) + "/" + operation.FullName();
+            var swaggerOperationPath = GetPathForEntitySet(entitySet) + "/" + operation.FullName();
             if (operation.IsFunction())
             {
                 swaggerOperationPath += "(";
@@ -489,19 +574,17 @@ namespace Swashbuckle.OData.Descriptions
         /// <summary>
         /// Get the Uri Swagger path for Edm operation bound to entity.
         /// </summary>
-        /// <param name="routePrefix">The route prefix.</param>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="entitySet">The entity set.</param>
         /// <returns>
         /// The <see cref="System.String" /> path represents the related Edm operation.
         /// </returns>
-        public static string GetPathForOperationOfEntity(string routePrefix, IEdmOperation operation, IEdmEntitySet entitySet)
+        public static string GetPathForOperationOfEntity(IEdmOperation operation, IEdmEntitySet entitySet)
         {
             Contract.Requires(operation != null);
             Contract.Requires(entitySet != null);
-            Contract.Requires(routePrefix != null);
 
-            var swaggerOperationPath = GetPathForEntity(routePrefix, entitySet) + "/" + operation.FullName();
+            var swaggerOperationPath = GetPathForEntity(entitySet) + "/" + operation.FullName();
             if (operation.IsFunction())
             {
                 swaggerOperationPath += "(";
@@ -712,12 +795,14 @@ namespace Swashbuckle.OData.Descriptions
             return responses;
         }
 
-        private static Operation Parameters(this Operation obj, IList<Parameter> parameters)
+        private static Operation Parameters(this Operation operation, IList<Parameter> parameters)
         {
-            Contract.Requires(obj != null);
+            Contract.Requires(operation != null);
+            Contract.Requires(parameters != null);
 
-            obj.parameters = parameters;
-            return obj;
+            operation.parameters = operation.parameters?.Concat(parameters).ToList() ?? parameters;
+
+            return operation;
         }
 
         private static IList<Parameter> Parameter(this IList<Parameter> parameters, string name, string kind, string description, string type, bool required, string format = null)

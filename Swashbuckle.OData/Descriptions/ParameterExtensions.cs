@@ -125,11 +125,11 @@ namespace Swashbuckle.OData.Descriptions
                 case "date-time":
                     return "2015-10-10T17:00:00Z";
                 case "double":
-                    return "2.34d";
+                    return "2.34";
                 case "decimal":
-                    return "1.12m";
+                    return "1.12";
                 case "float":
-                    return "2.0f";
+                    return "2.0";
                 case "guid":
                     return Guid.NewGuid().ToString();
                 case "binary":

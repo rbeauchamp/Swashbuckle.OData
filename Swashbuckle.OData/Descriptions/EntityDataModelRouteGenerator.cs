@@ -45,7 +45,7 @@ namespace Swashbuckle.OData.Descriptions
             return oDataRoute.GetEdmModel()
                 .EntityContainer
                 .EntitySets()?
-                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntitySet(oDataRoute.GetRoutePrefix(), entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntitySet(entitySet)));
+                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntitySet(entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntitySet(entitySet, oDataRoute)));
         }
 
         private static IEnumerable<SwaggerRoute> GenerateEntityRoutes(ODataRoute oDataRoute)
@@ -56,7 +56,7 @@ namespace Swashbuckle.OData.Descriptions
             return oDataRoute.GetEdmModel()
                 .EntityContainer
                 .EntitySets()?
-                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntity(oDataRoute.GetRoutePrefix(), entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet)));
+                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntity(entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet, oDataRoute)));
         }
 
         private static IEnumerable<SwaggerRoute> GenerateOperationImportRoutes(ODataRoute oDataRoute)
@@ -67,7 +67,7 @@ namespace Swashbuckle.OData.Descriptions
             return oDataRoute.GetEdmModel()
                 .EntityContainer
                 .OperationImports()?
-                .Select(operationImport => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationImport(oDataRoute.GetRoutePrefix(), operationImport), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationImport(operationImport)));
+                .Select(operationImport => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationImport(operationImport), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationImport(operationImport, oDataRoute)));
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Swashbuckle.OData.Descriptions
                             var entityType = (IEdmEntityType)boundType;
                             var edmEntitySets = oDataRoute.GetEdmModel().EntityContainer.EntitySets();
                             Contract.Assume(edmEntitySets != null);
-                            routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntity(oDataRoute.GetRoutePrefix(), operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntity(operation, entitySet))));
+                            routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntity(operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntity(operation, entitySet))));
                         }
                         else if (boundType.TypeKind == EdmTypeKind.Collection)
                         {
@@ -118,7 +118,7 @@ namespace Swashbuckle.OData.Descriptions
                                 var entityType = (IEdmEntityType)collectionType.ElementType?.GetDefinition();
                                 var edmEntitySets = oDataRoute.GetEdmModel().EntityContainer.EntitySets();
                                 Contract.Assume(edmEntitySets != null);
-                                routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntitySet(operation, entitySet, oDataRoute.GetRoutePrefix()), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntitySet(operation, entitySet))));
+                                routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntitySet(operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntitySet(operation, entitySet, oDataRoute))));
                             }
                         }
                     }
