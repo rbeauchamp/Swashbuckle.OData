@@ -55,11 +55,13 @@ namespace Swashbuckle.OData.Tests
         private static async Task IsValidAgainstJsonSchemaAsync(HttpResponseMessage response)
         {
             var swaggerJson = await response.Content.ReadAsStringAsync();
+            var schemaDraftFile = Path.Combine(NUnit.Framework.TestContext.CurrentContext.TestDirectory, @"schema-draft-v4.json");
+            var swaggerSchemaFile = Path.Combine(NUnit.Framework.TestContext.CurrentContext.TestDirectory, @"schema-draft-v4.json");
 
             var resolver = new JSchemaPreloadedResolver();
-            resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText(@"schema-draft-v4.json"));
+            resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText(schemaDraftFile));
 
-            var swaggerSchema = File.ReadAllText(@"swagger-2.0-schema.json");
+            var swaggerSchema = File.ReadAllText(swaggerSchemaFile);
             var schema = JSchema.Parse(swaggerSchema, resolver);
 
             var swaggerJObject = JObject.Parse(swaggerJson);
