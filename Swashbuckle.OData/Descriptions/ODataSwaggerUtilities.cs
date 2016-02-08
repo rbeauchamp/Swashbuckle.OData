@@ -67,12 +67,12 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false);
         }
 
-    /// <summary>
-    /// Create the Swagger path for the Edm entity.
-    /// </summary>
-    /// <param name="entitySet">The entity set.</param>
-    /// <returns></returns>
-    public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet)
+        /// <summary>
+        /// Create the Swagger path for the Edm entity.
+        /// </summary>
+        /// <param name="entitySet">The entity set.</param>
+        /// <returns></returns>
+        public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet)
         {
             Contract.Requires(entitySet != null);
             Contract.Ensures(Contract.Result<PathItem>() != null);
