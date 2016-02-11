@@ -1,7 +1,5 @@
 using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
-using System.Web.Http;
 using System.Web.Http.Controllers;
 using Swashbuckle.Swagger;
 

@@ -72,14 +72,14 @@ namespace Swashbuckle.OData.Descriptions
                     return typeof(int);
                 case "int64":
                     return typeof(long);
-                case "byte":
-                    return typeof(byte);
                 case "date":
                     return typeof(DateTime);
                 case "date-time":
                     return typeof(DateTimeOffset);
                 case "double":
                     return typeof(double);
+                case "decimal":
+                    return typeof(decimal);
                 case "float":
                     return typeof(float);
                 case "guid":
@@ -120,16 +120,16 @@ namespace Swashbuckle.OData.Descriptions
                 case "int32":
                 case "int64":
                     return "42";
-                case "byte":
-                    return "1";
                 case "date":
                     return "2015-12-12T12:00";
                 case "date-time":
                     return "2015-10-10T17:00:00Z";
                 case "double":
-                    return "2.34d";
+                    return "2.34";
+                case "decimal":
+                    return "1.12";
                 case "float":
-                    return "2.0f";
+                    return "2.0";
                 case "guid":
                     return Guid.NewGuid().ToString();
                 case "binary":
@@ -146,27 +146,7 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(!string.IsNullOrWhiteSpace(parameter.schema.@ref));
             Contract.Requires(parameter.@in == "body");
 
-            var fullTypeName = parameter.schema.@ref.Replace("#/definitions/", string.Empty);
-
-            return FindType(fullTypeName);
-        }
-
-        /// <summary>
-        /// Looks in all loaded assemblies for the given type.
-        /// </summary>
-        /// <param name="fullName">
-        /// The full name of the type.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Type"/> found; null if not found.
-        /// </returns>
-        private static Type FindType(string fullName)
-        {
-            return
-                AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => !a.IsDynamic)
-                    .SelectMany(a => a.GetTypes())
-                    .First(t => t.FullName.Equals(fullName));
+            return parameter.schema.GetReferencedType();
         }
     }
 }

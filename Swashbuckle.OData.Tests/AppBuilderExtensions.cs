@@ -9,12 +9,22 @@ namespace Swashbuckle.OData.Tests
 {
     public static class AppBuilderExtensions
     {
-        public static HttpConfiguration GetStandardHttpConfig(this IAppBuilder appBuilder, Type targetController, Action<SwaggerDocsConfig> unitTestConfigs = null)
+        public static HttpConfiguration GetStandardHttpConfig(this IAppBuilder appBuilder, params Type[] targetControllers)
+        {
+            return GetStandardHttpConfig(appBuilder, null, targetControllers);
+        }
+
+        public static HttpConfiguration GetStandardHttpConfig(this IAppBuilder appBuilder, Action<SwaggerDocsConfig> unitTestConfigs, params Type[] targetControllers)
         {
             var config = new HttpConfiguration
             {
                 IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always
             };
+            return ConfigureHttpConfig(appBuilder, config, unitTestConfigs, targetControllers);
+        }
+
+        public static HttpConfiguration ConfigureHttpConfig(this IAppBuilder appBuilder, HttpConfiguration config, Action<SwaggerDocsConfig> unitTestConfigs, params Type[] targetControllers)
+        {
             var server = new HttpServer(config);
             appBuilder.UseWebApi(server);
             config.EnableSwagger(c =>
@@ -32,12 +42,11 @@ namespace Swashbuckle.OData.Tests
 
                 // Apply test-specific configs
                 unitTestConfigs?.Invoke(c);
-
             }).EnableSwaggerUi();
 
             FormatterConfig.Register(config);
 
-            config.Services.Replace(typeof (IHttpControllerSelector), new UnitTestControllerSelector(config, targetController));
+            config.Services.Replace(typeof (IHttpControllerSelector), new UnitTestControllerSelector(config, targetControllers));
 
             return config;
         }

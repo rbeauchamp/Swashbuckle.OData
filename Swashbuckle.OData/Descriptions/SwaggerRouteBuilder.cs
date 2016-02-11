@@ -81,11 +81,5 @@ namespace Swashbuckle.OData.Descriptions
                     throw new ArgumentOutOfRangeException(nameof(httpMethod));
             }
         }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariants()
-        {
-            Contract.Invariant(SwaggerRoute != null);
-        }
     }
 }

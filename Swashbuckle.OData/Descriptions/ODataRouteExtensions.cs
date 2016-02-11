@@ -17,6 +17,14 @@ namespace Swashbuckle.OData.Descriptions
             return result;
         }
 
+        public static string GetRoutePrefix(this ODataRoute oDataRoute)
+        {
+            Contract.Requires(oDataRoute != null);
+            Contract.Ensures(Contract.Result<string>() != null);
+
+            return oDataRoute.RoutePrefix ?? string.Empty;
+        }
+
         public static ODataPathRouteConstraint GetODataPathRouteConstraint(this ODataRoute oDataRoute)
         {
             Contract.Requires(oDataRoute != null);

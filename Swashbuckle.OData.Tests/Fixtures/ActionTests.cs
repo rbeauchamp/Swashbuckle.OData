@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
@@ -12,6 +13,7 @@ using System.Web.OData.Extensions;
 using FluentAssertions;
 using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Owin;
 using Swashbuckle.Swagger;
@@ -22,6 +24,62 @@ namespace Swashbuckle.OData.Tests
     [TestFixture]
     public class ActionTests
     {
+        [Test]
+        public async Task It_supports_actions_that_accept_an_array_of_complex_types()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(SuppliersController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+                // Verify that the OData route and post data to the test controller is valid
+                var suppliers = new SupplierDtos
+                {
+                    Suppliers = new List<SupplierDto>
+                    {
+                        new SupplierDto
+                        {
+                            Name = "SupplierNameOne",
+                            Code = "CodeOne",
+                            Description = "SupplierOneDescription"
+                        },
+                        new SupplierDto
+                        {
+                            Name = "SupplierNameTwo",
+                            Code = "CodeTwo",
+                            Description = "SupplierTwoDescription"
+                        }
+                    }
+                };
+
+                var result = await httpClient.PostAsJsonAsync("/odata/Suppliers/Default.PostArrayOfSuppliers", suppliers);
+                result.IsSuccessStatusCode.Should().BeTrue();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/Suppliers/Default.PostArrayOfSuppliers", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.post.Should().NotBeNull();
+                pathItem.post.parameters.Count.Should().Be(1);
+                pathItem.post.parameters.Single().@in.Should().Be("body");
+                pathItem.post.parameters.Single().name.Should().Be("parameters");
+                pathItem.post.parameters.Single().schema.Should().NotBeNull();
+                pathItem.post.parameters.Single().schema.type.Should().Be("object");
+                pathItem.post.parameters.Single().schema.properties.Should().NotBeNull();
+                pathItem.post.parameters.Single().schema.properties.Count.Should().Be(1);
+                pathItem.post.parameters.Single().schema.properties.Should().ContainKey("suppliers");
+                pathItem.post.parameters.Single().schema.properties.Single(pair => pair.Key == "suppliers").Value.type.Should().Be("array");
+                pathItem.post.parameters.Single().schema.properties.Single(pair => pair.Key == "suppliers").Value.items.Should().NotBeNull();
+                pathItem.post.parameters.Single().schema.properties.Single(pair => pair.Key == "suppliers").Value.items.@ref.Should().Be("#/definitions/SupplierDto");
+
+                swaggerDocument.definitions.Keys.Should().Contain("SupplierDto");
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         [Test]
         public async Task It_supports_actions_with_only_body_paramters()
         {
@@ -170,6 +228,7 @@ namespace Swashbuckle.OData.Tests
         {
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<Supplier>("Suppliers");
+            //builder.ComplexType<SupplierDto>();
             var entityType = builder.EntityType<Supplier>();
 
             var create = entityType.Collection.Action("Create");
@@ -182,11 +241,21 @@ namespace Swashbuckle.OData.Tests
             createWithEnum.ReturnsFromEntitySet<Supplier>("Suppliers");
             createWithEnum.Parameter<MyEnum?>("EnumValue");
 
+            var postArray = entityType.Collection.Action("PostArrayOfSuppliers");
+            postArray.ReturnsCollectionFromEntitySet<Supplier>("Suppliers");
+            postArray.CollectionParameter<SupplierDto>("suppliers");
+
             entityType.Action("Rate")
                 .Parameter<int>("Rating");
 
             return builder.GetEdmModel();
         }
+    }
+
+    public class SupplierDtos
+    {
+        [JsonProperty("suppliers")]
+        public List<SupplierDto> Suppliers { get; set; }
     }
 
     public class SupplierDto
@@ -217,6 +286,17 @@ namespace Swashbuckle.OData.Tests
 
     public class SuppliersController : ODataController
     {
+        [HttpPost]
+        [ResponseType(typeof(List<Supplier>))]
+        public List<Supplier> PostArrayOfSuppliers(ODataActionParameters parameters)
+        {
+            parameters.Should().ContainKey("suppliers");
+            parameters.Count.Should().Be(1);
+            parameters["suppliers"].Should().BeAssignableTo<IEnumerable<SupplierDto>>();
+
+            return new List<Supplier>();
+        }
+
         [HttpPost]
         [ResponseType(typeof(Supplier))]
         public IHttpActionResult Create(ODataActionParameters parameters)

@@ -2,7 +2,7 @@ Swashbuckle.OData
 =========
 
 [![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata/)
-[![Coverage Status](https://coveralls.io/repos/rbeauchamp/Swashbuckle.OData/badge.svg?branch=master&service=github)](https://coveralls.io/github/rbeauchamp/Swashbuckle.OData?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/rbeauchamp/Swashbuckle.OData/badge.svg?branch=master)](https://coveralls.io/github/rbeauchamp/Swashbuckle.OData?branch=master)
 [![Issue Stats](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData/badge/pr)](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData)
 [![Issue Stats](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData/badge/issue)](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData)
 
@@ -60,6 +60,32 @@ config.AddCustomSwaggerRoute(restierRoute, "/Customers({CustomerId})/Orders({Ord
     .PathParameter<string>("CustomerId")
     .PathParameter<int>("OrderId");
 ```
+
+### Route prefixes that have parameters ###
+
+The follow snippet demonstrates how to configure route prefixes that have parameters:
+
+```csharp
+// For example, if you have a route prefix with a parameter "tenantId" of type long
+var odataRoute = config.MapODataServiceRoute("odata", "odata/{tenantId}", builder.GetEdmModel());
+
+// Then add the following route constraint so that Swashbuckle.OData knows the parameter type.
+// If you don't add this line then the parameter will be assumed to be of type string.
+odataRoute.Constraints.Add("tenantId", new LongRouteConstraint());
+```
+Swashbuckle.OData supports the following route constraints:
+
+| Parameter Type | Route Constraint          |
+|----------------|---------------------------|
+| `bool`         | `BoolRouteConstraint`     |
+| `DateTime`     | `DateTimeRouteConstraint` |
+| `decimal`      | `DecimalRouteConstraint`  |
+| `double`       | `DoubleRouteConstraint`   |
+| `float`        | `FloatRouteConstraint`    |
+| `Guid`         | `GuidRouteConstraint`     |
+| `int`          | `IntRouteConstraint`      |
+| `long`         | `LongRouteConstraint`     |
+
 
 ### OWIN  ###
 

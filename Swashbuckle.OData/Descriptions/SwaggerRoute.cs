@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.Contracts;
+using System.Web;
 using System.Web.OData.Routing;
+using Flurl;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
@@ -37,6 +39,15 @@ namespace Swashbuckle.OData.Descriptions
             }
         }
 
+        public string PrefixedTemplate
+        {
+            get
+            {
+                Contract.Ensures(!string.IsNullOrWhiteSpace(Contract.Result<string>()));
+                return HttpUtility.UrlDecode(ODataRoute.GetRoutePrefix().AppendPathSegment(_template));
+            }
+        }
+
         public ODataRoute ODataRoute
         {
             get
@@ -53,14 +64,6 @@ namespace Swashbuckle.OData.Descriptions
                 Contract.Ensures(Contract.Result<PathItem>() != null);
                 return _pathItem;
             }
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariants()
-        {
-            Contract.Invariant(!string.IsNullOrWhiteSpace(_template));
-            Contract.Invariant(_oDataRoute != null);
-            Contract.Invariant(_pathItem != null);
         }
     }
 }

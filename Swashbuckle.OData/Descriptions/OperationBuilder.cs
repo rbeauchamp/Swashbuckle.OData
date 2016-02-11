@@ -55,11 +55,5 @@ namespace Swashbuckle.OData.Descriptions
         {
             return _swaggerRouteBuilder.SwaggerRoute.ODataRoute.GetEdmModel();
         }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(_swaggerRouteBuilder != null);
-        }
     }
 }

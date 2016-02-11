@@ -17,7 +17,7 @@ namespace Swashbuckle.OData.Descriptions
                 .ToDictionary(queryParameter => queryParameter.name, queryParameter => queryParameter.GenerateSamplePathParameterValue());
         }
 
-        public static string GenerateSampleODataAbsoluteUri(this Operation operation, string serviceRoot, string pathTemplate)
+        public static string GenerateSampleODataUri(this Operation operation, string serviceRoot, string pathTemplate)
         {
             Contract.Requires(operation != null);
             Contract.Requires(serviceRoot != null);

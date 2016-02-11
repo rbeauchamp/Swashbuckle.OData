@@ -125,7 +125,7 @@ namespace SwashbuckleODataSample.ODataControllers
         }
 
         /// <summary>
-        /// Creates a product. This action accepts parameters via an ODataActionParameters object.
+        /// Creates a product from values passed in an ODataActionParameters object.
         /// </summary>
         /// <param name="parameters">The OData action parameters.</param>
         [HttpPost]
@@ -141,6 +141,36 @@ namespace SwashbuckleODataSample.ODataControllers
             };
             Data.TryAdd(product.Id, product);
             return Created(product);
+        }
+
+        /// <summary>
+        /// Creates a set of products from an array of ProductDTOs passed in an ODataActionParameters object.
+        /// </summary>
+        /// <param name="parameters">The OData action parameters containing an array of ProductDTOs</param>
+        [HttpPost]
+        public List<Product> PostArray(ODataActionParameters parameters)
+        {
+            var productDtos = parameters["products"] as IEnumerable<ProductDto>;
+
+            var newProducts = new List<Product>();
+
+            if (productDtos != null && productDtos.Any())
+            {
+                foreach (var productDto in productDtos)
+                {
+                    var product = new Product
+                    {
+                        Id = Data.Values.Max(existingProduct => existingProduct.Id) + 1,
+                        Name = productDto.Name,
+                        Price = productDto.Price,
+                        EnumValue = productDto.EnumValue
+                    };
+                    newProducts.Add(product);
+                    Data.TryAdd(product.Id, product);
+                }
+            }
+
+            return newProducts;
         }
 
         /// <summary>

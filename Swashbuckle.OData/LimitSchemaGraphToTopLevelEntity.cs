@@ -33,7 +33,7 @@ namespace Swashbuckle.OData
 
         private static bool IsEntityType(KeyValuePair<string, Schema> definition)
         {
-            return !definition.Key.StartsWith("ODataResponse[");
+            return !definition.Key.Contains("ODataResponse[");
         }
 
         private static void RemoveCollectionTypeProperty(KeyValuePair<string, Schema> property, ICollection<KeyValuePair<string, Schema>> properties)

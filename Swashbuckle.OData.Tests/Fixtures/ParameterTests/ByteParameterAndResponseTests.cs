@@ -14,7 +14,6 @@ using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
-using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Tests
 {

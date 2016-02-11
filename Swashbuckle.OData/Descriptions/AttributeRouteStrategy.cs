@@ -51,7 +51,7 @@ namespace Swashbuckle.OData.Descriptions
 
             var odataRouteAttribute = actionDescriptor.GetCustomAttributes<ODataRouteAttribute>()?.FirstOrDefault();
             Contract.Assume(odataRouteAttribute != null);
-            var pathTemplate = HttpUtility.UrlDecode(oDataRoute.RoutePrefix.AppendPathSegment(odataRouteAttribute.PathTemplate));
+            var pathTemplate = HttpUtility.UrlDecode(oDataRoute.GetRoutePrefix().AppendPathSegment(odataRouteAttribute.PathTemplate));
             Contract.Assume(pathTemplate != null);
             return new ODataActionDescriptor(actionDescriptor, oDataRoute, pathTemplate, CreateHttpRequestMessage(actionDescriptor, oDataRoute, httpConfig));
         }

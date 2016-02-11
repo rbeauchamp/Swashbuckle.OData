@@ -73,7 +73,7 @@ namespace Swashbuckle.OData
                 swaggerDocsConfig.GetFieldValue<bool>("_ignoreObsoleteActions"),
                 swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string>>("_groupingKeySelector"),
                 swaggerDocsConfig.GetFieldValue<IComparer<string>>("_groupingKeyComparer"),
-                swaggerDocsConfig.GetFieldValue<IDictionary<Type, Func<Schema>>>("_customSchemaMappings"),
+                GetODataCustomSchemaMappings(swaggerDocsConfig),
                 swaggerDocsConfig.GetFieldValue<IList<Func<ISchemaFilter>>>("_schemaFilters", true).Select(factory => factory()),
                 swaggerDocsConfig.GetFieldValue<IList<Func<IModelFilter>>>("_modelFilters", true).Select(factory => factory()),
                 swaggerDocsConfig.GetFieldValue<bool>("_ignoreObsoleteProperties"),
@@ -84,6 +84,18 @@ namespace Swashbuckle.OData
                 GetODataDocumentFilters(swaggerDocsConfig),
                 swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver")
             );
+        }
+
+        /// <summary>
+        /// Gets custom schema mappings that will only be applied to OData operations.
+        /// </summary>
+        /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
+        /// <returns></returns>
+        private static IDictionary<Type, Func<Schema>> GetODataCustomSchemaMappings(SwaggerDocsConfig swaggerDocsConfig)
+        {
+            var customSchemaMappings = swaggerDocsConfig.GetFieldValue<IDictionary<Type, Func<Schema>>>("_customSchemaMappings", true);
+            customSchemaMappings[typeof(decimal)] = () => new Schema { type = "number", format = "decimal" };
+            return customSchemaMappings;
         }
 
         /// <summary>

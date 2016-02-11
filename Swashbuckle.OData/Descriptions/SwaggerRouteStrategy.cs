@@ -8,7 +8,6 @@ using System.Web.Http.Controllers;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
-using Flurl;
 using Microsoft.OData.Edm;
 using Swashbuckle.Swagger;
 
@@ -48,23 +47,23 @@ namespace Swashbuckle.OData.Descriptions
 
             var oDataActionDescriptors = new List<ODataActionDescriptor>();
 
-            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("DELETE"), potentialSwaggerRoute.PathItem.delete, potentialSwaggerRoute.Template, potentialSwaggerRoute.ODataRoute, httpConfig));
-            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("GET"), potentialSwaggerRoute.PathItem.get, potentialSwaggerRoute.Template, potentialSwaggerRoute.ODataRoute, httpConfig));
-            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("POST"), potentialSwaggerRoute.PathItem.post, potentialSwaggerRoute.Template, potentialSwaggerRoute.ODataRoute, httpConfig));
-            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("PUT"), potentialSwaggerRoute.PathItem.put, potentialSwaggerRoute.Template, potentialSwaggerRoute.ODataRoute, httpConfig));
-            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("PATCH"), potentialSwaggerRoute.PathItem.patch, potentialSwaggerRoute.Template, potentialSwaggerRoute.ODataRoute, httpConfig));
+            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("DELETE"), potentialSwaggerRoute.PathItem.delete, potentialSwaggerRoute, httpConfig));
+            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("GET"), potentialSwaggerRoute.PathItem.get, potentialSwaggerRoute, httpConfig));
+            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("POST"), potentialSwaggerRoute.PathItem.post, potentialSwaggerRoute, httpConfig));
+            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("PUT"), potentialSwaggerRoute.PathItem.put, potentialSwaggerRoute, httpConfig));
+            oDataActionDescriptors.AddIfNotNull(GetActionDescriptors(new HttpMethod("PATCH"), potentialSwaggerRoute.PathItem.patch, potentialSwaggerRoute, httpConfig));
 
             return oDataActionDescriptors;
         }
 
-        private static ODataActionDescriptor GetActionDescriptors(HttpMethod httpMethod, Operation potentialOperation, string potentialPathTemplate, ODataRoute oDataRoute, HttpConfiguration httpConfig)
+        private static ODataActionDescriptor GetActionDescriptors(HttpMethod httpMethod, Operation potentialOperation, SwaggerRoute potentialSwaggerRoute, HttpConfiguration httpConfig)
         {
             Contract.Requires(potentialOperation == null || httpConfig != null);
-            Contract.Requires(potentialPathTemplate != null);
+            Contract.Requires(potentialSwaggerRoute != null);
 
             if (potentialOperation != null)
             {
-                var request = CreateHttpRequestMessage(httpMethod, potentialOperation, potentialPathTemplate, oDataRoute, httpConfig);
+                var request = CreateHttpRequestMessage(httpMethod, potentialOperation, potentialSwaggerRoute, httpConfig);
 
                 var actionDescriptor = request.GetHttpActionDescriptor(httpConfig);
 
@@ -72,26 +71,26 @@ namespace Swashbuckle.OData.Descriptions
                 {
                     actionDescriptor = MapForRestierIfNecessary(request, actionDescriptor);
 
-                    return new ODataActionDescriptor(actionDescriptor, oDataRoute, potentialPathTemplate, request, potentialOperation);
+                    return new ODataActionDescriptor(actionDescriptor, potentialSwaggerRoute.ODataRoute, potentialSwaggerRoute.PrefixedTemplate, request, potentialOperation);
                 }
             }
 
             return null;
         }
 
-        private static HttpRequestMessage CreateHttpRequestMessage(HttpMethod httpMethod, Operation potentialOperation, string potentialPathTemplate, ODataRoute oDataRoute, HttpConfiguration httpConfig)
+        private static HttpRequestMessage CreateHttpRequestMessage(HttpMethod httpMethod, Operation potentialOperation, SwaggerRoute potentialSwaggerRoute, HttpConfiguration httpConfig)
         {
             Contract.Requires(httpConfig != null);
-            Contract.Requires(oDataRoute != null);
+            Contract.Requires(potentialSwaggerRoute != null);
             Contract.Ensures(Contract.Result<HttpRequestMessage>() != null);
 
-            Contract.Assume(oDataRoute.Constraints != null);
+            Contract.Assume(potentialSwaggerRoute.ODataRoute.Constraints != null);
 
-            var oDataAbsoluteUri = potentialOperation.GenerateSampleODataAbsoluteUri(ServiceRoot, potentialPathTemplate);
+            var oDataAbsoluteUri = potentialOperation.GenerateSampleODataUri(ServiceRoot, potentialSwaggerRoute.PrefixedTemplate);
 
             var httpRequestMessage = new HttpRequestMessage(httpMethod, oDataAbsoluteUri);
 
-            var odataPath = GenerateSampleODataPath(oDataRoute, oDataAbsoluteUri);
+            var odataPath = GenerateSampleODataPath(potentialOperation, potentialSwaggerRoute);
 
             var requestContext = new HttpRequestContext
             {
@@ -99,7 +98,7 @@ namespace Swashbuckle.OData.Descriptions
             };
             httpRequestMessage.SetConfiguration(httpConfig);
             httpRequestMessage.SetRequestContext(requestContext);
-
+            var oDataRoute = potentialSwaggerRoute.ODataRoute;
             var httpRequestMessageProperties = httpRequestMessage.ODataProperties();
             Contract.Assume(httpRequestMessageProperties != null);
             httpRequestMessageProperties.Model = oDataRoute.GetEdmModel();
@@ -151,27 +150,24 @@ namespace Swashbuckle.OData.Descriptions
             return request.Method == HttpMethod.Get || request.Method == HttpMethod.Post;
         }
 
-        private static ODataPath GenerateSampleODataPath(ODataRoute oDataRoute, string sampleODataAbsoluteUri)
+        private static ODataPath GenerateSampleODataPath(Operation operation, SwaggerRoute swaggerRoute)
         {
-            Contract.Requires(oDataRoute != null);
-            Contract.Requires(oDataRoute.Constraints != null);
+            Contract.Requires(operation != null);
+            Contract.Requires(swaggerRoute != null);
+            Contract.Requires(swaggerRoute.ODataRoute.Constraints != null);
             Contract.Ensures(Contract.Result<ODataPath>() != null);
 
-            var oDataPathRouteConstraint = oDataRoute.GetODataPathRouteConstraint();
+            var oDataPathRouteConstraint = swaggerRoute.ODataRoute.GetODataPathRouteConstraint();
 
-            var model = oDataRoute.GetEdmModel();
+            var model = swaggerRoute.ODataRoute.GetEdmModel();
 
             Contract.Assume(oDataPathRouteConstraint.PathHandler != null);
 
-            var result = oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot.AppendPathSegment(oDataRoute.RoutePrefix), sampleODataAbsoluteUri);
+            var odataPath = operation.GenerateSampleODataUri(ServiceRoot, swaggerRoute.Template).Replace(ServiceRoot, string.Empty);
+
+            var result = oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot, odataPath);
             Contract.Assume(result != null);
             return result;
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(_swaggerRouteGenerators != null);
         }
     }
 }

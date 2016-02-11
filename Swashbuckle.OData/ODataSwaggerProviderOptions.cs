@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Web.Http.Description;
 using Swashbuckle.Swagger;
 
@@ -28,7 +27,7 @@ namespace Swashbuckle.OData
             DescribeStringEnumsInCamelCase = swaggerProviderOptions.DescribeStringEnumsInCamelCase;
             OperationFilters = swaggerProviderOptions.OperationFilters ?? new List<IOperationFilter>();
             DocumentFilters = swaggerProviderOptions.DocumentFilters ?? new List<IDocumentFilter>();
-            ConflictingActionsResolver = swaggerProviderOptions.ConflictingActionsResolver ?? DefaultConflictingActionsResolver;
+            ConflictingActionsResolver = swaggerProviderOptions.ConflictingActionsResolver;
         }
 
         public Func<ApiDescription, string, bool> VersionSupportResolver { get; private set; }
@@ -66,15 +65,6 @@ namespace Swashbuckle.OData
         private static string DefaultSchemaIdSelector(Type type)
         {
             return type.FriendlyId();
-        }
-
-        private static ApiDescription DefaultConflictingActionsResolver(IEnumerable<ApiDescription> apiDescriptions)
-        {
-            Contract.Requires(apiDescriptions != null);
-            Contract.Requires(apiDescriptions.Any());
-
-            var first = apiDescriptions.First();
-            throw new NotSupportedException($"Not supported by Swagger 2.0: Multiple operations with path '{first.RelativePathSansQueryString()}' and method '{first.HttpMethod}'. " + "See the config setting - \"ResolveConflictingActions\" for a potential workaround");
         }
     }
 }
