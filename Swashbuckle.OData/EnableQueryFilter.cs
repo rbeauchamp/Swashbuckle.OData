@@ -5,7 +5,6 @@ using System.Web.Http.Description;
 using System.Web.OData;
 using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
-using System.Web.Http;
 using System;
 
 namespace Swashbuckle.OData
