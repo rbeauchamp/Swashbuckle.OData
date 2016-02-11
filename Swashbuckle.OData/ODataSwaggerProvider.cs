@@ -15,10 +15,7 @@ namespace Swashbuckle.OData
     public class ODataSwaggerProvider : ISwaggerProvider
     {
         private readonly ISwaggerProvider _defaultProvider;
-        private readonly HttpConfiguration _httpConfig;
-        private readonly ODataSwaggerProviderOptions _options;
-        private readonly IDictionary<string, Info> _apiVersions;
-        private readonly IApiExplorer _odataApiExplorer;
+        private readonly ODataSwaggerDocsConfig _config;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
@@ -40,56 +37,37 @@ namespace Swashbuckle.OData
         /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
         /// <param name="httpConfig">The HttpConfiguration that contains the OData Edm Model.</param>
         public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerDocsConfig swaggerDocsConfig, HttpConfiguration httpConfig)
-            : this(defaultProvider, DefaultCompositionRoot.GetSwaggerProviderOptions(swaggerDocsConfig), DefaultCompositionRoot.GetApiVersions(swaggerDocsConfig), DefaultCompositionRoot.GetApiExplorer(httpConfig), httpConfig)
         {
             Contract.Requires(defaultProvider != null);
             Contract.Requires(swaggerDocsConfig != null);
             Contract.Requires(httpConfig != null);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
-        /// Use this constructor to customize all <see cref="ODataSwaggerProvider" /> dependencies.
-        /// </summary>
-        /// <param name="defaultProvider">The default provider.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="apiVersions">The version information.</param>
-        /// <param name="odataApiExplorer">The API explorer.</param>
-        /// <param name="httpConfig">The HttpConfiguration that contains the OData Edm Model.</param>
-        internal ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerProviderOptions options, IDictionary<string, Info> apiVersions, IApiExplorer odataApiExplorer, HttpConfiguration httpConfig)
-        {
-            Contract.Requires(defaultProvider != null);
-            Contract.Requires(odataApiExplorer != null);
-            Contract.Requires(httpConfig != null);
-            Contract.Requires(options != null);
 
             _defaultProvider = defaultProvider;
-            _httpConfig = httpConfig;
-            _options = new ODataSwaggerProviderOptions(options);
-            _apiVersions = apiVersions;
-            _odataApiExplorer = odataApiExplorer;
+            _config = new ODataSwaggerDocsConfig(swaggerDocsConfig, httpConfig);
         }
 
         public SwaggerDocument GetSwagger(string rootUrl, string apiVersion)
         {
+            var swashbuckleOptions = _config.GetSwashbuckleOptions();
+
             var schemaRegistry = new SchemaRegistry(
-                _httpConfig.SerializerSettingsOrDefault(),
-                _options.CustomSchemaMappings,
-                _options.SchemaFilters,
-                _options.ModelFilters,
-                _options.IgnoreObsoleteProperties,
-                _options.SchemaIdSelector,
-                _options.DescribeAllEnumsAsStrings,
-                _options.DescribeStringEnumsInCamelCase);
+                _config.Configuration.SerializerSettingsOrDefault(),
+                swashbuckleOptions.CustomSchemaMappings,
+                swashbuckleOptions.SchemaFilters,
+                swashbuckleOptions.ModelFilters,
+                swashbuckleOptions.IgnoreObsoleteProperties,
+                swashbuckleOptions.SchemaIdSelector,
+                swashbuckleOptions.DescribeAllEnumsAsStrings,
+                swashbuckleOptions.DescribeStringEnumsInCamelCase);
 
             Info info;
-            _apiVersions.TryGetValue(apiVersion, out info);
+            _config.GetApiVersions().TryGetValue(apiVersion, out info);
             if (info == null)
                 throw new UnknownApiVersion(apiVersion);
 
             var paths = GetApiDescriptionsFor(apiVersion)
-                .Where(apiDesc => !(_options.IgnoreObsoleteActions && apiDesc.IsObsolete()))
-                .OrderBy(_options.GroupingKeySelector, _options.GroupingKeyComparer)
+                .Where(apiDesc => !(swashbuckleOptions.IgnoreObsoleteActions && apiDesc.IsObsolete()))
+                .OrderBy(swashbuckleOptions.GroupingKeySelector, swashbuckleOptions.GroupingKeyComparer)
                 .GroupBy(apiDesc => apiDesc.RelativePathSansQueryString())
                 .ToDictionary(group => "/" + group.Key, group => CreatePathItem(@group, schemaRegistry));
 
@@ -101,17 +79,17 @@ namespace Swashbuckle.OData
                 info = info,
                 host = rootUri.Host + port,
                 basePath = rootUri.AbsolutePath != "/" ? rootUri.AbsolutePath : null,
-                schemes = _options.Schemes?.ToList() ?? new[] { rootUri.Scheme }.ToList(),
+                schemes = swashbuckleOptions.Schemes?.ToList() ?? new[] { rootUri.Scheme }.ToList(),
                 paths = paths,
                 definitions = schemaRegistry.Definitions,
-                securityDefinitions = _options.SecurityDefinitions
+                securityDefinitions = swashbuckleOptions.SecurityDefinitions
             };
 
-            foreach(var filter in _options.DocumentFilters)
+            foreach(var filter in swashbuckleOptions.DocumentFilters)
             {
                 Contract.Assume(filter != null);
 
-                filter.Apply(odataSwaggerDoc, schemaRegistry, _odataApiExplorer);
+                filter.Apply(odataSwaggerDoc, schemaRegistry, _config.GetApiExplorer());
             }
 
             return MergeODataAndWebApiSwaggerDocs(rootUrl, apiVersion, odataSwaggerDoc);
@@ -165,7 +143,7 @@ namespace Swashbuckle.OData
 
                 var apiDescription = group.Count() == 1
                     ? group.First()
-                    : _options.ConflictingActionsResolver(group);
+                    : _config.GetSwashbuckleOptions().ConflictingActionsResolver(group);
 
                 Contract.Assume(apiDescription != null);
                 Contract.Assume(apiDescription.ParameterDescriptions != null);
@@ -224,7 +202,7 @@ namespace Swashbuckle.OData
             var operation = new Operation
             {
                 summary = apiDescription.Documentation,
-                tags = new[] { _options.GroupingKeySelector(apiDescription) },
+                tags = new[] { _config.GetSwashbuckleOptions().GroupingKeySelector(apiDescription) },
                 operationId = apiDescription.OperationId(),
                 produces = apiDescription.Produces()?.ToList(),
                 consumes = apiDescription.Consumes()?.ToList(),
@@ -233,7 +211,7 @@ namespace Swashbuckle.OData
                 deprecated = apiDescription.IsObsolete()
             };
 
-            foreach (var filter in _options.OperationFilters)
+            foreach (var filter in _config.GetSwashbuckleOptions().OperationFilters)
             {
                 Contract.Assume(filter != null);
                 filter.Apply(operation, schemaRegistry, apiDescription);
@@ -323,14 +301,23 @@ namespace Swashbuckle.OData
         {
             Contract.Ensures(Contract.Result<IEnumerable<ApiDescription>>() != null);
 
-            Contract.Assume(_options.VersionSupportResolver == null || _odataApiExplorer.ApiDescriptions != null);
+            var odataApiExplorer = _config.GetApiExplorer();
 
-            var result = _options.VersionSupportResolver == null 
-                ? _odataApiExplorer.ApiDescriptions 
-                : _odataApiExplorer.ApiDescriptions.Where(apiDesc => _options.VersionSupportResolver(apiDesc, apiVersion));
+            Contract.Assume(_config.GetSwashbuckleOptions().VersionSupportResolver == null || odataApiExplorer.ApiDescriptions != null);
+
+            var result = _config.GetSwashbuckleOptions().VersionSupportResolver == null 
+                ? odataApiExplorer.ApiDescriptions 
+                : odataApiExplorer.ApiDescriptions.Where(apiDesc => _config.GetSwashbuckleOptions().VersionSupportResolver(apiDesc, apiVersion));
 
             Contract.Assume(result != null);
             return result;
+        }
+
+        public ODataSwaggerProvider Configure(Action<ODataSwaggerDocsConfig> configure)
+        {
+            configure?.Invoke(_config);
+
+            return this;
         }
     }
 }

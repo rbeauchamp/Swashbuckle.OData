@@ -68,9 +68,9 @@ namespace Swashbuckle.OData.Tests
             return config;
         }
 
-        private static HttpConfiguration ConfigureOData(IAppBuilder appBuilder, Type[] targetController, HttpConfiguration config, Action<SwaggerDocsConfig> unitTestConfigs)
+        private static HttpConfiguration ConfigureOData(IAppBuilder appBuilder, Type[] targetController, HttpConfiguration config, Action<SwaggerDocsConfig> swaggerDocsConfig)
         {
-            config = appBuilder.ConfigureHttpConfig(config, unitTestConfigs, targetController);
+            config = appBuilder.ConfigureHttpConfig(config, swaggerDocsConfig, null, targetController);
 
             config.MapODataServiceRoute("odata", "odata", GetEdmModel());
 

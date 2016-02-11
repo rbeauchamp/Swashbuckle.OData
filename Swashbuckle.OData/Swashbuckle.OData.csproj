@@ -172,7 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
-    <Compile Include="DefaultCompositionRoot.cs" />
+    <Compile Include="ODataSwaggerDocsConfig.cs" />
     <Compile Include="Descriptions\ApiDescriptionExtensions.cs" />
     <Compile Include="Descriptions\ApiParameterDescriptionEqualityComparer.cs" />
     <Compile Include="Descriptions\AttributeRouteStrategy.cs" />
@@ -213,9 +213,9 @@
     <Compile Include="EnableQueryFilter.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Descriptions\ODataApiExplorer.cs" />
-    <Compile Include="LimitSchemaGraphToTopLevelEntity.cs" />
+    <Compile Include="RemoveNavigationPropertiesFromDefinition.cs" />
     <Compile Include="ODataResponse.cs" />
-    <Compile Include="ODataSwaggerProviderOptions.cs" />
+    <Compile Include="SwashbuckleOptions.cs" />
     <Compile Include="SchemaExtensions.cs" />
     <Compile Include="SwaggerDocsConfigExtensions.cs" />
     <Compile Include="SwaggerProviderOptions.cs" />

@@ -27,7 +27,7 @@ namespace Swashbuckle.OData.Tests
             Action<SwaggerDocsConfig> config = c => c.DocumentFilter<ApplyNewHostName>();
             var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
 
-            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, unitTestConfigs: config)))
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder, swaggerDocsConfig: config)))
             {
                 // Act
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
@@ -145,9 +145,9 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
-        private static void Configuration(IAppBuilder appBuilder, Type targetController = null, Action<SwaggerDocsConfig> unitTestConfigs = null)
+        private static void Configuration(IAppBuilder appBuilder, Type targetController = null, Action<SwaggerDocsConfig> swaggerDocsConfig = null)
         {
-            var config = appBuilder.GetStandardHttpConfig(unitTestConfigs, targetController);
+            var config = appBuilder.GetStandardHttpConfig(swaggerDocsConfig, null, targetController);
 
             var controllerSelector = new UnitTestODataVersionControllerSelector(config, targetController);
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);

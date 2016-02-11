@@ -6,9 +6,9 @@ using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData
 {
-    internal class ODataSwaggerProviderOptions
+    internal class SwashbuckleOptions
     {
-        public ODataSwaggerProviderOptions(SwaggerProviderOptions swaggerProviderOptions)
+        public SwashbuckleOptions(SwaggerProviderOptions swaggerProviderOptions)
         {
             Contract.Requires(swaggerProviderOptions != null);
 

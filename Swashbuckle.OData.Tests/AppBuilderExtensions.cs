@@ -11,19 +11,19 @@ namespace Swashbuckle.OData.Tests
     {
         public static HttpConfiguration GetStandardHttpConfig(this IAppBuilder appBuilder, params Type[] targetControllers)
         {
-            return GetStandardHttpConfig(appBuilder, null, targetControllers);
+            return GetStandardHttpConfig(appBuilder, null, null, targetControllers);
         }
 
-        public static HttpConfiguration GetStandardHttpConfig(this IAppBuilder appBuilder, Action<SwaggerDocsConfig> unitTestConfigs, params Type[] targetControllers)
+        public static HttpConfiguration GetStandardHttpConfig(this IAppBuilder appBuilder, Action<SwaggerDocsConfig> swaggerDocsConfig, Action<ODataSwaggerDocsConfig> odataSwaggerDocsConfig, params Type[] targetControllers)
         {
             var config = new HttpConfiguration
             {
                 IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always
             };
-            return ConfigureHttpConfig(appBuilder, config, unitTestConfigs, targetControllers);
+            return ConfigureHttpConfig(appBuilder, config, swaggerDocsConfig, odataSwaggerDocsConfig, targetControllers);
         }
 
-        public static HttpConfiguration ConfigureHttpConfig(this IAppBuilder appBuilder, HttpConfiguration config, Action<SwaggerDocsConfig> unitTestConfigs, params Type[] targetControllers)
+        public static HttpConfiguration ConfigureHttpConfig(this IAppBuilder appBuilder, HttpConfiguration config, Action<SwaggerDocsConfig> swaggerDocsConfig, Action<ODataSwaggerDocsConfig> odataSwaggerDocsConfig, params Type[] targetControllers)
         {
             var server = new HttpServer(config);
             appBuilder.UseWebApi(server);
@@ -38,10 +38,10 @@ namespace Swashbuckle.OData.Tests
                 // Wrap the default SwaggerGenerator with additional behavior (e.g. caching) or provide an
                 // alternative implementation for ISwaggerProvider with the CustomProvider option.
                 //
-                c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, config));
+                c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, config).Configure(odataSwaggerDocsConfig));
 
                 // Apply test-specific configs
-                unitTestConfigs?.Invoke(c);
+                swaggerDocsConfig?.Invoke(c);
             }).EnableSwaggerUi();
 
             FormatterConfig.Register(config);

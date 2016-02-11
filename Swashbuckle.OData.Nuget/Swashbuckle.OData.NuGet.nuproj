@@ -25,12 +25,12 @@
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support!</Summary>
     <Description>Extends Swashbuckle with OData v4 support!</Description>
-    <ReleaseNotes>OData query parameters are limited to $expand and $select for APIs that return a single result.</ReleaseNotes>
+    <ReleaseNotes>Configuration option now allows Navigation Properties to be included in the entity swagger models.</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright 2015</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUi OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
-    <Version>2.15.0</Version>
+    <Version>2.16.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />

@@ -23,7 +23,19 @@ In `SwaggerConfig` configure the custom provider:
 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
 ```
 
-### Custom Swagger Routes  ###
+### Include Navigation Properties in your entity swagger models ###
+
+By default, OData does not get related entities unless you specify `$expand` on a navigation property.
+Swashbuckle.OData tries to accurately reflect this behavior and therefore, by default, does not include 
+navigation properties in your entity swagger models. You can override this though by specifying:
+```csharp
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c).Configure(odataConfig =>
+                    {
+                        odataConfig.IncludeNavigationProperties();
+                    }));
+```
+
+### Custom Swagger Routes ###
 
 The following snippet demonstrates how to configure a custom swagger route such that it will appear in the Swagger UI:
 ```csharp

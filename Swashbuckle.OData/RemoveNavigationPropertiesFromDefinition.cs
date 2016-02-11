@@ -9,7 +9,7 @@ namespace Swashbuckle.OData
     /// <summary>
     /// Limits the object graph to the top level entity.
     /// </summary>
-    internal class LimitSchemaGraphToTopLevelEntity : IDocumentFilter
+    internal class RemoveNavigationPropertiesFromDefinition : IDocumentFilter
     {
         public void Apply(SwaggerDocument swaggerDoc, SchemaRegistry schemaRegistry, IApiExplorer apiExplorer)
         {
