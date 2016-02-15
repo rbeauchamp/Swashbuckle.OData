@@ -1,4 +1,7 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Reflection;
 
 namespace Swashbuckle.OData
@@ -20,12 +23,27 @@ namespace Swashbuckle.OData
             Contract.Requires(instance != null);
             Contract.Ensures(Contract.Result<T>() != null || !ensureNonNull);
 
-            const BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
-            var fieldInfo = instance.GetType().GetField(fieldName, bindFlags);
+            var fieldInfo = instance.GetType().GetAllFields().SingleOrDefault(info => info.Name == fieldName);
             Contract.Assume(fieldInfo != null);
             var value = fieldInfo.GetValue(instance);
             Contract.Assume(value != null || !ensureNonNull);
             return value != null ? (T)value : default (T);
+        }
+
+        private static IEnumerable<FieldInfo> GetAllFields(this Type type)
+        {
+            if (type == null)
+            {
+                return Enumerable.Empty<FieldInfo>();
+            }
+
+            const BindingFlags flags = BindingFlags.Public 
+                | BindingFlags.NonPublic 
+                | BindingFlags.Static 
+                | BindingFlags.Instance 
+                | BindingFlags.DeclaredOnly;
+
+            return type.GetFields(flags).Concat(GetAllFields(type.BaseType));   
         }
 
         /// <summary>

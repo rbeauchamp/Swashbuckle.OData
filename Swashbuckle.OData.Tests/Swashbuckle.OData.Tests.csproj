@@ -146,6 +146,7 @@
     <Compile Include="ContentType.cs" />
     <Compile Include="Fixtures\ParameterTests\DecimalParameterAndResponseTests.cs" />
     <Compile Include="Fixtures\ModelSharedBetweenODataAndWebApiTests.cs" />
+    <Compile Include="Fixtures\CustomRoutingConventionTests.cs" />
     <Compile Include="Fixtures\QueryStringParameterTests.cs" />
     <Compile Include="Fixtures\ParameterizedRoutePrefixTests.cs" />
     <Compile Include="Fixtures\RoutePrefixTests.cs" />
