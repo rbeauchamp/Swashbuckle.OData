@@ -6,7 +6,7 @@ Swashbuckle.OData
 [![Issue Stats](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData/badge/pr)](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData)
 [![Issue Stats](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData/badge/issue)](http://www.issuestats.com/github/rbeauchamp/Swashbuckle.OData)
 
-Extends Swashbuckle with OData v4 support!
+Extends Swashbuckle with OData v4 support!Supports both WebApi and OData controllers! 
 
 ### <a href="http://swashbuckleodata.azurewebsites.net/swagger/" target="_blank">Try it out!</a> ###
 
