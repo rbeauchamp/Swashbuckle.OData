@@ -132,14 +132,14 @@ namespace Swashbuckle.OData.Descriptions
 
         public static IList<Parameter> AddQueryOptionParametersForEntitySet(IList<Parameter> parameterList)
         {
-			return parameterList
-				.Parameter("$expand", "query", "Expands related entities (navigation properties) inline. For example, setting $expand to \"CreatedByUser\", if the model has a property called CreatedByUser, will allow the results to include the User model for the CreatedByUser property.", "string", false)
-				.Parameter("$filter", "query", "Filters the results, based on a Boolean condition. Operator examples include \"eq\" for \"equals\", \"ne\" for \"does not equal\", \"gt\" and \"lt\" for \"greater than\"/\"less than\", \"contains('foo')\", \"endswith('bar')\", etc. <a href=\"http://docs.oasis-open.org/odata/odata/v4.0/errata02/os/complete/part2-url-conventions/odata-v4.0-errata02-os-part2-url-conventions-complete.html#_Toc406398106\" target=\"_blank\">See querystring examples.</a>", "string", false)
-				.Parameter("$select", "query", "Selects which properties to include in the response. For example, if the model has a nested property of CreatedByUser, and $select is set to \"CreatedByUser\", then the response will <em>only</em> include the CreatedByUser model.", "string", false)
-				.Parameter("$orderby", "query", "Sorts the results. For example, setting $orderby to \"LastName,FirstName\" will sort the results by LastName then FirstName.", "string", false)
-				.Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
-				.Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
-				.Parameter("$count", "query", "Includes a count of the matching results (property \"@odata.count\") in the response.", "boolean", false);
+            return parameterList
+                .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
+                .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string", false)
+                .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false)
+                .Parameter("$orderby", "query", "Sorts the results.", "string", false)
+                .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
+                .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
+                .Parameter("$count", "query", "Includes a count of the matching results in the response.", "boolean", false);
         }
 
         public static IList<Parameter> AddQueryOptionParametersForEntity(IList<Parameter> parameterList)
