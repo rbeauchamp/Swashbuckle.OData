@@ -2,14 +2,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Routing;
 using FluentAssertions;
 using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
+using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -32,6 +35,86 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
+        [Test]
+        public async Task It_handles_an_odata_route_prefix_attribute()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Pins", out pathItem);
+                pathItem.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
+        public async Task It_handles_an_odata_route_prefix_attribute_with_an_odata_route_attribute()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Pins({key})", out pathItem);
+                pathItem.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
+        public async Task It_handles_an_odata_route_prefix_attribute_with_an_odata_route_attribute_on_a_bound_function()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Pins/Default.Archived()", out pathItem);
+                pathItem.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+        [Test]
+        public async Task It_handles_an_odata_route_prefix_attribute_with_an_odata_route_attribute_on_an_unbound_function()
+        {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/Foo()", out pathItem);
+                pathItem.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         private static void Configuration(IAppBuilder appBuilder, Type targetController)
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
@@ -46,6 +129,10 @@ namespace Swashbuckle.OData.Tests
             var builder = new ODataConventionModelBuilder();
 
             builder.EntitySet<Pin>("Pins");
+
+            builder.Function("Foo").Returns<int>();
+
+            builder.EntityType<Pin>().Collection.Function("Archived").ReturnsCollection<Pin>();
 
             return builder.GetEdmModel();
         }
@@ -66,6 +153,37 @@ namespace Swashbuckle.OData.Tests
         public IQueryable<Pin> GetPins()
         {
             return Enumerable.Empty<Pin>().AsQueryable();
+        }
+    }
+
+    [ODataRoutePrefix("Pins")]
+    public class RoutePrefixedPinsController : ODataController
+    {
+        [EnableQuery]
+        [ODataRoute]
+        public IQueryable<Pin> GetPins()
+        {
+            return Enumerable.Empty<Pin>().AsQueryable();
+        }
+
+        [EnableQuery]
+        [ODataRoute("({key})")]
+        public SingleResult<Pin> GetPin([FromODataUri] long key)
+        {
+            return SingleResult.Create(Enumerable.Empty<Pin>().AsQueryable());
+        }
+
+        [EnableQuery]
+        [ODataRoute("Default.Archived")]
+        public IQueryable<Pin> GetArchived()
+        {
+            return Enumerable.Empty<Pin>().AsQueryable();
+        }
+
+        [ODataRoute("/Foo")]
+        public int GetFoo()
+        {
+            return 0;
         }
     }
 }

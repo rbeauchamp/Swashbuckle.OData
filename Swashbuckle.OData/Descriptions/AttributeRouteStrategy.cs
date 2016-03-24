@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -49,11 +50,44 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(oDataRoute != null);
             Contract.Ensures(Contract.Result<ODataActionDescriptor>() != null);
 
+            var odataRoutePrefixAttribute = actionDescriptor.ControllerDescriptor.GetCustomAttributes<ODataRoutePrefixAttribute>()?.FirstOrDefault();
             var odataRouteAttribute = actionDescriptor.GetCustomAttributes<ODataRouteAttribute>()?.FirstOrDefault();
+
             Contract.Assume(odataRouteAttribute != null);
-            var pathTemplate = HttpUtility.UrlDecode(oDataRoute.GetRoutePrefix().AppendPathSegment(odataRouteAttribute.PathTemplate));
+            var pathTemplate = HttpUtility.UrlDecode(oDataRoute.GetRoutePrefix().AppendPathSegment(GetODataPathTemplate(odataRoutePrefixAttribute?.Prefix, odataRouteAttribute.PathTemplate)));
             Contract.Assume(pathTemplate != null);
+
             return new ODataActionDescriptor(actionDescriptor, oDataRoute, pathTemplate, CreateHttpRequestMessage(actionDescriptor, oDataRoute, httpConfig));
+        }
+
+        private static string GetODataPathTemplate(string prefix, string pathTemplate)
+        {
+            if (pathTemplate.StartsWith("/", StringComparison.Ordinal))
+            {
+                return pathTemplate.Substring(1);
+            }
+
+            if (string.IsNullOrEmpty(prefix))
+            {
+                return pathTemplate;
+            }
+
+            if (prefix.StartsWith("/", StringComparison.Ordinal))
+            {
+                prefix = prefix.Substring(1);
+            }
+
+            if (string.IsNullOrEmpty(pathTemplate))
+            {
+                return prefix;
+            }
+
+            if (pathTemplate.StartsWith("(", StringComparison.Ordinal))
+            {
+                return prefix + pathTemplate;
+            }
+
+            return prefix + "/" + pathTemplate;
         }
 
         private static HttpRequestMessage CreateHttpRequestMessage(HttpActionDescriptor actionDescriptor, ODataRoute oDataRoute, HttpConfiguration httpConfig)
