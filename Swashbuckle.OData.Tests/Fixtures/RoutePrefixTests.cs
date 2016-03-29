@@ -35,8 +35,11 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
-        [Test]
-        public async Task It_handles_an_odata_route_prefix_attribute()
+        [TestCase("/Pins")]
+        [TestCase("/Pins({key})")]
+        [TestCase("/Pins/Default.Archived()")]
+        [TestCase("/Foo()")]
+        public async Task It_handles_an_odata_route_prefix_attribute(string path)
         {
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
             {
@@ -48,67 +51,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Pins", out pathItem);
-                pathItem.Should().NotBeNull();
-
-                await ValidationUtils.ValidateSwaggerJson();
-            }
-        }
-
-        [Test]
-        public async Task It_handles_an_odata_route_prefix_attribute_with_an_odata_route_attribute()
-        {
-            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
-            {
-                // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
-
-                // Act
-                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
-
-                // Assert
-                PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Pins({key})", out pathItem);
-                pathItem.Should().NotBeNull();
-
-                await ValidationUtils.ValidateSwaggerJson();
-            }
-        }
-
-        [Test]
-        public async Task It_handles_an_odata_route_prefix_attribute_with_an_odata_route_attribute_on_a_bound_function()
-        {
-            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
-            {
-                // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
-
-                // Act
-                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
-
-                // Assert
-                PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Pins/Default.Archived()", out pathItem);
-                pathItem.Should().NotBeNull();
-
-                await ValidationUtils.ValidateSwaggerJson();
-            }
-        }
-
-        [Test]
-        public async Task It_handles_an_odata_route_prefix_attribute_with_an_odata_route_attribute_on_an_unbound_function()
-        {
-            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(RoutePrefixedPinsController))))
-            {
-                // Arrange
-                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
-
-                // Act
-                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
-
-                // Assert
-                PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/Foo()", out pathItem);
+                swaggerDocument.paths.TryGetValue(path, out pathItem);
                 pathItem.Should().NotBeNull();
 
                 await ValidationUtils.ValidateSwaggerJson();
