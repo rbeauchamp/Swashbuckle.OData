@@ -25,12 +25,12 @@
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Summary>
     <Description>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Description>
-    <ReleaseNotes>Upgrades to Swashbuckle v5.3.2. Reverts extended OData parameter information (#74).</ReleaseNotes>
+    <ReleaseNotes>Supports ODataRoutePrefix attribute (fixes #71).</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright 2015</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUI OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
-    <Version>2.17.1</Version>
+    <Version>2.18.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />
