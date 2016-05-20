@@ -68,6 +68,8 @@ namespace Swashbuckle.OData.Descriptions
                         default:
                             throw new Exception($"Could not determine .NET type for parameter type {type} and format 'null'");
                     }
+                case "byte":
+                    return typeof(byte);
                 case "int32":
                     return typeof(int);
                 case "int64":
@@ -117,6 +119,8 @@ namespace Swashbuckle.OData.Descriptions
                         default:
                             throw new Exception($"Could not generate sample value for query parameter type {type} and format {"null"}");
                     }
+                case "byte":
+                    return "254";
                 case "int32":
                 case "int64":
                     return "42";
