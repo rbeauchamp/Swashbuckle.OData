@@ -94,8 +94,10 @@ namespace Swashbuckle.OData.Descriptions
 
                 if (oDataMediaTypeFormatter != null)
                 {
-                    oDataMediaTypeFormatter.SetInstanceProperty("Request", oDataActionDescriptor.Request);
-                    return mediaTypeFormatter.CanWriteType(returnType);
+                    var mediaType = oDataMediaTypeFormatter.SupportedMediaTypes.FirstOrDefault();
+                    var instanceFormatter = oDataMediaTypeFormatter.GetPerRequestFormatterInstance(returnType,
+                        oDataActionDescriptor.Request, mediaType);
+                    return instanceFormatter.CanWriteType(returnType);
                 }
                 return false;
             };
@@ -109,8 +111,10 @@ namespace Swashbuckle.OData.Descriptions
 
                 if (oDataMediaTypeFormatter != null)
                 {
-                    oDataMediaTypeFormatter.SetInstanceProperty("Request", oDataActionDescriptor.Request);
-                    return mediaTypeFormatter.CanReadType(bodyParameter.ParameterDescriptor.ParameterType);
+                    var mediaType = oDataMediaTypeFormatter.SupportedMediaTypes.FirstOrDefault();
+                    var instanceFormatter = oDataMediaTypeFormatter.GetPerRequestFormatterInstance(bodyParameter.ParameterDescriptor.ParameterType,
+                        oDataActionDescriptor.Request, mediaType);
+                    return instanceFormatter.CanReadType(bodyParameter.ParameterDescriptor.ParameterType);
                 }
                 return false;
             };
