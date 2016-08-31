@@ -116,6 +116,10 @@ namespace SwashbuckleODataSample
             enumParamFunction.Parameter<MyEnum>("EnumValue");
             enumParamFunction.ReturnsCollectionFromEntitySet<Product>("Products");
 
+            var enumParamEntityFunction = productType.Function("IsEnumValueMatch");
+            enumParamEntityFunction.Parameter<MyEnum>("EnumValue");
+            enumParamEntityFunction.Returns<bool>();
+
             // Function bound to an entity set
             // Returns the most expensive product, a single entity
             productType.Collection
