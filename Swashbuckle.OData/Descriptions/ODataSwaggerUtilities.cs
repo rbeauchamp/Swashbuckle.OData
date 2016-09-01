@@ -600,7 +600,7 @@ namespace Swashbuckle.OData.Descriptions
                 foreach (var parameter in edmOperationParameters.Skip(1))
                 {
                     Contract.Assume(parameter != null);
-                    swaggerOperationPath += parameter.Name + "=" + "{" + parameter.Name + "},";
+                    swaggerOperationPath += GetFunctionParameterAssignmentPath(parameter);
                 }
             }
             if (swaggerOperationPath.EndsWith(",", StringComparison.Ordinal))

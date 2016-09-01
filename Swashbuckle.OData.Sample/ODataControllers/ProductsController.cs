@@ -50,6 +50,16 @@ namespace SwashbuckleODataSample.ODataControllers
         }
 
         /// <summary>
+        /// Demonstrates a function binds to an entity that accepts an enum parameter from the OData URI.
+        /// </summary>
+        [HttpGet]
+        [ResponseType(typeof(bool))]
+        public IHttpActionResult IsEnumValueMatch([FromODataUri] int Key, [FromODataUri] MyEnum EnumValue)
+        {
+            return Ok(Data[Key].EnumValue == EnumValue);
+        }
+
+        /// <summary>
         /// Get the most expensive product. This is a function bound to a collection.
         /// </summary>
         [HttpGet]
