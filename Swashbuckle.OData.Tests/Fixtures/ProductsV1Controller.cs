@@ -19,11 +19,14 @@ namespace Swashbuckle.OData.Tests
             Data = new ConcurrentDictionary<int, Product>();
             var rand = new Random();
 
+            var enumValues = Enum.GetValues(typeof(MyEnum));
+
             Enumerable.Range(0, 100).Select(i => new Product
             {
                 Id = i,
                 Name = "Product " + i,
-                Price = rand.NextDouble() * 1000
+                Price = rand.NextDouble() * 1000,
+                EnumValue = (MyEnum)enumValues.GetValue(rand.Next(enumValues.Length))
             }).ToList().ForEach(p => Data.TryAdd(p.Id, p));
         }
 
@@ -39,6 +42,13 @@ namespace Swashbuckle.OData.Tests
         public IHttpActionResult EnumParam([FromODataUri]int Id, [FromODataUri]MyEnum EnumValue)
         {
             return Ok(Data.Values.Take(2));
+        }
+
+        [HttpGet]
+        [ResponseType(typeof(bool))]
+        public IHttpActionResult IsEnumValueMatch([FromODataUri] int key, [FromODataUri] MyEnum EnumValue)
+        {
+            return Ok(Data[key].EnumValue == EnumValue);
         }
 
         /// <summary>

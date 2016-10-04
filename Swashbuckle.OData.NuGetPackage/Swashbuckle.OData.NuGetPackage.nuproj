@@ -11,26 +11,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>5cd33fc5-9e4c-48e3-a69d-ef5f0bac2162</ProjectGuid>
+    <ProjectGuid>cada82a0-f6ff-45d0-8ee5-9bc6b936be5c</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
-    <!--<NuProjPath Condition=" '$(NuProjPath)' == '' ">$(MSBuildExtensionsPath)\NuProj\</NuProjPath>-->
-    <NuProjPath Condition=" '$(NuProjPath)' == '' ">..\tools\NuProj.0.10.4-beta-gf7fc34e7d8\tools</NuProjPath>
+    <NuProjPath Condition=" '$(NuProjPath)' == '' ">$(MSBuildExtensionsPath)\NuProj\</NuProjPath>
   </PropertyGroup>
   <Import Project="$(NuProjPath)\NuProj.props" Condition="Exists('$(NuProjPath)\NuProj.props')" />
   <PropertyGroup Label="Configuration">
     <Id>Swashbuckle.OData</Id>
+    <Version>2.18.6</Version>
     <Title>Swashbuckle.OData</Title>
     <Authors>Richard Beauchamp</Authors>
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Summary>
     <Description>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Description>
-    <ReleaseNotes>Supports ODataRoutePrefix attribute (fixes #71). Added missing CLR type (byte) #89. Constrain Flurl dependency to &lt;v2.0.0</ReleaseNotes>
+    <ReleaseNotes>Fix CodeContracts build issue, Constrain NuGet package dependencies per https://github.com/rbeauchamp/Swashbuckle.OData/issues/68#issuecomment-249264098</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
-    <Copyright>Copyright 2015</Copyright>
+    <Copyright>Copyright © Richard Beauchamp</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUI OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
-    <Version>2.18.2</Version>
+    <GenerateSymbolPackage>false</GenerateSymbolPackage>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />
