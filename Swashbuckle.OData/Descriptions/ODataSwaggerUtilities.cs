@@ -384,7 +384,7 @@ namespace Swashbuckle.OData.Descriptions
         /// <param name="operation">The Edm operation.</param>
         /// <param name="entitySet">The entity set.</param>
         /// <returns></returns>
-        public static PathItem CreateSwaggerPathForOperationOfEntity(IEdmOperation operation, IEdmEntitySet entitySet)
+        public static PathItem CreateSwaggerPathForOperationOfEntity(IEdmOperation operation, IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
             Contract.Requires(operation != null);
             Contract.Requires(entitySet != null);
@@ -424,6 +424,7 @@ namespace Swashbuckle.OData.Descriptions
             var swaggerOperation = new Operation()
                 .Summary("Call operation  " + operation.Name)
                 .Description("Call operation  " + operation.Name)
+                .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Tags(entitySet.Name, isFunction ? "Function" : "Action");
 
             if (swaggerParameters.Count > 0)
