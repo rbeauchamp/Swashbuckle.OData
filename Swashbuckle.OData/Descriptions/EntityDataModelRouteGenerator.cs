@@ -107,7 +107,7 @@ namespace Swashbuckle.OData.Descriptions
                             var entityType = (IEdmEntityType)boundType;
                             var edmEntitySets = oDataRoute.GetEdmModel().EntityContainer.EntitySets();
                             Contract.Assume(edmEntitySets != null);
-                            routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntity(operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntity(operation, entitySet))));
+                            routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntity(operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntity(operation, entitySet, oDataRoute))));
                         }
                         else if (boundType.TypeKind == EdmTypeKind.Collection)
                         {

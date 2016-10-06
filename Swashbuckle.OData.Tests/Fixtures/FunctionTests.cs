@@ -11,6 +11,8 @@ using NUnit.Framework;
 using Owin;
 using Swashbuckle.Swagger;
 using SwashbuckleODataSample.Models;
+using System.Web.Http.Routing.Constraints;
+using System.Web.Http;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -196,6 +198,34 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
+        [Test]
+        public async Task It_supports_a_function_bound_to_an_entity_using_route_param()
+        {
+            Action<HttpConfiguration> configAction = config =>
+            {
+                // Define a route to a controller class that contains functions
+                var route = config.MapODataServiceRoute("FunctionsODataRouteWithParam", "odata/v1/{intParam}", GetFunctionsEdmModel());
+                route.Constraints.Add("intParam", new IntRouteConstraint());
+            };
+
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ProductsV1Controller),configAction)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/v1/{intParam}/Products({Id})/Default.GetPriceRank()", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         private static void Configuration(IAppBuilder appBuilder, Type targetController)
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
@@ -205,6 +235,20 @@ namespace Swashbuckle.OData.Tests
 
             // Define a route to a controller class that contains functions
             config.MapODataServiceRoute("FunctionsODataRoute", "odata/v1", GetFunctionsEdmModel());
+            controllerSelector.RouteVersionSuffixMapping.Add("FunctionsODataRoute", "V1");
+
+            config.EnsureInitialized();
+        }
+
+        private static void Configuration(IAppBuilder appBuilder, Type targetController, Action<HttpConfiguration> configAction)
+        {
+            var config = appBuilder.GetStandardHttpConfig(targetController);
+
+            var controllerSelector = new UnitTestODataVersionControllerSelector(config, targetController);
+            config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
+
+            configAction(config);
+
             controllerSelector.RouteVersionSuffixMapping.Add("FunctionsODataRoute", "V1");
 
             config.EnsureInitialized();
