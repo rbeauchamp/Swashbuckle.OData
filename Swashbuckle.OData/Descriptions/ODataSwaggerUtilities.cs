@@ -164,11 +164,27 @@ namespace Swashbuckle.OData.Descriptions
             foreach (var key in entitySet.GetEntityType().GetKey())
             {
                 Contract.Assume(key != null);
-                string format;
-                var keyDefinition = key.GetPropertyType().GetDefinition() as IEdmPrimitiveType;
-                Contract.Assume(keyDefinition != null);
-                var type = GetPrimitiveTypeAndFormat(keyDefinition, out format);
-                keyParameters.Parameter(key.Name, "path", "key: " + key.Name, type, true, format);
+
+                // Create key parameters for primitive and enum types
+                IEdmType keyDefinitionAsType = null;
+                var keyDefinition = key.GetPropertyType().GetDefinition();
+
+                if (EdmTypeKind.Primitive == keyDefinition.TypeKind)
+                {
+                    keyDefinitionAsType = keyDefinition as IEdmPrimitiveType;
+                }
+                else if(EdmTypeKind.Enum == keyDefinition.TypeKind)
+                { 
+                    keyDefinitionAsType = keyDefinition as IEdmEnumType;
+                }
+                Contract.Assume(keyDefinitionAsType != null);
+                
+                keyParameters.Parameter(
+                                key.Name, 
+                                "path", 
+                                "key: " + key.Name, 
+                                keyDefinitionAsType, 
+                                true);
             }
 
             return new PathItem
