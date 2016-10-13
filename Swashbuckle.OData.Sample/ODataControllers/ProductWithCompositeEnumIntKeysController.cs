@@ -9,16 +9,13 @@ namespace SwashbuckleODataSample.ODataControllers
 {
     public class ProductWithCompositeEnumIntKeysController : ODataController
     {
-        private static readonly Dictionary<Tuple<MyEnum, int>, 
-                                    ProductWithCompositeEnumIntKey> DataCompositeKey;
+        private static readonly List<ProductWithCompositeEnumIntKey> DataCompositeKey;
 
         static ProductWithCompositeEnumIntKeysController()
         {
-            DataCompositeKey = new Dictionary<Tuple<MyEnum, int>, 
-                                    ProductWithCompositeEnumIntKey>()
+            DataCompositeKey = new List<ProductWithCompositeEnumIntKey>()
             {
                 {
-                    Tuple.Create(MyEnum.ValueOne, 1),
                     new ProductWithCompositeEnumIntKey
                     {
                         EnumValue = MyEnum.ValueOne,
@@ -28,7 +25,6 @@ namespace SwashbuckleODataSample.ODataControllers
                     }
                 },
                 {
-                    Tuple.Create(MyEnum.ValueTwo, 2),
                     new ProductWithCompositeEnumIntKey
                     {
                         EnumValue = MyEnum.ValueTwo,
@@ -46,7 +42,7 @@ namespace SwashbuckleODataSample.ODataControllers
         [EnableQuery]
         public IQueryable<ProductWithCompositeEnumIntKey> Get()
         {
-            return DataCompositeKey.Values.AsQueryable();
+            return DataCompositeKey.AsQueryable();
         }
 
         /// <summary>
@@ -58,7 +54,9 @@ namespace SwashbuckleODataSample.ODataControllers
         [EnableQuery]
         public IHttpActionResult Get([FromODataUri]MyEnum keyenumValue, [FromODataUri]int keyid)
         {
-            return Ok(DataCompositeKey[Tuple.Create(keyenumValue, keyid)]);
+            return Ok(DataCompositeKey
+                        .Where(x => x.EnumValue == keyenumValue 
+                                    && x.Id == keyid));
         }
     }
 }
