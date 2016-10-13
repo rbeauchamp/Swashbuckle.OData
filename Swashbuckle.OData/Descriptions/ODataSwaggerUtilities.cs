@@ -13,6 +13,7 @@ using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.Swagger;
+using System.Web.Http;
 
 namespace Swashbuckle.OData.Descriptions
 {
@@ -21,6 +22,38 @@ namespace Swashbuckle.OData.Descriptions
     /// </summary>
     internal static class ODataSwaggerUtilities
     {
+        /// <summary>
+        /// HttpConfiguration for ODataSwaggerUtilities
+        /// </summary>
+        public static HttpConfiguration HttpConfig = null;
+
+        /// <summary>
+        /// Resolver Settings Key namespace
+        /// </summary>
+        private const string ResolverSettingsKey 
+                        = "System.Web.OData.ResolverSettingsKey";
+
+        /// <summary>
+        /// Enum Prefix Free property name
+        /// </summary>
+        private const string EnumPrefixFree = "EnumPrefixFree";
+
+        /// <summary>
+        /// The ending Path offset
+        /// </summary>
+        private const int EntityPathSubStrOffset = 1;
+
+        /// <summary>
+        /// Sets the HttpConfig static variable for use in the 
+        /// ODataSwaggerUtilities class.
+        /// </summary>
+        /// <param name="httpConfig"></param>
+        public static void SetHttpConfig(HttpConfiguration httpConfig)
+        {
+            Contract.Requires(httpConfig != null);
+            HttpConfig = httpConfig;
+        }
+
         /// <summary>
         /// Create the Swagger path for the Edm entity set.
         /// </summary>
@@ -485,8 +518,8 @@ namespace Swashbuckle.OData.Descriptions
             singleEntityPath = entitySet.GetEntityType().GetKey().Count() == 1
                 ? AppendSingleColumnKeyTemplate(entitySet, singleEntityPath)
                 : AppendMultiColumnKeyTemplate(entitySet, singleEntityPath);
-            Contract.Assume(singleEntityPath.Length - 2 >= 0);
-            singleEntityPath = singleEntityPath.Substring(0, singleEntityPath.Length - 2);
+            Contract.Assume(singleEntityPath.Length - EntityPathSubStrOffset >= 0);
+            singleEntityPath = singleEntityPath.Substring(0, singleEntityPath.Length - EntityPathSubStrOffset);
             singleEntityPath += ")";
 
             return singleEntityPath;
@@ -498,7 +531,7 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Ensures(Contract.Result<string>() != null);
 
             var key = entitySet.GetEntityType().GetKey().Single();
-            singleEntityPath += "{" + key.Name + "}, ";
+            singleEntityPath += GetParameterPathAssignment(key.Name, key.Type, false);
             return singleEntityPath;
         }
 
@@ -509,7 +542,7 @@ namespace Swashbuckle.OData.Descriptions
             foreach (var key in entitySet.GetEntityType().GetKey())
             {
                 Contract.Assume(key != null);
-                singleEntityPath += key.Name + "={" + key.Name + "}, ";
+                singleEntityPath += GetParameterPathAssignment(key.Name, key.Type, true);
             }
             Contract.Assume(singleEntityPath != null);
             return singleEntityPath;
@@ -586,12 +619,39 @@ namespace Swashbuckle.OData.Descriptions
         {
             Contract.Requires(parameter != null);
 
-            switch (parameter.Type.Definition.TypeKind)
+            return GetParameterPathAssignment(parameter.Name, parameter.Type, true);
+        }
+
+        /// <summary>
+        /// Path builder for endpoint parameters.
+        /// </summary>
+        /// <param name="parameterName">parameter's name</param>
+        /// <param name="type">iedmtype of the parameter</param>
+        /// <param name="isIncludeParamName">true to include the parameter name in the path</param>
+        /// <returns></returns>
+        private static string GetParameterPathAssignment(string parameterName, IEdmTypeReference type, bool isIncludeParamName)
+        {
+            Contract.Requires(parameterName != null);
+            Contract.Requires(type != null);
+            const string paramNamePrefixFormat = "{0}=";
+
+            string parameterPrefix = String.Empty;
+            if (isIncludeParamName)
+            {
+                parameterPrefix = String.Format(paramNamePrefixFormat, parameterName);
+            }
+            
+            switch (type.Definition.TypeKind)
             {
                 case EdmTypeKind.Enum:
-                    return parameter.Name + "=" + parameter.Type.FullName() + "\'{" + parameter.Name + "}\',";
+                    string enumFullName = type.FullName();
+                    if (IsEnableEnumPrefixFree())
+                    {
+                        enumFullName = String.Empty;
+                    }
+                    return parameterPrefix + enumFullName + "\'{" + parameterName + "}\',";
                 default:
-                    return parameter.Name + "=" + "{" + parameter.Name + "},";
+                    return parameterPrefix + "{" + parameterName + "},";
             }
         }
 
@@ -928,6 +988,26 @@ namespace Swashbuckle.OData.Descriptions
             var result = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, serializerSettings), serializerSettings);
             Contract.Assume(result != null);
             return result;
+        }
+
+        /// <summary>
+        /// Gets the value of the EnumPrefixFree setting in the HttpConfiguration
+        /// </summary>
+        /// <returns>EnumPrefixFree value</returns>
+        private static bool IsEnableEnumPrefixFree()
+        {
+            Contract.Requires(HttpConfig != null);
+            Contract.Ensures(Contract.Result<bool>().GetType() == typeof(bool));
+
+            var odataUriResolverSettings = HttpConfig
+                                    .Properties
+                                    .Where(prop =>
+                                        prop.Key.Equals(ResolverSettingsKey))
+                                    .FirstOrDefault().Value;
+            return Convert.ToBoolean(odataUriResolverSettings
+                                    .GetType()
+                                    .GetProperty(EnumPrefixFree)
+                                    .GetValue(odataUriResolverSettings));
         }
     }
 }
