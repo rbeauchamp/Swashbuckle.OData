@@ -109,8 +109,7 @@ namespace Swashbuckle.OData.Descriptions
                         case "string":
                             if (parameter.@enum != null && parameter.@enum.Any())
                             {
-                                return String.Format("\'{0}\'", 
-                                        parameter.@enum.First().ToString());
+                                return parameter.@enum.First().ToString();
                             }
                             return "\'SampleString\'";
                         case "boolean":
