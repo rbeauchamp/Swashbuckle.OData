@@ -52,7 +52,6 @@ namespace SwashbuckleODataSample
                 .Operation(HttpMethod.Post)
                 .PathParameter<int>("Id")
                 .BodyParameter<Order>("order");
-            
 
             // Define a route to a controller class that contains functions
             config.MapODataServiceRoute("FunctionsODataRoute", ODataRoutePrefix, GetFunctionsEdmModel());
