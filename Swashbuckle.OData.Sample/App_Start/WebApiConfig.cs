@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿using System.Web.Configuration;
+using System.Web.Http;
+using System.Web.OData.Extensions;
 
 namespace SwashbuckleODataSample
 {
@@ -6,6 +8,9 @@ namespace SwashbuckleODataSample
     {
         public static void Register(HttpConfiguration config)
         {
+            bool isPrefixFreeEnabled = System.Convert.ToBoolean(
+                        WebConfigurationManager.AppSettings["EnableEnumPrefixFree"]);
+            config.EnableEnumPrefixFree(isPrefixFreeEnabled);
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new { id = RouteParameter.Optional });

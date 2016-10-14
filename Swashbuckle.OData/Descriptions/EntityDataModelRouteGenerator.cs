@@ -19,6 +19,7 @@ namespace Swashbuckle.OData.Descriptions
     {
         public IEnumerable<SwaggerRoute> Generate(HttpConfiguration httpConfig)
         {
+            ODataSwaggerUtilities.SetHttpConfig(httpConfig);
             return httpConfig.GetODataRoutes().SelectMany(Generate);
         }
 
