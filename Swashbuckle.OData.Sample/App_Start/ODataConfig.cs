@@ -13,7 +13,6 @@ using Swashbuckle.OData;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Repositories;
 using SwashbuckleODataSample.Versioning;
-using System.Web.Configuration;
 
 namespace SwashbuckleODataSample
 {
@@ -29,11 +28,7 @@ namespace SwashbuckleODataSample
 
         private static async void ConfigureRestierOData(HttpConfiguration config)
         {
-            if (true == System.Convert.ToBoolean(
-                        WebConfigurationManager.AppSettings["LoadRestierRoutes"]))
-            {
-                await config.MapRestierRoute<DbApi<RestierODataContext>>("RESTierRoute", "restier", new RestierBatchHandler(GlobalConfiguration.DefaultServer));
-            }
+            await config.MapRestierRoute<DbApi<RestierODataContext>>("RESTierRoute", "restier", new RestierBatchHandler(GlobalConfiguration.DefaultServer));
         }
 
         private static void ConfigureWebApiOData(HttpConfiguration config)
@@ -41,57 +36,39 @@ namespace SwashbuckleODataSample
             var controllerSelector = new ODataVersionControllerSelector(config);
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
 
-            if (true == System.Convert.ToBoolean(
-                        WebConfigurationManager.AppSettings["LoadVersionedRoutes"]))
-            {
-                // Define a versioned route
-                config.MapODataServiceRoute("V1RouteVersioning", "odata/v1", GetVersionedModel());
-                controllerSelector.RouteVersionSuffixMapping.Add("V1RouteVersioning", "V1");
+            // Define a versioned route
+            config.MapODataServiceRoute("V1RouteVersioning", "odata/v1", GetVersionedModel());
+            controllerSelector.RouteVersionSuffixMapping.Add("V1RouteVersioning", "V1");
 
-                // Define a versioned route that doesn't map to any controller
-                config.MapODataServiceRoute("odata/v2", "odata/v2", GetFakeModel());
-                controllerSelector.RouteVersionSuffixMapping.Add("odata/v2", "V2");
-            }
+            // Define a versioned route that doesn't map to any controller
+            config.MapODataServiceRoute("odata/v2", "odata/v2", GetFakeModel());
+            controllerSelector.RouteVersionSuffixMapping.Add("odata/v2", "V2");
 
-            if (true == System.Convert.ToBoolean(
-                        WebConfigurationManager.AppSettings["LoadCustomRoutes"]))
-            {
-                // Define a custom route with custom routing conventions
-                var conventions = ODataRoutingConventions.CreateDefault();
-                conventions.Insert(0, new CustomNavigationPropertyRoutingConvention());
-                var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetCustomRouteModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: conventions);
-                config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders")
-                    .Operation(HttpMethod.Post)
-                    .PathParameter<int>("Id")
-                    .BodyParameter<Order>("order");
-            }
+            // Define a custom route with custom routing conventions
+            var conventions = ODataRoutingConventions.CreateDefault();
+            conventions.Insert(0, new CustomNavigationPropertyRoutingConvention());
+            var customODataRoute = config.MapODataServiceRoute("CustomODataRoute", ODataRoutePrefix, GetCustomRouteModel(), batchHandler: null, pathHandler: new DefaultODataPathHandler(), routingConventions: conventions);
+            config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders")
+                .Operation(HttpMethod.Post)
+                .PathParameter<int>("Id")
+                .BodyParameter<Order>("order");
+            
 
-            if (true == System.Convert.ToBoolean(
-                        WebConfigurationManager.AppSettings["LoadRoutesWithFunctions"]))
-            {
-                // Define a route to a controller class that contains functions
-                config.MapODataServiceRoute("FunctionsODataRoute", ODataRoutePrefix, GetFunctionsEdmModel());
-            }
+            // Define a route to a controller class that contains functions
+            config.MapODataServiceRoute("FunctionsODataRoute", ODataRoutePrefix, GetFunctionsEdmModel());
 
-            if (true == System.Convert.ToBoolean(
-                        WebConfigurationManager.AppSettings["LoadDefaultRoutes"]))
-            {
-                // Define a default non- versioned route(default route should be at the end as a last catch-all)
-                config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetDefaultModel());
-            }
+            // Define a default non- versioned route(default route should be at the end as a last catch-all)
+            config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetDefaultModel());
 
-            if (true == System.Convert.ToBoolean(
-                        WebConfigurationManager.AppSettings["LoadEnumRoutes"]))
-            {
-                // Define a route with an enum as a key
-                config.MapODataServiceRoute("EnumODataRoute",
+            // Define a route with an enum as a key
+            config.MapODataServiceRoute("EnumODataRoute",
+                                    ODataRoutePrefix,
+                                    GetProductWithEnumKeyModel());
+
+            // Define a route with an enum/int composite key
+            config.MapODataServiceRoute("EnumIntCompositeODataRoute",
                                         ODataRoutePrefix,
-                                        GetProductWithEnumKeyModel());
-                // Define a route with an enum/int composite key
-                config.MapODataServiceRoute("EnumIntCompositeODataRoute",
-                                            ODataRoutePrefix,
-                                            GetProductWithCompositeEnumIntKeyModel());
-            }
+                                        GetProductWithCompositeEnumIntKeyModel());
         }
 
         private static IEdmModel GetDefaultModel()

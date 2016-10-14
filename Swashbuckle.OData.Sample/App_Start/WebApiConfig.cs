@@ -13,11 +13,7 @@ namespace SwashbuckleODataSample
             config.EnableEnumPrefixFree(isPrefixFreeEnabled);
             config.MapHttpAttributeRoutes();
 
-            if (true == System.Convert.ToBoolean(
-                        WebConfigurationManager.AppSettings["LoadDefaultApiRoutes"]))
-            {
-                config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new { id = RouteParameter.Optional });
-            }
+            config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new { id = RouteParameter.Optional });
         }
     }
 }
