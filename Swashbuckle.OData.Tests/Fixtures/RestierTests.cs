@@ -173,7 +173,7 @@ namespace Swashbuckle.OData.Tests
 
                 // Assert
                 PathItem pathItem;
-                swaggerDocument.paths.TryGetValue("/restier/OrderDetails(OrderId={OrderId}, ProductId={ProductId})", out pathItem);
+                swaggerDocument.paths.TryGetValue("/restier/OrderDetails(OrderId={OrderId},ProductId={ProductId})", out pathItem);
                 pathItem.Should().NotBeNull();
                 var getResponse = pathItem.get.responses.SingleOrDefault(response => response.Key == "200");
                 getResponse.Should().NotBeNull();

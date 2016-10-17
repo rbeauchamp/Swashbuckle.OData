@@ -146,6 +146,9 @@
     <Compile Include="DocumentFilters\ApplyResourceDocumentation.cs" />
     <Compile Include="Models\MyEnum.cs" />
     <Compile Include="Models\Product.cs" />
+    <Compile Include="Models\ProductWithEnumKey.cs" />
+    <Compile Include="ODataControllers\ProductWithCompositeEnumIntKeysController.cs" />
+    <Compile Include="ODataControllers\ProductWithEnumKeysController.cs" />
     <Compile Include="ODataControllers\ProductsController.cs" />
     <Compile Include="Repositories\RestierODataContext.cs" />
     <Compile Include="Models\User.cs" />

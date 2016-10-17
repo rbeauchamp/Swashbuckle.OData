@@ -167,6 +167,7 @@
     <Compile Include="Fixtures\RestierTests.cs" />
     <Compile Include="Fixtures\SchemaTests.cs" />
     <Compile Include="Fixtures\ResponseModelTests.cs" />
+    <Compile Include="Fixtures\ParameterKeyTests.cs" />
     <Compile Include="Fixtures\StringTypeUrlParamTests.cs" />
     <Compile Include="HttpClientUtils.cs" />
     <Compile Include="Fixtures\GetTests.cs" />

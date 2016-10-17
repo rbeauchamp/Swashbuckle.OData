@@ -1,5 +1,9 @@
-.\packages\OpenCover.4.6.166\tools\OpenCover.Console.exe -register:user "-filter:+[Swashbuckle.OData]* -[Swashbuckle.OData]System.*" "-target:.\packages\NUnit.Runners.2.6.4\tools\nunit-console-x86.exe" "-targetargs:/noshadow .\Swashbuckle.OData.Tests\bin\Debug\Swashbuckle.OData.Tests.dll"
+set OpenCoverVersion=4.6.519
+set ReportGeneratorVersion=2.4.3.0
+set NUnitRunnersVersion=2.6.4
 
-.\packages\ReportGenerator.2.3.5.0\tools\ReportGenerator.exe "-reports:results.xml" "-targetdir:.\coverage"
+.\packages\OpenCover.%OpenCoverVersion%\tools\OpenCover.Console.exe -register:user "-filter:+[Swashbuckle.OData]* -[Swashbuckle.OData]System.*" "-target:.\packages\NUnit.Runners.%NUnitRunnersVersion%\tools\nunit-console-x86.exe" "-targetargs:/noshadow .\Swashbuckle.OData.Tests\bin\Debug\Swashbuckle.OData.Tests.dll"
+
+.\packages\ReportGenerator.%ReportGeneratorVersion%\tools\ReportGenerator.exe "-reports:results.xml" "-targetdir:.\coverage"
 
 pause

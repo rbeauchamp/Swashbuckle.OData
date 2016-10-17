@@ -58,6 +58,16 @@ namespace SwashbuckleODataSample
 
             // Define a default non- versioned route(default route should be at the end as a last catch-all)
             config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetDefaultModel());
+
+            // Define a route with an enum as a key
+            config.MapODataServiceRoute("EnumODataRoute",
+                                    ODataRoutePrefix,
+                                    GetProductWithEnumKeyModel());
+
+            // Define a route with an enum/int composite key
+            config.MapODataServiceRoute("EnumIntCompositeODataRoute",
+                                        ODataRoutePrefix,
+                                        GetProductWithCompositeEnumIntKeyModel());
         }
 
         private static IEdmModel GetDefaultModel()
@@ -174,5 +184,28 @@ namespace SwashbuckleODataSample
 
             return builder.GetEdmModel();
         }
+
+        #region Enum Routes
+        private static IEdmModel GetProductWithEnumKeyModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EnableLowerCamelCase();
+
+            builder.EntitySet<ProductWithEnumKey>("ProductWithEnumKeys");
+
+            return builder.GetEdmModel();
+        }
+
+        private static IEdmModel GetProductWithCompositeEnumIntKeyModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EnableLowerCamelCase();
+
+            builder.EntitySet<ProductWithCompositeEnumIntKey>
+                            ("ProductWithCompositeEnumIntKeys");
+
+            return builder.GetEdmModel();
+        }
+        #endregion
     }
 }
