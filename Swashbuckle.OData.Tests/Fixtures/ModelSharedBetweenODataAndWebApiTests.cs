@@ -100,7 +100,7 @@ namespace Swashbuckle.OData.Tests
             var oDataRoute = ConfigureOData(appBuilder, targetControllers, config, unitTestConfigs);
             var rootContainer = config.GetODataRootContainer(oDataRoute);
 
-            config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(new NullSerializerProvider(rootContainer), new DefaultODataDeserializerProvider(rootContainer)));
+            config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(new DefaultODataSerializerProvider(rootContainer), new DefaultODataDeserializerProvider(rootContainer)));
 
             config.EnsureInitialized();
         }
@@ -126,65 +126,6 @@ namespace Swashbuckle.OData.Tests
             builder.EntitySet<SharedModel>("SharedModels");
 
             return builder.GetEdmModel();
-        }
-
-        public class NullSerializerProvider : DefaultODataSerializerProvider
-        {
-            private readonly NullEntityTypeSerializer _nullEntityTypeSerializer;
-
-            public NullSerializerProvider(IServiceProvider rootContainer) : base(rootContainer)
-            {
-                _nullEntityTypeSerializer = new NullEntityTypeSerializer(this);
-            }
-
-            public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request)
-            {
-                var serializer = base.GetODataPayloadSerializer(type, request);
-                if (serializer == null)
-                {
-                    var model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
-                    var functions = model.SchemaElements.Where(s => s.SchemaElementKind == EdmSchemaElementKind.Function
-                                                                    || s.SchemaElementKind == EdmSchemaElementKind.Action);
-                    var isFunctionCall = false;
-                    foreach (var f in functions)
-                    {
-                        // ReSharper disable once UseStringInterpolation
-                        var fname = string.Format("{0}.{1}", f.Namespace, f.Name);
-                        if (request.RequestUri.OriginalString.Contains(fname))
-                        {
-                            isFunctionCall = true;
-                            break;
-                        }
-                    }
-                    // only, if it is not a function call
-                    if (!isFunctionCall)
-                    {
-                        var response = request.GetOwinContext()?.Response;
-                        response?.OnSendingHeaders(state =>
-                        {
-                            ((IOwinResponse)state).StatusCode = (int)HttpStatusCode.NotFound;
-                        }, response);
-                        // in case you are NOT using Owin, uncomment the following and comment everything above
-                        // HttpContext.Current.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                    }
-                    return _nullEntityTypeSerializer;
-                }
-                return serializer;
-            }
-        }
-
-        public class NullEntityTypeSerializer : ODataResourceSerializer
-        {
-            public NullEntityTypeSerializer(ODataSerializerProvider serializerProvider)
-                : base(serializerProvider)
-            { }
-            public override void WriteObjectInline(object graph, IEdmTypeReference expectedType, ODataWriter writer, ODataSerializerContext writeContext)
-            {
-                if (graph != null)
-                {
-                    base.WriteObjectInline(graph, expectedType, writer, writeContext);
-                }
-            }
         }
 
         public class SharedModel
