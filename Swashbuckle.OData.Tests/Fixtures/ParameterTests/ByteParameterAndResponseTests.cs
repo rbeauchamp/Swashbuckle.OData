@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -14,53 +13,34 @@ using Microsoft.OData.Edm;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
+using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Tests
 {
     [TestFixture]
     public class ByteParameterAndResponseTests
     {
-        //[Test]
-        //public async Task It_supports_a_byte_parameter()
-        //{
-        //    using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ByteParametersController))))
-        //    {
-        //        // Arrange
-        //        var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
-        //        // Verify that the OData route in the test controller is valid
-        //        var result = await httpClient.GetJsonAsync<ByteParameter>("/odata/ByteParameters(1)");
-        //        result.Should().NotBeNull();
-
-        //        // Act
-        //        var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
-
-        //        // Assert
-        //        PathItem pathItem;
-        //        swaggerDocument.paths.TryGetValue("/odata/ByteParameters({Id})", out pathItem);
-        //        pathItem.Should().NotBeNull();
-        //        pathItem.get.Should().NotBeNull();
-
-        //        await ValidationUtils.ValidateSwaggerJson();
-        //    }
-        //}
-
-        /// <summary>
-        /// See https://github.com/OData/odata.net/issues/262
-        /// </summary>
         [Test]
-        public async Task OData_does_not_support_byte_parameters()
+        public async Task It_supports_a_byte_parameter()
         {
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(ByteParametersController))))
             {
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+                // Verify that the OData route in the test controller is valid
+                var result = await httpClient.GetJsonAsync<ByteParameter>("/odata/ByteParameters(1)");
+                result.Should().NotBeNull();
 
                 // Act
-                var result = await httpClient.GetAsync("/odata/ByteParameters/Default.ResponseTest(param=1)");
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
 
                 // Assert
-                result.IsSuccessStatusCode.Should().BeFalse();
-                result.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/ByteParameters({Id})", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.get.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
             }
         }
 

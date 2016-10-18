@@ -86,7 +86,7 @@ namespace SwashbuckleODataSample.ODataControllers
         [AcceptVerbs("PATCH", "MERGE")]
         public async Task<IHttpActionResult> Patch([FromODataUri] Guid key, Delta<Order> patch)
         {
-            Validate(patch.GetEntity());
+            Validate(patch.GetInstance());
 
             if (!ModelState.IsValid)
             {

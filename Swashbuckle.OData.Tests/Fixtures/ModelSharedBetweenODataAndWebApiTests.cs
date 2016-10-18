@@ -13,8 +13,10 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Deserialization;
 using System.Web.OData.Formatter.Serialization;
+using System.Web.OData.Routing;
 using FluentAssertions;
-using Microsoft.OData.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Owin;
 using Microsoft.Owin.Hosting;
@@ -81,7 +83,7 @@ namespace Swashbuckle.OData.Tests
 
             config = ConfigureWebApi(config);
 
-            config = ConfigureOData(appBuilder, targetControllers, config, unitTestConfigs);
+            ConfigureOData(appBuilder, targetControllers, config, unitTestConfigs);
 
             config.EnsureInitialized();
         }
@@ -95,9 +97,10 @@ namespace Swashbuckle.OData.Tests
 
             config = ConfigureWebApi(config);
 
-            config = ConfigureOData(appBuilder, targetControllers, config, unitTestConfigs);
+            var oDataRoute = ConfigureOData(appBuilder, targetControllers, config, unitTestConfigs);
+            var rootContainer = config.GetODataRootContainer(oDataRoute);
 
-            config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(new NullSerializerProvider(), new DefaultODataDeserializerProvider()));
+            config.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create(new NullSerializerProvider(rootContainer), new DefaultODataDeserializerProvider(rootContainer)));
 
             config.EnsureInitialized();
         }
@@ -109,13 +112,11 @@ namespace Swashbuckle.OData.Tests
             return config;
         }
 
-        private static HttpConfiguration ConfigureOData(IAppBuilder appBuilder, Type[] targetController, HttpConfiguration config, Action<SwaggerDocsConfig> swaggerDocsConfig)
+        private static ODataRoute ConfigureOData(IAppBuilder appBuilder, Type[] targetController, HttpConfiguration config, Action<SwaggerDocsConfig> swaggerDocsConfig)
         {
             config = appBuilder.ConfigureHttpConfig(config, swaggerDocsConfig, null, targetController);
 
-            config.MapODataServiceRoute("odata", "odata", GetEdmModel());
-
-            return config;
+            return config.MapODataServiceRoute("odata", "odata", GetEdmModel());
         }
 
         public static IEdmModel GetEdmModel()
@@ -131,16 +132,17 @@ namespace Swashbuckle.OData.Tests
         {
             private readonly NullEntityTypeSerializer _nullEntityTypeSerializer;
 
-            public NullSerializerProvider()
+            public NullSerializerProvider(IServiceProvider rootContainer) : base(rootContainer)
             {
                 _nullEntityTypeSerializer = new NullEntityTypeSerializer(this);
             }
 
-            public override ODataSerializer GetODataPayloadSerializer(IEdmModel model, Type type, HttpRequestMessage request)
+            public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request)
             {
-                var serializer = base.GetODataPayloadSerializer(model, type, request);
+                var serializer = base.GetODataPayloadSerializer(type, request);
                 if (serializer == null)
                 {
+                    var model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
                     var functions = model.SchemaElements.Where(s => s.SchemaElementKind == EdmSchemaElementKind.Function
                                                                     || s.SchemaElementKind == EdmSchemaElementKind.Action);
                     var isFunctionCall = false;
@@ -171,7 +173,7 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
-        public class NullEntityTypeSerializer : ODataEntityTypeSerializer
+        public class NullEntityTypeSerializer : ODataResourceSerializer
         {
             public NullEntityTypeSerializer(ODataSerializerProvider serializerProvider)
                 : base(serializerProvider)

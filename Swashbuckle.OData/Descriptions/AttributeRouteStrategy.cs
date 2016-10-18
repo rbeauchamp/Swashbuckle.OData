@@ -9,7 +9,9 @@ using System.Web.Http.Controllers;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using System.Web.OData.Routing.Template;
 using Flurl;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Swashbuckle.OData.Descriptions
 {
@@ -28,10 +30,9 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(oDataRoute != null);
             Contract.Requires(oDataRoute.Constraints != null);
 
-            var attributeRoutingConvention = (AttributeRoutingConvention)oDataRoute
-                .GetODataPathRouteConstraint()
-                .RoutingConventions?
-                .SingleOrDefault(convention => convention is AttributeRoutingConvention);
+            var rootContainer = httpConfig.GetODataRootContainer(oDataRoute);
+            var routingConventions = rootContainer.GetServices<IODataRoutingConvention>();
+            var attributeRoutingConvention = routingConventions.OfType<AttributeRoutingConvention>().SingleOrDefault();
 
             if (attributeRoutingConvention != null)
             {
@@ -110,10 +111,7 @@ namespace Swashbuckle.OData.Descriptions
 
             var httpRequestMessageProperties = httpRequestMessage.ODataProperties();
             Contract.Assume(httpRequestMessageProperties != null);
-            httpRequestMessageProperties.Model = oDataRoute.GetEdmModel();
-            httpRequestMessageProperties.RouteName = oDataRoute.GetODataPathRouteConstraint().RouteName;
-            httpRequestMessageProperties.RoutingConventions = oDataRoute.GetODataPathRouteConstraint().RoutingConventions;
-            httpRequestMessageProperties.PathHandler = oDataRoute.GetODataPathRouteConstraint().PathHandler;
+            httpRequestMessage.CreateRequestContainer(oDataRoute.PathRouteConstraint.RouteName);
             return httpRequestMessage;
         }
     }

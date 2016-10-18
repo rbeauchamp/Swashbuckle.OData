@@ -8,6 +8,7 @@ using System.Web.Http.Controllers;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Swashbuckle.Swagger;
 
@@ -87,10 +88,10 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Assume(potentialSwaggerRoute.ODataRoute.Constraints != null);
 
             var oDataAbsoluteUri = potentialOperation.GenerateSampleODataUri(ServiceRoot, potentialSwaggerRoute.PrefixedTemplate);
+            var oDataRoute = potentialSwaggerRoute.ODataRoute;
 
             var httpRequestMessage = new HttpRequestMessage(httpMethod, oDataAbsoluteUri);
-
-            var odataPath = GenerateSampleODataPath(potentialOperation, potentialSwaggerRoute);
+            var odataPath = GenerateSampleODataPath(potentialOperation, potentialSwaggerRoute, httpConfig.GetODataRootContainer(oDataRoute));
 
             var requestContext = new HttpRequestContext
             {
@@ -98,14 +99,9 @@ namespace Swashbuckle.OData.Descriptions
             };
             httpRequestMessage.SetConfiguration(httpConfig);
             httpRequestMessage.SetRequestContext(requestContext);
-            var oDataRoute = potentialSwaggerRoute.ODataRoute;
             var httpRequestMessageProperties = httpRequestMessage.ODataProperties();
             Contract.Assume(httpRequestMessageProperties != null);
-            httpRequestMessageProperties.Model = oDataRoute.GetEdmModel();
             httpRequestMessageProperties.Path = odataPath;
-            httpRequestMessageProperties.RouteName = oDataRoute.GetODataPathRouteConstraint().RouteName;
-            httpRequestMessageProperties.RoutingConventions = oDataRoute.GetODataPathRouteConstraint().RoutingConventions;
-            httpRequestMessageProperties.PathHandler = oDataRoute.GetODataPathRouteConstraint().PathHandler;
             httpRequestMessage.SetRouteData(oDataRoute.GetRouteData("/", httpRequestMessage));
             return httpRequestMessage;
         }
@@ -123,16 +119,17 @@ namespace Swashbuckle.OData.Descriptions
                 Type returnType = null;
                 if (ReturnsValue(request))
                 {
+                    var model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
                     if (odataPath.EdmType.TypeKind == EdmTypeKind.Collection)
                     {
                         var edmElementType = ((IEdmCollectionType) odataPath.EdmType).ElementType;
-                        var elementType = EdmLibHelpers.GetClrType(edmElementType, request.ODataProperties().Model);
+                        var elementType = EdmLibHelpers.GetClrType(edmElementType, model);
                         var queryableType = typeof (IQueryable<>);
                         returnType = queryableType.MakeGenericType(elementType);
                     }
                     else
                     {
-                        returnType = EdmLibHelpers.GetClrType(odataPath.EdmType.ToEdmTypeReference(false), request.ODataProperties().Model);
+                        returnType = EdmLibHelpers.GetClrType(odataPath.EdmType.ToEdmTypeReference(false), model);
                     }
                 }
 
@@ -150,22 +147,19 @@ namespace Swashbuckle.OData.Descriptions
             return request.Method == HttpMethod.Get || request.Method == HttpMethod.Post;
         }
 
-        private static ODataPath GenerateSampleODataPath(Operation operation, SwaggerRoute swaggerRoute)
+        private static ODataPath GenerateSampleODataPath(Operation operation, SwaggerRoute swaggerRoute, IServiceProvider rootContainer)
         {
             Contract.Requires(operation != null);
             Contract.Requires(swaggerRoute != null);
             Contract.Requires(swaggerRoute.ODataRoute.Constraints != null);
             Contract.Ensures(Contract.Result<ODataPath>() != null);
 
-            var oDataPathRouteConstraint = swaggerRoute.ODataRoute.GetODataPathRouteConstraint();
-
-            var model = swaggerRoute.ODataRoute.GetEdmModel();
-
-            Contract.Assume(oDataPathRouteConstraint.PathHandler != null);
+            var pathHandler = rootContainer.GetRequiredService<IODataPathHandler>();
+            Contract.Assume(pathHandler != null);
 
             var odataPath = operation.GenerateSampleODataUri(ServiceRoot, swaggerRoute.Template).Replace(ServiceRoot, string.Empty);
 
-            var result = oDataPathRouteConstraint.PathHandler.Parse(model, ServiceRoot, odataPath);
+            var result = pathHandler.Parse(ServiceRoot, odataPath, rootContainer);
             Contract.Assume(result != null);
             return result;
         }

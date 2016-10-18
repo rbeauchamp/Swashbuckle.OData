@@ -5,9 +5,9 @@ using System.Text;
 using System.Web.Http.ModelBinding;
 using System.Web.Http.Routing;
 using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
-using Microsoft.OData.Core;
-using Microsoft.OData.Core.UriParser;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace SwashbuckleODataSample.Versioning
 {
@@ -64,13 +64,13 @@ namespace SwashbuckleODataSample.Versioning
 
             //get the odata path Ex: ~/entityset/key/$links/navigation
             var odataPath = request.CreateODataPath(uri);
-            var keySegment = odataPath.Segments.OfType<KeyValuePathSegment>().FirstOrDefault();
+            var keySegment = odataPath.Segments.OfType<KeySegment>().FirstOrDefault();
             if (keySegment == null)
             {
                 throw new InvalidOperationException("The link does not contain a key.");
             }
 
-            var value = ODataUriUtils.ConvertFromUriLiteral(keySegment.Value, ODataVersion.V4);
+            var value = ODataUriUtils.ConvertFromUriLiteral(keySegment.Keys.SingleOrDefault().Value as string, ODataVersion.V4);
             return (TKey)value;
         }
 

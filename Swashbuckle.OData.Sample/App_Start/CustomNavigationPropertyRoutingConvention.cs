@@ -1,9 +1,10 @@
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData.UriParser;
 using SwashbuckleODataSample.ODataControllers;
+using ODataPath = System.Web.OData.Routing.ODataPath;
 
 namespace SwashbuckleODataSample
 {
@@ -17,7 +18,7 @@ namespace SwashbuckleODataSample
             {
                 if (odataPath.PathTemplate.Equals("~/entityset/key/navigation")) //POST OR GET
                 {
-                    controllerContext.RouteData.Values["orderID"] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
+                    controllerContext.RouteData.Values["orderID"] = ((KeySegment)odataPath.Segments[1]).Keys.Single().Value;
                     return controllerContext.Request.Method.ToString();
                 }
             }
@@ -25,14 +26,14 @@ namespace SwashbuckleODataSample
             {
                 if (odataPath.PathTemplate.Equals("~/entityset/key/navigation")) //POST OR GET
                 {
-                    controllerContext.RouteData.Values["customerID"] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
+                    controllerContext.RouteData.Values["customerID"] = ((KeySegment)odataPath.Segments[1]).Keys.Single().Value;
                     return controllerContext.Request.Method.ToString();
                 }
                 if (odataPath.PathTemplate.Equals("~/entityset/key/navigation/key")) //PATCH OR DELETE
                 {
-                    controllerContext.RouteData.Values["customerID"] = (odataPath.Segments[1] as KeyValuePathSegment).Value;
+                    controllerContext.RouteData.Values["customerID"] = ((KeySegment)odataPath.Segments[1]).Keys.Single().Value;
 
-                    controllerContext.RouteData.Values["key"] = (odataPath.Segments[3] as KeyValuePathSegment).Value;
+                    controllerContext.RouteData.Values["key"] = ((KeySegment)odataPath.Segments[3]).Keys.Single().Value;
                     return controllerContext.Request.Method.ToString();
                 }
             }
@@ -42,13 +43,13 @@ namespace SwashbuckleODataSample
 
         public override string SelectController(ODataPath odataPath, HttpRequestMessage request)
         {
-            // We use always use the last naviation as the controller vs. the initial entityset
+            // We use always use the last navigation as the controller vs. the initial entityset
             if (odataPath.PathTemplate.Contains("~/entityset/key/navigation"))
             {
                 // Find controller.  Controller should be last navigation property
-                return ODataSegmentKinds.Navigation == odataPath.Segments[odataPath.Segments.Count - 1].SegmentKind
-                    ? odataPath.Segments[odataPath.Segments.Count - 1].ToString()
-                    : odataPath.Segments[odataPath.Segments.Count - 2].ToString();
+                return odataPath.Segments[odataPath.Segments.Count - 1] is NavigationPropertySegment
+                    ? odataPath.Segments[odataPath.Segments.Count - 1].Identifier
+                    : odataPath.Segments[odataPath.Segments.Count - 2].Identifier;
             }
             return base.SelectController(odataPath, request);
         }

@@ -51,7 +51,7 @@ namespace SwashbuckleODataSample.Versioning
             }
 
             string routeTemplate = string.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.ODataPathTemplate : routePrefix + "/" + ODataRouteConstants.ODataPathTemplate;
-            ODataVersionRouteConstraint routeConstraint = new ODataVersionRouteConstraint(pathHandler, model, routeName, routingConventions, queryConstraints, headerConstraints);
+            ODataVersionRouteConstraint routeConstraint = new ODataVersionRouteConstraint(routeName, queryConstraints, headerConstraints);
             var constraints = new HttpRouteValueDictionary();
             constraints.Add(ODataRouteConstants.ConstraintName, routeConstraint);
             routes.MapHttpRoute(

@@ -6,8 +6,11 @@ using System.Web.Http;
 using System.Web.OData;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
+using System.Web.OData.Routing.Conventions;
 using FluentAssertions;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using Owin;
@@ -162,11 +165,17 @@ namespace Swashbuckle.OData.Tests
         private static void ConfigurationEnumKey(IAppBuilder appBuilder, bool isEnumPrefixFree)
         {
             var config = appBuilder.GetStandardHttpConfig(typeof(ProductWithEnumKeysTestController));
-            config.EnableEnumPrefixFree(isEnumPrefixFree);
 
-            config.MapODataServiceRoute("EnumKeyODataRoute",
+            const string routeName = "EnumKeyODataRoute";
+            var model = GetProductWithEnumKeyModel();
+            var routingConventions = (IEnumerable<IODataRoutingConvention>)ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, config);
+            var uriResolver = isEnumPrefixFree ? new StringAsEnumResolver() : new ODataUriResolver();
+            config.MapODataServiceRoute(routeName,
                                         ODataRoutePrefix,
-                                        GetProductWithEnumKeyModel());
+                                        builder => builder
+                                            .AddService(ServiceLifetime.Singleton, sp => model)
+                                            .AddService(ServiceLifetime.Singleton, sp => routingConventions)
+                                            .AddService(ServiceLifetime.Singleton, sp => uriResolver));
 
             config.EnsureInitialized();
         }
@@ -174,11 +183,17 @@ namespace Swashbuckle.OData.Tests
         private static void ConfigurationCompositeKey(IAppBuilder appBuilder, bool isEnumPrefixFree)
         {
             var config = appBuilder.GetStandardHttpConfig(typeof(ProductWithCompositeEnumIntKeysTestController));
-            config.EnableEnumPrefixFree(isEnumPrefixFree);
 
-            config.MapODataServiceRoute("CompositeKeyODataRoute",
+            const string routeName = "CompositeKeyODataRoute";
+            var model = GetProductWithCompositeEnumIntKeyModel();
+            var routingConventions = (IEnumerable<IODataRoutingConvention>)ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, config);
+            var uriResolver = isEnumPrefixFree ? new StringAsEnumResolver() : new ODataUriResolver();
+            config.MapODataServiceRoute(routeName,
                                         ODataRoutePrefix,
-                                        GetProductWithCompositeEnumIntKeyModel());
+                                        builder => builder
+                                            .AddService(ServiceLifetime.Singleton, sp => model)
+                                            .AddService(ServiceLifetime.Singleton, sp => routingConventions)
+                                            .AddService(ServiceLifetime.Singleton, sp => uriResolver));
 
             config.EnsureInitialized();
         }

@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Web.Http.Dispatcher;
 using Microsoft.OData.Edm;
-using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
 
 namespace System.Web.OData.Formatter

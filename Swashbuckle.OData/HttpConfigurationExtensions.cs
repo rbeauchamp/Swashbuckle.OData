@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Routing;
@@ -51,12 +53,24 @@ namespace Swashbuckle.OData
                 : new JsonSerializerSettings();
         }
 
+        private static readonly MethodInfo GetODataRootContainerMethod = typeof(System.Web.OData.Extensions.HttpConfigurationExtensions).GetMethod("GetODataRootContainer", BindingFlags.Static | BindingFlags.NonPublic);
+
+        // We need access to the root container but System.Web.OData.Extensions.HttpConfigurationExtensions.GetODataRootContainer is internal.
+        public static IServiceProvider GetODataRootContainer(this HttpConfiguration configuration, ODataRoute oDataRoute)
+        {
+            Contract.Requires(configuration != null);
+            Contract.Requires(oDataRoute != null);
+            return (IServiceProvider)GetODataRootContainerMethod.Invoke(null, new object[] {configuration, oDataRoute.PathRouteConstraint.RouteName});
+        }
+
         public static SwaggerRouteBuilder AddCustomSwaggerRoute(this HttpConfiguration httpConfig, ODataRoute oDataRoute, string routeTemplate)
         {
             Contract.Requires(httpConfig != null);
             Contract.Requires(oDataRoute != null);
             Contract.Requires(httpConfig.Properties != null);
             Contract.Ensures(Contract.Result<SwaggerRouteBuilder>() != null);
+
+            oDataRoute.SetHttpConfiguration(httpConfig);
 
             var urlDecodedTemplate = HttpUtility.UrlDecode(routeTemplate);
             Contract.Assume(!string.IsNullOrWhiteSpace(urlDecodedTemplate));
