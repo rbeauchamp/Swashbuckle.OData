@@ -3,8 +3,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Routing;
 using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
-using Microsoft.OData.Edm;
 
 namespace SwashbuckleODataSample.Versioning
 {
@@ -18,13 +16,10 @@ namespace SwashbuckleODataSample.Versioning
     public class ODataVersionRouteConstraint : ODataPathRouteConstraint
     {
         public ODataVersionRouteConstraint(
-            IODataPathHandler pathHandler,
-            IEdmModel model,
             string routeName,
-            IEnumerable<IODataRoutingConvention> routingConventions,
             object queryConstraints,
             object headerConstraints)
-            : base(pathHandler, model, routeName, routingConventions)
+            : base(routeName)
         {
             QueryStringConstraints = new HttpRouteValueDictionary(queryConstraints);
             HeaderConstraints = new HttpRouteValueDictionary(headerConstraints);

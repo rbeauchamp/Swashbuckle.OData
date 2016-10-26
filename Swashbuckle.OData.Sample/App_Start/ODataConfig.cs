@@ -1,14 +1,18 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using System.Web.Configuration;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Routing;
 using System.Web.OData.Routing.Conventions;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Restier.EntityFramework;
-using Microsoft.Restier.WebApi;
-using Microsoft.Restier.WebApi.Batch;
+using Microsoft.OData.UriParser;
+using Microsoft.Restier.Providers.EntityFramework;
+using Microsoft.Restier.Publishers.OData;
+using Microsoft.Restier.Publishers.OData.Batch;
 using Swashbuckle.OData;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Repositories;
@@ -28,7 +32,8 @@ namespace SwashbuckleODataSample
 
         private static async void ConfigureRestierOData(HttpConfiguration config)
         {
-            await config.MapRestierRoute<DbApi<RestierODataContext>>("RESTierRoute", "restier", new RestierBatchHandler(GlobalConfiguration.DefaultServer));
+            config.Filter().Expand().Select().OrderBy().MaxTop(null).Count();
+            await config.MapRestierRoute<EntityFrameworkApi<RestierODataContext>>("RESTierRoute", "restier", new RestierBatchHandler(GlobalConfiguration.DefaultServer));
         }
 
         private static void ConfigureWebApiOData(HttpConfiguration config)
@@ -59,15 +64,26 @@ namespace SwashbuckleODataSample
             // Define a default non- versioned route(default route should be at the end as a last catch-all)
             config.MapODataServiceRoute("DefaultODataRoute", ODataRoutePrefix, GetDefaultModel());
 
+            bool isPrefixFreeEnabled = System.Convert.ToBoolean(WebConfigurationManager.AppSettings["EnableEnumPrefixFree"]);
+            var uriResolver = isPrefixFreeEnabled ? new StringAsEnumResolver() : new ODataUriResolver();
+
             // Define a route with an enum as a key
-            config.MapODataServiceRoute("EnumODataRoute",
-                                    ODataRoutePrefix,
-                                    GetProductWithEnumKeyModel());
+            const string enumRouteName = "EnumODataRoute";
+            config.MapODataServiceRoute(enumRouteName,
+                                        ODataRoutePrefix,
+                                        builder => builder
+                                            .AddService(ServiceLifetime.Singleton, sp => GetProductWithEnumKeyModel())
+                                            .AddService(ServiceLifetime.Singleton, sp => (IEnumerable<IODataRoutingConvention>)ODataRoutingConventions.CreateDefaultWithAttributeRouting(enumRouteName, config))
+                                            .AddService(ServiceLifetime.Singleton, sp => uriResolver));
 
             // Define a route with an enum/int composite key
-            config.MapODataServiceRoute("EnumIntCompositeODataRoute",
+            const string enumIntCompositeRouteName = "EnumIntCompositeODataRoute";
+            config.MapODataServiceRoute(enumIntCompositeRouteName,
                                         ODataRoutePrefix,
-                                        GetProductWithCompositeEnumIntKeyModel());
+                                        builder => builder
+                                            .AddService(ServiceLifetime.Singleton, sp => GetProductWithCompositeEnumIntKeyModel())
+                                            .AddService(ServiceLifetime.Singleton, sp => (IEnumerable<IODataRoutingConvention>)ODataRoutingConventions.CreateDefaultWithAttributeRouting(enumIntCompositeRouteName, config))
+                                            .AddService(ServiceLifetime.Singleton, sp => uriResolver));
         }
 
         private static IEdmModel GetDefaultModel()

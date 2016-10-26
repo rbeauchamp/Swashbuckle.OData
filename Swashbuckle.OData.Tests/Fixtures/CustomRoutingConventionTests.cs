@@ -55,13 +55,15 @@ namespace Swashbuckle.OData.Tests
 
             var edmModel = GetEdmModel();
 
+            const string routeName = "ODataRoute";
+
             // See http://www.asp.net/web-api/overview/odata-support-in-aspnet-web-api/odata-routing-conventions
             // Create the default collection of built-in conventions.
             var conventions = ODataRoutingConventions.CreateDefault();
             // Insert the custom convention at the start of the collection.
-            conventions.Insert(0, new MyAttributeRoutingConvention(edmModel, config));
+            conventions.Insert(0, new MyAttributeRoutingConvention(routeName, config));
 
-            config.MapODataServiceRoute("ODataRoute", "odata", edmModel, new DefaultODataPathHandler(), conventions);
+            config.MapODataServiceRoute(routeName, "odata", edmModel, new DefaultODataPathHandler(), conventions);
 
             config.EnsureInitialized();
         }
@@ -101,19 +103,19 @@ namespace Swashbuckle.OData.Tests
 
         public class MyAttributeRoutingConvention : AttributeRoutingConvention
         {
-            public MyAttributeRoutingConvention(IEdmModel model, HttpConfiguration configuration) : base(model, configuration)
+            public MyAttributeRoutingConvention(string routeName, HttpConfiguration configuration) : base(routeName, configuration)
             {
             }
 
-            public MyAttributeRoutingConvention(IEdmModel model, HttpConfiguration configuration, IODataPathTemplateHandler pathTemplateHandler) : base(model, configuration, pathTemplateHandler)
+            public MyAttributeRoutingConvention(string routeName, HttpConfiguration configuration, IODataPathTemplateHandler pathTemplateHandler) : base(routeName, configuration, pathTemplateHandler)
             {
             }
 
-            public MyAttributeRoutingConvention(IEdmModel model, IEnumerable<HttpControllerDescriptor> controllers) : base(model, controllers)
+            public MyAttributeRoutingConvention(string routeName, IEnumerable<HttpControllerDescriptor> controllers) : base(routeName, controllers)
             {
             }
 
-            public MyAttributeRoutingConvention(IEdmModel model, IEnumerable<HttpControllerDescriptor> controllers, IODataPathTemplateHandler pathTemplateHandler) : base(model, controllers, pathTemplateHandler)
+            public MyAttributeRoutingConvention(string routeName, IEnumerable<HttpControllerDescriptor> controllers, IODataPathTemplateHandler pathTemplateHandler) : base(routeName, controllers, pathTemplateHandler)
             {
             }
         }

@@ -13,7 +13,6 @@ using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.Swagger;
-using System.Web.Http;
 
 namespace Swashbuckle.OData.Descriptions
 {
@@ -23,36 +22,9 @@ namespace Swashbuckle.OData.Descriptions
     internal static class ODataSwaggerUtilities
     {
         /// <summary>
-        /// HttpConfiguration for ODataSwaggerUtilities
-        /// </summary>
-        public static HttpConfiguration HttpConfig = null;
-
-        /// <summary>
-        /// Resolver Settings Key namespace
-        /// </summary>
-        private const string ResolverSettingsKey 
-                        = "System.Web.OData.ResolverSettingsKey";
-
-        /// <summary>
-        /// Enum Prefix Free property name
-        /// </summary>
-        private const string EnumPrefixFree = "EnumPrefixFree";
-
-        /// <summary>
         /// The ending Path offset
         /// </summary>
         private const int EntityPathSubStrOffset = 1;
-
-        /// <summary>
-        /// Sets the HttpConfig static variable for use in the 
-        /// ODataSwaggerUtilities class.
-        /// </summary>
-        /// <param name="httpConfig"></param>
-        public static void SetHttpConfig(HttpConfiguration httpConfig)
-        {
-            Contract.Requires(httpConfig != null);
-            HttpConfig = httpConfig;
-        }
 
         /// <summary>
         /// Create the Swagger path for the Edm entity set.
@@ -186,7 +158,7 @@ namespace Swashbuckle.OData.Descriptions
         /// Create the Swagger path for the Edm entity.
         /// </summary>
         /// <param name="entitySet">The entity set.</param>
-        /// <param name="oDataRoute"></param>
+        /// <param name="oDataRoute">The OData route.</param>
         /// <returns></returns>
         public static PathItem CreateSwaggerPathForEntity(IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
@@ -432,6 +404,7 @@ namespace Swashbuckle.OData.Descriptions
         /// </summary>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="entitySet">The entity set.</param>
+        /// <param name="oDataRoute">The OData route.</param>
         /// <returns></returns>
         public static PathItem CreateSwaggerPathForOperationOfEntity(IEdmOperation operation, IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
@@ -507,17 +480,18 @@ namespace Swashbuckle.OData.Descriptions
         /// Get the Uri Swagger path for the Edm entity set.
         /// </summary>
         /// <param name="entitySet">The entity set.</param>
+        /// <param name="oDataRoute">The OData route.</param>
         /// <returns>
         /// The <see cref="System.String" /> path represents the related Edm entity set.
         /// </returns>
-        public static string GetPathForEntity(IEdmEntitySet entitySet)
+        public static string GetPathForEntity(IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
             Contract.Requires(entitySet != null);
 
             var singleEntityPath = GetPathForEntitySet(entitySet) + "(";
             singleEntityPath = entitySet.GetEntityType().GetKey().Count() == 1
-                ? AppendSingleColumnKeyTemplate(entitySet, singleEntityPath)
-                : AppendMultiColumnKeyTemplate(entitySet, singleEntityPath);
+                ? AppendSingleColumnKeyTemplate(entitySet, singleEntityPath, oDataRoute)
+                : AppendMultiColumnKeyTemplate(entitySet, singleEntityPath, oDataRoute);
             Contract.Assume(singleEntityPath.Length - EntityPathSubStrOffset >= 0);
             singleEntityPath = singleEntityPath.Substring(0, singleEntityPath.Length - EntityPathSubStrOffset);
             singleEntityPath += ")";
@@ -525,24 +499,24 @@ namespace Swashbuckle.OData.Descriptions
             return singleEntityPath;
         }
 
-        private static string AppendSingleColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath)
+        private static string AppendSingleColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath, ODataRoute oDataRoute)
         {
             Contract.Requires(entitySet.GetEntityType().GetKey().Count() == 1);
             Contract.Ensures(Contract.Result<string>() != null);
 
             var key = entitySet.GetEntityType().GetKey().Single();
-            singleEntityPath += GetParameterPathAssignment(key.Name, key.Type, false);
+            singleEntityPath += GetParameterPathAssignment(key.Name, key.Type, false, oDataRoute);
             return singleEntityPath;
         }
 
-        private static string AppendMultiColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath)
+        private static string AppendMultiColumnKeyTemplate(IEdmEntitySet entitySet, string singleEntityPath, ODataRoute oDataRoute)
         {
             Contract.Ensures(Contract.Result<string>() != null);
 
             foreach (var key in entitySet.GetEntityType().GetKey())
             {
                 Contract.Assume(key != null);
-                singleEntityPath += GetParameterPathAssignment(key.Name, key.Type, true);
+                singleEntityPath += GetParameterPathAssignment(key.Name, key.Type, true, oDataRoute);
             }
             Contract.Assume(singleEntityPath != null);
             return singleEntityPath;
@@ -583,10 +557,11 @@ namespace Swashbuckle.OData.Descriptions
         /// </summary>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="entitySet">The entity set.</param>
+        /// <param name="oDataRoute">The OData route.</param>
         /// <returns>
         /// The <see cref="System.String" /> path represents the related Edm operation.
         /// </returns>
-        public static string GetPathForOperationOfEntitySet(IEdmOperation operation, IEdmEntitySet entitySet)
+        public static string GetPathForOperationOfEntitySet(IEdmOperation operation, IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
             Contract.Requires(operation != null);
             Contract.Requires(entitySet != null);
@@ -600,7 +575,7 @@ namespace Swashbuckle.OData.Descriptions
                 foreach (var parameter in edmOperationParameters.Skip(1))
                 {
                     Contract.Assume(parameter != null);
-                    swaggerOperationPath += GetFunctionParameterAssignmentPath(parameter);
+                    swaggerOperationPath += GetFunctionParameterAssignmentPath(parameter, oDataRoute);
                 }
             }
             if (swaggerOperationPath.EndsWith(",", StringComparison.Ordinal))
@@ -615,11 +590,11 @@ namespace Swashbuckle.OData.Descriptions
             return swaggerOperationPath;
         }
 
-        private static string GetFunctionParameterAssignmentPath(IEdmOperationParameter parameter)
+        private static string GetFunctionParameterAssignmentPath(IEdmOperationParameter parameter, ODataRoute oDataRoute)
         {
             Contract.Requires(parameter != null);
 
-            return GetParameterPathAssignment(parameter.Name, parameter.Type, true);
+            return GetParameterPathAssignment(parameter.Name, parameter.Type, true, oDataRoute);
         }
 
         /// <summary>
@@ -628,8 +603,9 @@ namespace Swashbuckle.OData.Descriptions
         /// <param name="parameterName">parameter's name</param>
         /// <param name="type">iedmtype of the parameter</param>
         /// <param name="isIncludeParamName">true to include the parameter name in the path</param>
+        /// <param name="oDataRoute">The OData route</param>
         /// <returns></returns>
-        private static string GetParameterPathAssignment(string parameterName, IEdmTypeReference type, bool isIncludeParamName)
+        private static string GetParameterPathAssignment(string parameterName, IEdmTypeReference type, bool isIncludeParamName, ODataRoute oDataRoute)
         {
             Contract.Requires(parameterName != null);
             Contract.Requires(type != null);
@@ -645,7 +621,7 @@ namespace Swashbuckle.OData.Descriptions
             {
                 case EdmTypeKind.Enum:
                     string enumFullName = type.FullName();
-                    if (IsEnableEnumPrefixFree())
+                    if (oDataRoute.IsEnumPrefixFree())
                     {
                         enumFullName = String.Empty;
                     }
@@ -660,15 +636,16 @@ namespace Swashbuckle.OData.Descriptions
         /// </summary>
         /// <param name="operation">The Edm operation.</param>
         /// <param name="entitySet">The entity set.</param>
+        /// <param name="oDataRoute">The OData route.</param>
         /// <returns>
         /// The <see cref="System.String" /> path represents the related Edm operation.
         /// </returns>
-        public static string GetPathForOperationOfEntity(IEdmOperation operation, IEdmEntitySet entitySet)
+        public static string GetPathForOperationOfEntity(IEdmOperation operation, IEdmEntitySet entitySet, ODataRoute oDataRoute)
         {
             Contract.Requires(operation != null);
             Contract.Requires(entitySet != null);
 
-            var swaggerOperationPath = GetPathForEntity(entitySet) + "/" + operation.FullName();
+            var swaggerOperationPath = GetPathForEntity(entitySet, oDataRoute) + "/" + operation.FullName();
             if (operation.IsFunction())
             {
                 swaggerOperationPath += "(";
@@ -677,7 +654,7 @@ namespace Swashbuckle.OData.Descriptions
                 foreach (var parameter in edmOperationParameters.Skip(1))
                 {
                     Contract.Assume(parameter != null);
-                    swaggerOperationPath += GetFunctionParameterAssignmentPath(parameter);
+                    swaggerOperationPath += GetFunctionParameterAssignmentPath(parameter, oDataRoute);
                 }
             }
             if (swaggerOperationPath.EndsWith(",", StringComparison.Ordinal))
@@ -988,26 +965,6 @@ namespace Swashbuckle.OData.Descriptions
             var result = JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, serializerSettings), serializerSettings);
             Contract.Assume(result != null);
             return result;
-        }
-
-        /// <summary>
-        /// Gets the value of the EnumPrefixFree setting in the HttpConfiguration
-        /// </summary>
-        /// <returns>EnumPrefixFree value</returns>
-        private static bool IsEnableEnumPrefixFree()
-        {
-            Contract.Requires(HttpConfig != null);
-            Contract.Ensures(Contract.Result<bool>().GetType() == typeof(bool));
-
-            var odataUriResolverSettings = HttpConfig
-                                    .Properties
-                                    .Where(prop =>
-                                        prop.Key.Equals(ResolverSettingsKey))
-                                    .FirstOrDefault().Value;
-            return Convert.ToBoolean(odataUriResolverSettings
-                                    .GetType()
-                                    .GetProperty(EnumPrefixFree)
-                                    .GetValue(odataUriResolverSettings));
         }
     }
 }

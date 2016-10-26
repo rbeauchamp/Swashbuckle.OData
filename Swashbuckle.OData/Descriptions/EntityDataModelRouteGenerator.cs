@@ -19,7 +19,10 @@ namespace Swashbuckle.OData.Descriptions
     {
         public IEnumerable<SwaggerRoute> Generate(HttpConfiguration httpConfig)
         {
-            ODataSwaggerUtilities.SetHttpConfig(httpConfig);
+            foreach (var oDataRoute in httpConfig.GetODataRoutes())
+            {
+                oDataRoute.SetHttpConfiguration(httpConfig);
+            }
             return httpConfig.GetODataRoutes().SelectMany(Generate);
         }
 
@@ -57,7 +60,7 @@ namespace Swashbuckle.OData.Descriptions
             return oDataRoute.GetEdmModel()
                 .EntityContainer
                 .EntitySets()?
-                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntity(entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet, oDataRoute)));
+                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntity(entitySet, oDataRoute), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet, oDataRoute)));
         }
 
         private static IEnumerable<SwaggerRoute> GenerateOperationImportRoutes(ODataRoute oDataRoute)
@@ -108,7 +111,7 @@ namespace Swashbuckle.OData.Descriptions
                             var entityType = (IEdmEntityType)boundType;
                             var edmEntitySets = oDataRoute.GetEdmModel().EntityContainer.EntitySets();
                             Contract.Assume(edmEntitySets != null);
-                            routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntity(operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntity(operation, entitySet, oDataRoute))));
+                            routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntity(operation, entitySet, oDataRoute), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntity(operation, entitySet, oDataRoute))));
                         }
                         else if (boundType.TypeKind == EdmTypeKind.Collection)
                         {
@@ -119,7 +122,7 @@ namespace Swashbuckle.OData.Descriptions
                                 var entityType = (IEdmEntityType)collectionType.ElementType?.GetDefinition();
                                 var edmEntitySets = oDataRoute.GetEdmModel().EntityContainer.EntitySets();
                                 Contract.Assume(edmEntitySets != null);
-                                routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntitySet(operation, entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntitySet(operation, entitySet, oDataRoute))));
+                                routes.AddRange(edmEntitySets.Where(es => es.GetEntityType().Equals(entityType)).Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationOfEntitySet(operation, entitySet, oDataRoute), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationOfEntitySet(operation, entitySet, oDataRoute))));
                             }
                         }
                     }

@@ -41,7 +41,7 @@ namespace SwashbuckleODataSample.ODataControllers
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> Put([FromODataUri] int key, Delta<Customer> patch)
         {
-            Validate(patch.GetEntity());
+            Validate(patch.GetInstance());
 
             if (!ModelState.IsValid)
             {
@@ -99,7 +99,7 @@ namespace SwashbuckleODataSample.ODataControllers
         [AcceptVerbs("PATCH", "MERGE")]
         public async Task<IHttpActionResult> Patch([FromODataUri] int key, Delta<Customer> patch)
         {
-            Validate(patch.GetEntity());
+            Validate(patch.GetInstance());
 
             if (!ModelState.IsValid)
             {

@@ -1,20 +1,59 @@
-﻿using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System;
+using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
+using System.Web.Http;
 using System.Web.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Swashbuckle.OData.Descriptions
 {
     internal static class ODataRouteExtensions
     {
+        private static readonly ConditionalWeakTable<ODataRoute, HttpConfiguration> RouteConfigurationTable = new ConditionalWeakTable<ODataRoute, HttpConfiguration>();
+
+        public static void SetHttpConfiguration(this ODataRoute oDataRoute, HttpConfiguration httpConfig)
+        {
+            Contract.Requires(oDataRoute != null);
+            HttpConfiguration registeredConfiguration;
+            if (RouteConfigurationTable.TryGetValue(oDataRoute, out registeredConfiguration))
+            {
+                Contract.Assert(Equals(httpConfig, registeredConfiguration));
+            }
+            else
+            {
+                RouteConfigurationTable.Add(oDataRoute, httpConfig);
+            }
+        }
+
+        private static HttpConfiguration GetHttpConfiguration(this ODataRoute oDataRoute)
+        {
+            Contract.Requires(oDataRoute != null);
+            Contract.Ensures(Contract.Result<HttpConfiguration>() != null);
+
+            var result = RouteConfigurationTable.GetValue(oDataRoute, key => null);
+            Contract.Assume(result != null);
+            return result;
+        }
+
+        private static IServiceProvider GetRootContainer(this ODataRoute oDataRoute)
+        {
+            Contract.Requires(oDataRoute != null);
+            return oDataRoute.GetHttpConfiguration().GetODataRootContainer(oDataRoute);
+        }
+
         public static IEdmModel GetEdmModel(this ODataRoute oDataRoute)
         {
             Contract.Requires(oDataRoute != null);
-            Contract.Ensures(Contract.Result<IEdmModel>() != null);
+            return oDataRoute.GetRootContainer().GetRequiredService<IEdmModel>();
+        }
 
-            var result = oDataRoute.GetODataPathRouteConstraint().EdmModel;
-            Contract.Assume(result != null);
-            return result;
+        public static bool IsEnumPrefixFree(this ODataRoute oDataRoute)
+        {
+            Contract.Requires(oDataRoute != null);
+            var uriResolver = oDataRoute.GetRootContainer().GetRequiredService<ODataUriResolver>();
+            return uriResolver is StringAsEnumResolver;
         }
 
         public static string GetRoutePrefix(this ODataRoute oDataRoute)
@@ -23,18 +62,6 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Ensures(Contract.Result<string>() != null);
 
             return oDataRoute.RoutePrefix ?? string.Empty;
-        }
-
-        public static ODataPathRouteConstraint GetODataPathRouteConstraint(this ODataRoute oDataRoute)
-        {
-            Contract.Requires(oDataRoute != null);
-            Contract.Ensures(Contract.Result<ODataPathRouteConstraint>() != null);
-
-            Contract.Assume(oDataRoute.Constraints != null);
-            Contract.Assume(oDataRoute.Constraints.Values.Count > 0);
-            var result = (ODataPathRouteConstraint)oDataRoute.Constraints.Values.Single(value => value is ODataPathRouteConstraint);
-            Contract.Assume(result != null);
-            return result;
         }
     }
 }
