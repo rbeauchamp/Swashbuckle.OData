@@ -19,16 +19,16 @@
   <Import Project="$(NuProjPath)\NuProj.props" Condition="Exists('$(NuProjPath)\NuProj.props')" />
   <PropertyGroup Label="Configuration">
     <Id>Swashbuckle.OData</Id>
-    <Version>2.19.0</Version>
+    <Version>3.0.0</Version>
     <Title>Swashbuckle.OData</Title>
     <Authors>Richard Beauchamp</Authors>
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Summary>
     <Description>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Description>
-    <ReleaseNotes>Adds support for Enums types as keys</ReleaseNotes>
+    <ReleaseNotes>Updated to latest versions of ODataLib, Microsoft ASP.NET Web API 2.2 for OData v4.0, RESTier, and their dependencies.</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
-    <Copyright>Copyright © Richard Beauchamp</Copyright>
+    <Copyright>Copyright © 2015 - 2016 Richard Beauchamp and the Swashbuckle.OData contributors</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUI OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
     <GenerateSymbolPackage>false</GenerateSymbolPackage>
   </PropertyGroup>
