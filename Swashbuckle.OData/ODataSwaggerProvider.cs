@@ -19,18 +19,6 @@ namespace Swashbuckle.OData
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
-        /// </summary>
-        /// <param name="defaultProvider">The default provider.</param>
-        /// <param name="swaggerDocsConfig">The swagger docs configuration.</param>
-        public ODataSwaggerProvider(ISwaggerProvider defaultProvider, SwaggerDocsConfig swaggerDocsConfig) 
-            : this(defaultProvider, swaggerDocsConfig, GlobalConfiguration.Configuration)
-        {
-            Contract.Requires(defaultProvider != null);
-            Contract.Requires(swaggerDocsConfig != null);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
         /// Use this constructor for self-hosted scenarios.
         /// </summary>
         /// <param name="defaultProvider">The default provider.</param>

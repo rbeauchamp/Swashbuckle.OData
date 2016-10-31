@@ -20,7 +20,7 @@ Install the Swashbuckle.OData NuGet package:
 
 In `SwaggerConfig` configure the custom provider:
 ```csharp
-c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c));
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, GlobalConfiguration.Configuration));
 ```
 
 ### Include Navigation Properties in your entity swagger models ###
