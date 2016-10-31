@@ -29,7 +29,7 @@ By default, OData does not get related entities unless you specify `$expand` on 
 Swashbuckle.OData tries to accurately reflect this behavior and therefore, by default, does not include 
 navigation properties in your entity swagger models. You can override this though by specifying:
 ```csharp
-c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c).Configure(odataConfig =>
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, GlobalConfiguration.Configuration).Configure(odataConfig =>
                     {
                         odataConfig.IncludeNavigationProperties();
                     }));
