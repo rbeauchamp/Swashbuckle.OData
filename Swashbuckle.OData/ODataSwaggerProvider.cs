@@ -37,7 +37,6 @@ namespace Swashbuckle.OData
         public SwaggerDocument GetSwagger(string rootUrl, string apiVersion)
         {
             var swashbuckleOptions = _config.GetSwashbuckleOptions();
-
             var schemaRegistry = new SchemaRegistry(
                 _config.Configuration.SerializerSettingsOrDefault(),
                 swashbuckleOptions.CustomSchemaMappings,
@@ -46,7 +45,8 @@ namespace Swashbuckle.OData
                 swashbuckleOptions.IgnoreObsoleteProperties,
                 swashbuckleOptions.SchemaIdSelector,
                 swashbuckleOptions.DescribeAllEnumsAsStrings,
-                swashbuckleOptions.DescribeStringEnumsInCamelCase);
+                swashbuckleOptions.DescribeStringEnumsInCamelCase,
+                true);
 
             Info info;
             _config.GetApiVersions().TryGetValue(apiVersion, out info);
@@ -73,7 +73,7 @@ namespace Swashbuckle.OData
                 securityDefinitions = swashbuckleOptions.SecurityDefinitions
             };
 
-            foreach(var filter in swashbuckleOptions.DocumentFilters)
+            foreach (var filter in swashbuckleOptions.DocumentFilters)
             {
                 Contract.Assume(filter != null);
 
@@ -175,8 +175,8 @@ namespace Swashbuckle.OData
                 {
                     var inPath = apiDescription.RelativePathSansQueryString().Contains("{" + paramDesc.Name + "}");
                     var swaggerApiParameterDescription = paramDesc as SwaggerApiParameterDescription;
-                    return swaggerApiParameterDescription != null 
-                    ? CreateParameter(swaggerApiParameterDescription, inPath, schemaRegistry, edmModel) 
+                    return swaggerApiParameterDescription != null
+                    ? CreateParameter(swaggerApiParameterDescription, inPath, schemaRegistry, edmModel)
                     : CreateParameter(paramDesc, inPath, schemaRegistry, edmModel);
                 })
                  .ToList();
@@ -293,8 +293,8 @@ namespace Swashbuckle.OData
 
             Contract.Assume(_config.GetSwashbuckleOptions().VersionSupportResolver == null || odataApiExplorer.ApiDescriptions != null);
 
-            var result = _config.GetSwashbuckleOptions().VersionSupportResolver == null 
-                ? odataApiExplorer.ApiDescriptions 
+            var result = _config.GetSwashbuckleOptions().VersionSupportResolver == null
+                ? odataApiExplorer.ApiDescriptions
                 : odataApiExplorer.ApiDescriptions.Where(apiDesc => _config.GetSwashbuckleOptions().VersionSupportResolver(apiDesc, apiVersion));
 
             Contract.Assume(result != null);

@@ -112,9 +112,7 @@ namespace SwashbuckleODataSample
         {
             var builder = new ODataConventionModelBuilder();
             builder.EnableLowerCamelCase();
-
             builder.EntitySet<Customer>("Customers");
-
             return builder.GetEdmModel();
         }
 
@@ -132,7 +130,6 @@ namespace SwashbuckleODataSample
         {
             var builder = new ODataConventionModelBuilder();
             builder.EnableLowerCamelCase();
-
             builder.EntitySet<Product>("Products");
 
             var productType = builder.EntityType<Product>();
@@ -183,10 +180,10 @@ namespace SwashbuckleODataSample
             // An action bound to an entity set
             // Accepts multiple action parameters
             var createAction = productType.Collection.Action("Create");
-                createAction.ReturnsFromEntitySet<Product>("Products");
-                createAction.Parameter<string>("Name").OptionalParameter = false;
-                createAction.Parameter<double>("Price").OptionalParameter = false;
-                createAction.Parameter<MyEnum>("EnumValue").OptionalParameter = false;
+            createAction.ReturnsFromEntitySet<Product>("Products");
+            createAction.Parameter<string>("Name").OptionalParameter = false;
+            createAction.Parameter<double>("Price").OptionalParameter = false;
+            createAction.Parameter<MyEnum>("EnumValue").OptionalParameter = false;
 
             // An action bound to an entity set
             // Accepts an array of complex types

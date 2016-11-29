@@ -84,7 +84,6 @@ namespace Swashbuckle.OData.Descriptions
             Contract.Requires(httpConfig != null);
             Contract.Requires(potentialSwaggerRoute != null);
             Contract.Ensures(Contract.Result<HttpRequestMessage>() != null);
-
             Contract.Assume(potentialSwaggerRoute.ODataRoute.Constraints != null);
 
             var oDataAbsoluteUri = potentialOperation.GenerateSampleODataUri(ServiceRoot, potentialSwaggerRoute.PrefixedTemplate);
@@ -122,9 +121,9 @@ namespace Swashbuckle.OData.Descriptions
                     var model = request.GetRequestContainer().GetRequiredService<IEdmModel>();
                     if (odataPath.EdmType.TypeKind == EdmTypeKind.Collection)
                     {
-                        var edmElementType = ((IEdmCollectionType) odataPath.EdmType).ElementType;
+                        var edmElementType = ((IEdmCollectionType)odataPath.EdmType).ElementType;
                         var elementType = EdmLibHelpers.GetClrType(edmElementType, model);
-                        var queryableType = typeof (IQueryable<>);
+                        var queryableType = typeof(IQueryable<>);
                         returnType = queryableType.MakeGenericType(elementType);
                     }
                     else
