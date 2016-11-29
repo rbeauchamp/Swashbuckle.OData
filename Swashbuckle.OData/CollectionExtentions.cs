@@ -97,9 +97,9 @@ namespace Swashbuckle.OData
         {
             var nonNullSource = source ?? new List<T>();
 
-            return item == null 
-                ? nonNullSource 
-                : nonNullSource.Concat(new List<T> {item});
+            return item == null
+                ? nonNullSource
+                : nonNullSource.Concat(new List<T> { item });
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
@@ -23,9 +24,7 @@ namespace Swashbuckle.OData.Tests
 
             // Assert
             await response.ValidateSuccessAsync();
-
             await IsValidAgainstJsonSchemaAsync(response);
-
             await HasUniqueOperationIdsAsync(response);
         }
 
@@ -49,21 +48,24 @@ namespace Swashbuckle.OData.Tests
                 .ConcatEvenIfNull(options)
                 .GroupBy(operation => operation.operationId)
                 .All(grouping => grouping.Count() == 1)
-                .Should().BeTrue();
+                .Should()
+                .BeTrue();
         }
 
         private static async Task IsValidAgainstJsonSchemaAsync(HttpResponseMessage response)
         {
-            var swaggerJson = await response.Content.ReadAsStringAsync();
-
+            var outputDir = AppDomain.CurrentDomain.BaseDirectory;
             var resolver = new JSchemaPreloadedResolver();
-            resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText(@"schema-draft-v4.json"));
+            resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText($@"{outputDir}\schema-draft-v4.json"));
 
-            var swaggerSchema = File.ReadAllText(@"swagger-2.0-schema.json");
+            var swaggerSchema = File.ReadAllText($@"{outputDir}\swagger-2.0-schema.json");
             var schema = JSchema.Parse(swaggerSchema, resolver);
 
+            var swaggerJson = await response.Content.ReadAsStringAsync();
             var swaggerJObject = JObject.Parse(swaggerJson);
+
             IList<string> messages;
+
             var isValid = swaggerJObject.IsValid(schema, out messages);
             isValid.Should().BeTrue();
         }

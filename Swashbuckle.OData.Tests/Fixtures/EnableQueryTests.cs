@@ -28,6 +28,7 @@ namespace Swashbuckle.OData.Tests
             {
                 // Arrange
                 var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
                 // Verify that the OData route in the test controller is valid
                 var response = await httpClient.GetJsonAsync<ODataResponse<List<Product5>>>("/odata/Product5s/Default.Top10()");
                 response.Value.Should().NotBeNull();
@@ -40,17 +41,15 @@ namespace Swashbuckle.OData.Tests
                 PathItem pathItem;
                 swaggerDocument.paths.TryGetValue("/odata/Product5s/Default.Top10()", out pathItem);
                 pathItem.Should().NotBeNull();
-                pathItem.get.Should().NotBeNull();
+                pathItem?.get.Should().NotBeNull();
+                pathItem?.get.parameters.Should().NotBeNull();
 
-                pathItem.get.parameters.Should().NotBeNull();
                 var filterParameter = pathItem.get.parameters.SingleOrDefault(parameter => parameter.name == "$filter");
                 filterParameter.Should().NotBeNull();
-                filterParameter.description.Should().NotBeNullOrWhiteSpace();
-                filterParameter.type.ShouldBeEquivalentTo("string");
-                filterParameter.@in.ShouldBeEquivalentTo("query");
-
+                filterParameter?.description.Should().NotBeNullOrWhiteSpace();
+                filterParameter?.type.ShouldBeEquivalentTo("string");
+                filterParameter?.@in.ShouldBeEquivalentTo("query");
                 pathItem.get.parameters.Where(parameter => parameter.name.StartsWith("$")).Should().OnlyContain(parameter => parameter.required == false);
-
                 pathItem.get.parameters.Count(parameter => parameter.name.StartsWith("$")).Should().Be(7);
 
                 await ValidationUtils.ValidateSwaggerJson();
