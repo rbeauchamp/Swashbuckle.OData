@@ -28,6 +28,7 @@ namespace Swashbuckle.OData
             OperationFilters = swaggerProviderOptions.OperationFilters ?? new List<IOperationFilter>();
             DocumentFilters = swaggerProviderOptions.DocumentFilters ?? new List<IDocumentFilter>();
             ConflictingActionsResolver = swaggerProviderOptions.ConflictingActionsResolver;
+            ApplyFiltersToAllSchemas = swaggerProviderOptions.ApplyFiltersToAllSchemas;
         }
 
         public Func<ApiDescription, string, bool> VersionSupportResolver { get; private set; }
@@ -61,6 +62,8 @@ namespace Swashbuckle.OData
         public IEnumerable<IDocumentFilter> DocumentFilters { get; private set; }
 
         public Func<IEnumerable<ApiDescription>, ApiDescription> ConflictingActionsResolver { get; private set; }
+
+        public bool ApplyFiltersToAllSchemas { get; private set; }
 
         private static string DefaultSchemaIdSelector(Type type)
         {
