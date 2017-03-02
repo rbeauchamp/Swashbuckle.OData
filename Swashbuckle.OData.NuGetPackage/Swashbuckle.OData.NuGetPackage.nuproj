@@ -25,7 +25,7 @@
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Summary>
     <Description>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Description>
-    <ReleaseNotes>Updated to latest versions of ODataLib, Microsoft ASP.NET Web API 2.2 for OData v4.0, RESTier, and their dependencies.</ReleaseNotes>
+    <ReleaseNotes>Updated Swashbuckle.Core package version to fix some bugs and decrease newtonsoft Json version requirements.</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright © 2015 - 2016 Richard Beauchamp and the Swashbuckle.OData contributors</Copyright>
