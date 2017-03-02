@@ -19,7 +19,7 @@
   <Import Project="$(NuProjPath)\NuProj.props" Condition="Exists('$(NuProjPath)\NuProj.props')" />
   <PropertyGroup Label="Configuration">
     <Id>Swashbuckle.OData</Id>
-    <Version>3.0.0</Version>
+    <Version>3.1.0</Version>
     <Title>Swashbuckle.OData</Title>
     <Authors>Richard Beauchamp</Authors>
     <Owners>Richard Beauchamp</Owners>

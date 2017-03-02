@@ -23,7 +23,8 @@ namespace Swashbuckle.OData
             bool describeStringEnumsInCamelCase,
             IEnumerable<IOperationFilter> operationFilters,
             IEnumerable<IDocumentFilter> documentFilters,
-            Func<IEnumerable<ApiDescription>, ApiDescription> conflictingActionsResolver
+            Func<IEnumerable<ApiDescription>, ApiDescription> conflictingActionsResolver,
+            bool applyFiltersToAllSchemas
             )
         {
             VersionSupportResolver = versionSupportResolver;
@@ -42,6 +43,7 @@ namespace Swashbuckle.OData
             OperationFilters = operationFilters;
             DocumentFilters = documentFilters;
             ConflictingActionsResolver = conflictingActionsResolver;
+            ApplyFiltersToAllSchemas = applyFiltersToAllSchemas;
         }
 
         public Func<ApiDescription, string, bool> VersionSupportResolver { get; private set; }
@@ -75,5 +77,7 @@ namespace Swashbuckle.OData
         public IEnumerable<IDocumentFilter> DocumentFilters { get; private set; }
 
         public Func<IEnumerable<ApiDescription>, ApiDescription> ConflictingActionsResolver { get; private set; }
+
+        public bool ApplyFiltersToAllSchemas { get; private set; }
     }
 }

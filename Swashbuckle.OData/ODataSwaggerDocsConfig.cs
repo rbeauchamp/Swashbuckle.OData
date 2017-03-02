@@ -95,8 +95,8 @@ namespace Swashbuckle.OData
         internal SwashbuckleOptions GetSwashbuckleOptions()
         {
             AddGlobalDocumentFilters();
-            AddODataDocumentFilters();
-
+            AddODataDocumentFilters();  
+                  
             var swaggerProviderOptions = new SwaggerProviderOptions(
                 _swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string, bool>>("_versionSupportResolver"),
                 _swaggerDocsConfig.GetFieldValue<IEnumerable<string>>("_schemes"),
@@ -113,7 +113,8 @@ namespace Swashbuckle.OData
                 _swaggerDocsConfig.GetFieldValue<bool>("_describeStringEnumsInCamelCase"),
                 GetODataOperationFilters(),
                 GetODataDocumentFilters(),
-                _swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver")
+                _swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver"),
+                _swaggerDocsConfig.GetFieldValue<bool>("_applyFiltersToAllSchemas")
             );
 
             return new SwashbuckleOptions(swaggerProviderOptions);
