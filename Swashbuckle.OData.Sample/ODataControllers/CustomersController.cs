@@ -23,7 +23,7 @@ namespace SwashbuckleODataSample.ODataControllers
         /// </summary>
         [EnableQuery(PageSize = 5)]
         [SwaggerResponse(HttpStatusCode.OK, Type= typeof(ODataListResponse<Customer>))]
-        public async Task<IHttpActionResult> Get()
+        public async Task<IHttpActionResult> GetCustomers()
         {
             var customers = await _db.Customers.ToListAsync();
             return Ok(customers);

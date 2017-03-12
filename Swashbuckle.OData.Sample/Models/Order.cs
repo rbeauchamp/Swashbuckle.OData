@@ -18,8 +18,6 @@ namespace SwashbuckleODataSample.Models
        [ForeignKey("Customer")]
         public int CustomerId { get; set; }
 
-       /* [ForeignKey("CustomerId")]
-        [ActionOnDelete(EdmOnDeleteAction.Cascade)]*/
-       public virtual Customer Customer { get; }
+       public virtual Customer Customer { get; set; }
     }
 }
