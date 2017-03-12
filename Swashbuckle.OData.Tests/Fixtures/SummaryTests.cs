@@ -32,6 +32,8 @@ namespace Swashbuckle.OData.Tests
             XmlNode xmlGetCustomersSummaryNode = xmlCommentsDoc.SelectSingleNode(
                 "//member[contains(@name, 'CustomersController.GetCustomers')]/summary");
 
+            xmlGetCustomersSummaryNode.Should().NotBeNull("Method GetCustomers not found in customersController in the xml comments");
+
             var getCustomersSummaryText = xmlGetCustomersSummaryNode.InnerText.Trim();
             
             //var xmlSummaryText = " asdas ";
