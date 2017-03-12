@@ -191,7 +191,6 @@ namespace Swashbuckle.OData.Descriptions
                                 keyDefinitionAsType, 
                                 true);
             }
-
             return new PathItem
             {
                 get = new Operation()
@@ -199,9 +198,7 @@ namespace Swashbuckle.OData.Descriptions
                 .OperationId(entitySet.Name + "_GetById")
                 .Description("Returns the entity with the key from " + entitySet.Name)
                 .Tags(entitySet.Name)
-                .Parameters(keyParameters.DeepClone()
-                  .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
-                  .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false))
+                .Parameters(AddQueryOptionParametersForEntity(keyParameters.DeepClone()))
                 .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>().Response("200", "EntitySet " + entitySet.Name, entitySet.GetEntityType()).DefaultErrorResponse()),
 
@@ -226,7 +223,8 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameters(AddRoutePrefixParameters(oDataRoute))
                 .Responses(new Dictionary<string, Response>().Response("204", "Empty response").DefaultErrorResponse()),
 
-                delete = new Operation().Summary("Delete entity in EntitySet " + entitySet.Name)
+                delete = new Operation()
+                .Summary("Delete entity in EntitySet " + entitySet.Name)
                 .OperationId(entitySet.Name + "_DeleteById")
                 .Description("Delete entity in EntitySet " + entitySet.Name)
                 .Tags(entitySet.Name)

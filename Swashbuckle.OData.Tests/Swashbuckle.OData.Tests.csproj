@@ -152,6 +152,7 @@
     <Compile Include="Containment\ODataModels.cs" />
     <Compile Include="Containment\Program.cs" />
     <Compile Include="ContentType.cs" />
+    <Compile Include="Fixtures\SummaryTests.cs" />
     <Compile Include="Fixtures\ParameterTests\DecimalParameterAndResponseTests.cs" />
     <Compile Include="Fixtures\ModelSharedBetweenODataAndWebApiTests.cs" />
     <Compile Include="Fixtures\CustomRoutingConventionTests.cs" />

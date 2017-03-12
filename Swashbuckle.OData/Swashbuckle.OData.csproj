@@ -15,6 +15,10 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -173,9 +177,11 @@
       <HintPath>..\packages\Microsoft.AspNet.OData.6.0.0\lib\net45\System.Web.OData.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionExtentions.cs" />
+    <Compile Include="ODataListResponse.cs" />
     <Compile Include="ODataSwaggerDocsConfig.cs" />
     <Compile Include="Descriptions\ApiDescriptionExtensions.cs" />
     <Compile Include="Descriptions\ApiParameterDescriptionEqualityComparer.cs" />
@@ -241,7 +247,9 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -7,6 +7,10 @@ using System.Web.Http.Description;
 using System.Web.OData;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Repositories;
+using System.Data.Entity;
+using Swashbuckle.Swagger.Annotations;
+using Swashbuckle.OData;
+using System.Web.OData.Routing;
 
 namespace SwashbuckleODataSample.ODataControllers
 {
@@ -17,10 +21,12 @@ namespace SwashbuckleODataSample.ODataControllers
         /// <summary>
         /// Query customers
         /// </summary>
-        [EnableQuery]
-        public IQueryable<Customer> GetCustomers()
+        [EnableQuery(PageSize = 5)]
+        [SwaggerResponse(HttpStatusCode.OK, Type= typeof(ODataListResponse<Customer>))]
+        public async Task<IHttpActionResult> Get()
         {
-            return _db.Customers;
+            var customers = await _db.Customers.ToListAsync();
+            return Ok(customers);
         }
 
         /// <summary>
@@ -152,8 +158,7 @@ namespace SwashbuckleODataSample.ODataControllers
         [EnableQuery]
         public IQueryable<Order> GetOrders([FromODataUri] int key)
         {
-            return _db.Customers.Where(m => m.Id == key)
-                .SelectMany(m => m.Orders);
+            return _db.Orders.Where(o => o.CustomerId == key);
         }
 
         /// <summary>
