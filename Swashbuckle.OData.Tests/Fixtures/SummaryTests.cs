@@ -36,7 +36,6 @@ namespace Swashbuckle.OData.Tests
 
             var getCustomersSummaryText = xmlGetCustomersSummaryNode.InnerText.Trim();
             
-            //var xmlSummaryText = " asdas ";
             using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(CustomersController))))
             {   
                 // Arrange
@@ -67,6 +66,8 @@ namespace Swashbuckle.OData.Tests
 
             XmlNode xmlCustommerIdSummaryNode = xmlCommentsDoc.SelectSingleNode(
                 "//member[contains(@name, 'Models.Customer.Id')]/summary");
+
+            xmlCustommerIdSummaryNode.Should().NotBeNull("Id property not found in Customer model in the xml comments");
 
             var customerIdSummaryText = xmlCustommerIdSummaryNode.InnerText.Trim();
 
