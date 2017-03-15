@@ -4,6 +4,8 @@ using System.Web.Http.Dispatcher;
 using Owin;
 using Swashbuckle.Application;
 using SwashbuckleODataSample;
+using System.Reflection;
+using System.IO;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -39,6 +41,13 @@ namespace Swashbuckle.OData.Tests
                 // alternative implementation for ISwaggerProvider with the CustomProvider option.
                 //
                 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, config).Configure(odataSwaggerDocsConfig));
+
+                //Add the xml comments File
+                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                var commentsFileName = "SwashbuckleODataSample.XML";
+                var commentsFile = Path.Combine(baseDirectory, commentsFileName);
+                if (File.Exists(commentsFile))
+                     c.IncludeXmlComments(commentsFile);
 
                 // Apply test-specific configs
                 swaggerDocsConfig?.Invoke(c);

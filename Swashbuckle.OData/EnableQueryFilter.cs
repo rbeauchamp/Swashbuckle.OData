@@ -47,11 +47,40 @@ namespace Swashbuckle.OData
 
             Type returnType = httpActionDescriptor.ReturnType;
 
-            var responseTypeAttr = httpActionDescriptor.GetCustomAttributes<ResponseTypeAttribute>().FirstOrDefault();
-            if (responseTypeAttr != null)
-                returnType = responseTypeAttr.ResponseType;
+            //Look if it has set a response type in the attributes
+            var swgResponseTypeAttr = httpActionDescriptor.GetCustomAttributes<Swagger.Annotations.SwaggerResponseAttribute>()?.FirstOrDefault();
+            if (swgResponseTypeAttr != null)
+                returnType = swgResponseTypeAttr.Type;
+            else
+            {
+                var responseTypeAttr = httpActionDescriptor.GetCustomAttributes<ResponseTypeAttribute>()?.FirstOrDefault();
+                if (responseTypeAttr != null)
+                    returnType = responseTypeAttr.ResponseType;
+            }
+
+            returnType = GetValueTypeFromODataResponseOrDescendants(returnType);
 
             return returnType.IsCollection();
+        }
+
+        /// <summary>
+        /// if <paramref name="type"/> or one of its parents is an implementation of <see cref="Swashbuckle.OData.ODataResponse{TValue}"/>
+        /// returns TValue, otherwise, return type
+        /// </summary>
+        /// <param name="type">type to be evaluated</param>
+        /// <returns>TValue or returntype</returns>
+        private static Type GetValueTypeFromODataResponseOrDescendants(Type returnType)
+        {
+            var type = returnType;
+
+            while (type != null && type != typeof(object))
+            {
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ODataResponse<>))                
+                    return type.GetGenericArguments().First();                    
+                                
+                type = type.BaseType;
+            }
+            return returnType;
         }
 
 

@@ -9,6 +9,7 @@ using System.Web.OData;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.Repositories;
 using SwashbuckleODataSample.Utils;
+using System.Collections.Generic;
 
 namespace SwashbuckleODataSample.ODataControllers
 {
@@ -20,10 +21,21 @@ namespace SwashbuckleODataSample.ODataControllers
         /// Query orders
         /// </summary>
         [EnableQuery]
-        public IQueryable<Order> GetOrders()
+        public IQueryable<Order> Get()
         {
             return _db.Orders;
         }
+
+
+        /// <summary>
+        /// Query orders by Customer Id
+        /// </summary>
+        [EnableQuery]
+        public ICollection<Order> Get([FromODataUri]int customerId)
+        {
+            return _db.Orders.Where(o => o.CustomerId == customerId).ToList();
+        }
+
 
         /// <summary>
         /// An example of a custom route. Create a new order for the customer with the given id
@@ -54,7 +66,7 @@ namespace SwashbuckleODataSample.ODataControllers
         [EnableQuery]
         public SingleResult<Order> GetOrder([FromODataUri] Guid key)
         {
-            return SingleResult.Create(_db.Orders.Where(order => order.OrderId == key));
+            return SingleResult.Create(_db.Orders.Where(order => order.OrderId ==key));
         }
 
         /// <summary>
@@ -139,8 +151,11 @@ namespace SwashbuckleODataSample.ODataControllers
         [EnableQuery]
         public SingleResult<Customer> GetCustomer([FromODataUri] Guid key)
         {
-            return SingleResult.Create(_db.Orders.Where(m => m.OrderId == key)
-                .Select(m => m.Customer));
+            var custId = _db.Orders.Where(m => m.OrderId == key)
+                            .Select(m => m.CustomerId).First();
+            return SingleResult.Create(_db.Customers.Where(c => c.Id == custId));
+            //return SingleResult.Create(_db.Orders.Where(m => m.OrderId == key)
+            //    .Select(m => m.Customer));
         }
 
         protected override void Dispose(bool disposing)

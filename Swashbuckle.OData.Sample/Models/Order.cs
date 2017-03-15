@@ -15,10 +15,9 @@ namespace SwashbuckleODataSample.Models
 
         public double UnitPrice { get; set; }
 
+       [ForeignKey("Customer")]
         public int CustomerId { get; set; }
 
-        [ForeignKey("CustomerId")]
-        [ActionOnDelete(EdmOnDeleteAction.Cascade)]
-        public Customer Customer { get; set; }
+       public virtual Customer Customer { get; set; }
     }
 }

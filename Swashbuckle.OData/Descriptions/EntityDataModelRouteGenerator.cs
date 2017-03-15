@@ -49,7 +49,8 @@ namespace Swashbuckle.OData.Descriptions
             return oDataRoute.GetEdmModel()
                 .EntityContainer
                 .EntitySets()?
-                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntitySet(entitySet), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntitySet(entitySet, oDataRoute)));
+                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntitySet(entitySet), oDataRoute, 
+                    ODataSwaggerUtilities.CreateSwaggerPathForEntitySet(entitySet, oDataRoute)));
         }
 
         private static IEnumerable<SwaggerRoute> GenerateEntityRoutes(ODataRoute oDataRoute)
@@ -60,7 +61,8 @@ namespace Swashbuckle.OData.Descriptions
             return oDataRoute.GetEdmModel()
                 .EntityContainer
                 .EntitySets()?
-                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntity(entitySet, oDataRoute), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet, oDataRoute)));
+                .Select(entitySet => new SwaggerRoute(ODataSwaggerUtilities.GetPathForEntity(entitySet, oDataRoute), oDataRoute, 
+                    ODataSwaggerUtilities.CreateSwaggerPathForEntity(entitySet, oDataRoute)));
         }
 
         private static IEnumerable<SwaggerRoute> GenerateOperationImportRoutes(ODataRoute oDataRoute)
@@ -71,7 +73,8 @@ namespace Swashbuckle.OData.Descriptions
             return oDataRoute.GetEdmModel()
                 .EntityContainer
                 .OperationImports()?
-                .Select(operationImport => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationImport(operationImport), oDataRoute, ODataSwaggerUtilities.CreateSwaggerPathForOperationImport(operationImport, oDataRoute)));
+                .Select(operationImport => new SwaggerRoute(ODataSwaggerUtilities.GetPathForOperationImport(operationImport), oDataRoute, 
+                    ODataSwaggerUtilities.CreateSwaggerPathForOperationImport(operationImport, oDataRoute)));
         }
 
         /// <summary>

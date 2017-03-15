@@ -11,10 +11,13 @@ namespace Swashbuckle.OData.Descriptions
         public static ResponseDescription CreateResponseDescription(this HttpActionDescriptor actionDescriptor)
         {
             Contract.Requires(actionDescriptor != null);
-
-            var responseTypeAttribute = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>();
-            var responseType = responseTypeAttribute?.Select(attribute => attribute.ResponseType).FirstOrDefault();
-
+                        
+            var responseType = actionDescriptor.GetCustomAttributes<Swagger.Annotations.SwaggerResponseAttribute>()?
+                .Select(attribute => attribute.Type).FirstOrDefault();
+            if (responseType == null)            
+                responseType = actionDescriptor.GetCustomAttributes<ResponseTypeAttribute>()?
+                    .Select(attribute => attribute.ResponseType).FirstOrDefault();
+            
             return new ResponseDescription
             {
                 DeclaredType = actionDescriptor.ReturnType,

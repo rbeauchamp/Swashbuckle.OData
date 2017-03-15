@@ -176,7 +176,7 @@ namespace SwashbuckleODataSample
                     {
                         // Set this flag to include navigation properties in your entity swagger models
                         //
-                        //odataConfig.IncludeNavigationProperties();
+                        odataConfig.IncludeNavigationProperties();
                     }));
             })
                 .EnableSwaggerUi(c =>

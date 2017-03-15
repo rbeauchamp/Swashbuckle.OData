@@ -7,6 +7,7 @@ using System.Web.Http.Description;
 using Swashbuckle.Application;
 using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
+using System.Xml.XPath;
 
 namespace Swashbuckle.OData
 {
@@ -95,8 +96,8 @@ namespace Swashbuckle.OData
         internal SwashbuckleOptions GetSwashbuckleOptions()
         {
             AddGlobalDocumentFilters();
-            AddODataDocumentFilters();  
-                  
+            AddODataDocumentFilters();                    
+
             var swaggerProviderOptions = new SwaggerProviderOptions(
                 _swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string, bool>>("_versionSupportResolver"),
                 _swaggerDocsConfig.GetFieldValue<IEnumerable<string>>("_schemes"),
@@ -105,8 +106,8 @@ namespace Swashbuckle.OData
                 _swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string>>("_groupingKeySelector"),
                 _swaggerDocsConfig.GetFieldValue<IComparer<string>>("_groupingKeyComparer"),
                 GetODataCustomSchemaMappings(),
-                _swaggerDocsConfig.GetFieldValue<IList<Func<ISchemaFilter>>>("_schemaFilters", true).Select(factory => factory()),
-                _swaggerDocsConfig.GetFieldValue<IList<Func<IModelFilter>>>("_modelFilters", true).Select(factory => factory()),
+                _swaggerDocsConfig.GetFieldValue<IEnumerable<Func<ISchemaFilter>>>("_schemaFilters", true).Select(factory => factory()),
+                _swaggerDocsConfig.GetFieldValue<IList<Func<IModelFilter>>>("_modelFilters", true).Select(factory => factory()).ToList(),
                 _swaggerDocsConfig.GetFieldValue<bool>("_ignoreObsoleteProperties"),
                 _swaggerDocsConfig.GetFieldValue<Func<Type, string>>("_schemaIdSelector"),
                 _swaggerDocsConfig.GetFieldValue<bool>("_describeAllEnumsAsStrings"),
@@ -114,8 +115,9 @@ namespace Swashbuckle.OData
                 GetODataOperationFilters(),
                 GetODataDocumentFilters(),
                 _swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver"),
-                _swaggerDocsConfig.GetFieldValue<bool>("_applyFiltersToAllSchemas")
-            );
+                _swaggerDocsConfig.GetFieldValue<bool>("_applyFiltersToAllSchemas"),
+                _swaggerDocsConfig.GetFieldValue<IEnumerable<Func<XPathDocument>>>("_xmlDocFactories").Select(factory=>factory).ToList()
+            );            
 
             return new SwashbuckleOptions(swaggerProviderOptions);
         }
@@ -133,11 +135,11 @@ namespace Swashbuckle.OData
         /// <summary>
         /// Gets operation filters that will only be applied to OData operations.
         /// </summary>
-        private IEnumerable<IOperationFilter> GetODataOperationFilters()
+        private IList<IOperationFilter> GetODataOperationFilters()
         {
             return _swaggerDocsConfig.GetFieldValue<IList<Func<IOperationFilter>>>("_operationFilters", true)
                 .Select(factory => factory())
-                .Concat(new EnableQueryFilter());
+                .Concat(new EnableQueryFilter()).ToList();
         }
 
         /// <summary>
@@ -156,7 +158,7 @@ namespace Swashbuckle.OData
         private void AddGlobalDocumentFilters()
         {
             _swaggerDocsConfig.DocumentFilter<EnsureUniqueOperationIdsFilter>();
-        }
+        }  
 
         /// <summary>
         /// Gets the API versions. I'd rather not use reflection because the implementation may change, but can't find a better way.
