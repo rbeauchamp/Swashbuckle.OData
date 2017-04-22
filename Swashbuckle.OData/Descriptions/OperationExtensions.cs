@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Flurl;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
@@ -30,7 +29,7 @@ namespace Swashbuckle.OData.Descriptions
 
                 return new UriTemplate(pathTemplate).BindByName(prefix, parameters).ToString();
             }
-            return serviceRoot.AppendPathSegment(pathTemplate);
+            return serviceRoot.AppendUriSegment(pathTemplate);
         }
 
         public static IList<Parameter> Parameters(this Operation operation)
