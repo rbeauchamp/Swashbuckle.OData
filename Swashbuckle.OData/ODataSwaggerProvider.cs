@@ -9,6 +9,7 @@ using Microsoft.OData.Edm;
 using Swashbuckle.Application;
 using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
+using System.Collections.Concurrent;
 
 namespace Swashbuckle.OData
 {
@@ -16,6 +17,9 @@ namespace Swashbuckle.OData
     {
         private readonly ISwaggerProvider _defaultProvider;
         private readonly ODataSwaggerDocsConfig _config;
+
+        private static ConcurrentDictionary<string, Lazy<SwaggerDocument>> _cache =
+            new ConcurrentDictionary<string, Lazy<SwaggerDocument>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSwaggerProvider" /> class.
@@ -35,6 +39,24 @@ namespace Swashbuckle.OData
         }
 
         public SwaggerDocument GetSwagger(string rootUrl, string apiVersion)
+        {
+            if(_config.enableCache)
+            {
+                var cacheKey = string.Format("{0}_{1}", rootUrl, apiVersion);
+                var SwaggerDoc = _cache.GetOrAdd(cacheKey, (key) =>
+                        //making GetOrAdd operation thread-safe
+                        new Lazy<SwaggerDocument>(() => {
+                        //Getting swagger
+                        return GenerateSwagger(rootUrl, apiVersion);
+                        })
+                    );
+                return SwaggerDoc.Value;
+            }
+            else
+                return GenerateSwagger(rootUrl, apiVersion); 
+        }
+
+        private SwaggerDocument GenerateSwagger(string rootUrl, string apiVersion)
         {
             var swashbuckleOptions = _config.GetSwashbuckleOptions();
 
