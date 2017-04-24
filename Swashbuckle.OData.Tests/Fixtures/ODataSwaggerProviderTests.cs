@@ -145,9 +145,36 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
-        private static void Configuration(IAppBuilder appBuilder, Type targetController = null, Action<SwaggerDocsConfig> swaggerDocsConfig = null)
+        /// <summary>
+        /// Test to check if the cached swagger documents have the same value as the non-cached and to check if they are valid
+        /// </summary>
+        /// <returns></returns>
+        [Test]
+        public async Task It_supports_caching_swagger_document()
         {
-            var config = appBuilder.GetStandardHttpConfig(swaggerDocsConfig, null, targetController);
+            Action<ODataSwaggerDocsConfig> config = c => c.EnableSwaggerRequestCaching();
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(CustomersController), 
+                odataSwaggerDocsConfig: config)))
+            {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+
+                // First request (Non-cached)
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                //Cached request
+                var swaggerDocument2 = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                swaggerDocument.ShouldBeEquivalentTo(swaggerDocument2);
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
+
+        private static void Configuration(IAppBuilder appBuilder, Type targetController = null, Action<SwaggerDocsConfig> swaggerDocsConfig = null, Action<ODataSwaggerDocsConfig> odataSwaggerDocsConfig = null)
+        {
+            var config = appBuilder.GetStandardHttpConfig(swaggerDocsConfig, odataSwaggerDocsConfig, targetController);
 
             var controllerSelector = new UnitTestODataVersionControllerSelector(config, targetController);
             config.Services.Replace(typeof(IHttpControllerSelector), controllerSelector);
