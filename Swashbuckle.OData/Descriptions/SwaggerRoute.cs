@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 using System.Web;
 using System.Web.OData.Routing;
-using Flurl;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
@@ -44,7 +43,7 @@ namespace Swashbuckle.OData.Descriptions
             get
             {
                 Contract.Ensures(!string.IsNullOrWhiteSpace(Contract.Result<string>()));
-                return HttpUtility.UrlDecode(ODataRoute.GetRoutePrefix().AppendPathSegment(_template));
+                return HttpUtility.UrlDecode(ODataRoute.GetRoutePrefix().AppendUriSegment(_template));
             }
         }
 
