@@ -33,6 +33,18 @@ c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c,
                     }));
 ```
 
+### Enable caching of the swagger requests ###
+
+To enable the built-in caché funcionality you must set this configuration:
+
+```csharp
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, GlobalConfiguration.Configuration).Configure(odataConfig =>
+                    {
+                        // Enable Caché for swagger doc requests
+                        odataConfig.EnableSwaggerRequestCaching();
+                    }));
+```
+
 ### Custom Swagger Routes ###
 
 The following snippet demonstrates how to configure a custom swagger route such that it will appear in the Swagger UI:
