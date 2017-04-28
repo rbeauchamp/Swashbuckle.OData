@@ -16,6 +16,7 @@ namespace Swashbuckle.OData
         private readonly SwaggerDocsConfig _swaggerDocsConfig;
         private readonly List<Func<IDocumentFilter>> _documentFilters;
         private bool _includeNavigationProperties;
+        internal bool enableCache;
 
         internal ODataSwaggerDocsConfig(SwaggerDocsConfig swaggerDocsConfig, HttpConfiguration httpConfiguration)
         {
@@ -24,8 +25,9 @@ namespace Swashbuckle.OData
 
             Configuration = httpConfiguration;
             _swaggerDocsConfig = swaggerDocsConfig;
-            _includeNavigationProperties = false;
+            _includeNavigationProperties = false;            
             _documentFilters = new List<Func<IDocumentFilter>>();
+            enableCache = false;
         }
 
         internal void DocumentFilter<TFilter>() where TFilter : IDocumentFilter, new()
@@ -171,6 +173,11 @@ namespace Swashbuckle.OData
         public void IncludeNavigationProperties()
         {
             _includeNavigationProperties = true;
+        }
+
+        public void EnableSwaggerRequestCaching()
+        {
+            enableCache = true;
         }
     }
 }
