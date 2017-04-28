@@ -14,7 +14,9 @@ namespace System.Web.OData
 {
     internal static class TypeHelper
     {
-        public static Type ToNullable(this Type t)
+        private static IAssembliesResolver _assembliesResolver =  new DefaultAssembliesResolver();
+
+        internal static Type ToNullable(this Type t)
         {
             Contract.Requires(t != null);
 
@@ -26,7 +28,7 @@ namespace System.Web.OData
         }
 
         // Gets the collection element type.
-        public static Type GetInnerElementType(this Type type)
+        internal static Type GetInnerElementType(this Type type)
         {
             Contract.Requires(type != null);
 
@@ -37,7 +39,7 @@ namespace System.Web.OData
             return elementType;
         }
 
-        public static bool IsCollection(this Type type)
+        internal static bool IsCollection(this Type type)
         {
             Contract.Requires(type != null);
 
@@ -45,7 +47,7 @@ namespace System.Web.OData
             return type.IsCollection(out elementType);
         }
 
-        public static bool IsCollection(this Type type, out Type elementType)
+        internal static bool IsCollection(this Type type, out Type elementType)
         {
             Contract.Requires(type != null);
             Contract.Ensures(Contract.ValueAtReturn(out elementType) != null);
@@ -74,19 +76,28 @@ namespace System.Web.OData
             return false;
         }
 
-        public static Type GetUnderlyingTypeOrSelf(Type type)
+        internal static Type GetUnderlyingTypeOrSelf(Type type)
         {
             Contract.Requires(type != null);
 
             return Nullable.GetUnderlyingType(type) ?? type;
         }
 
-        public static bool IsEnum(Type type)
+        internal static bool IsEnum(Type type)
         {
             Contract.Requires(type != null);
 
             var underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(type);
             return underlyingTypeOrSelf.IsEnum;
+        }
+
+        /// <summary>
+        /// Set the custom Assemblies Resolver to be used instead of using the default one
+        /// </summary>
+        /// <param name="assembliesResolver"></param>
+        internal static void SetAssembliesResolver(IAssembliesResolver assembliesResolver)
+        {
+            _assembliesResolver = assembliesResolver;
         }
 
         /// <summary>
@@ -165,14 +176,12 @@ namespace System.Web.OData
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Catching all exceptions in this case is the right to do.")]
         // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
-        internal static IEnumerable<Type> GetLoadedTypes(IAssembliesResolver assembliesResolver)
+        internal static IEnumerable<Type> GetLoadedTypes()
         {
-            Contract.Requires(assembliesResolver != null);
-
             var result = new List<Type>();
 
             // Go through all assemblies referenced by the application and search for types matching a predicate
-            var assemblies = assembliesResolver.GetAssemblies();
+            var assemblies = _assembliesResolver.GetAssemblies();
             Contract.Assume(assemblies != null);
             foreach (var assembly in assemblies)
             {
@@ -230,12 +239,9 @@ namespace System.Web.OData
         /// <returns>
         /// The <see cref="Type"/> found; null if not found.
         /// </returns>
-        public static Type FindType(string fullName)
+        internal static Type FindType(string fullName)
         {
-            return
-                AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => !a.IsDynamic)
-                    .SelectMany(a => a.GetTypes())
+            return GetLoadedTypes()
                     .First(t => t.FullName.Equals(fullName));
         }
     }

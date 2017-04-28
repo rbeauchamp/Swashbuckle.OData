@@ -8,6 +8,7 @@ using Swashbuckle.Application;
 using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
 using System.Xml.XPath;
+using System.Web.Http.Dispatcher;
 
 namespace Swashbuckle.OData
 {
@@ -169,15 +170,29 @@ namespace Swashbuckle.OData
         {
             return _swaggerDocsConfig.GetFieldValue<VersionInfoBuilder>("_versionInfoBuilder", true).Build();
         }
-
+        /// <summary>
+        /// Include the navigation properties (get related entities in the models)
+        /// </summary>
         public void IncludeNavigationProperties()
         {
             _includeNavigationProperties = true;
         }
 
+        /// <summary>
+        /// Enable Swagger built-in Cache
+        /// </summary>
         public void EnableSwaggerRequestCaching()
         {
             enableCache = true;
+        }
+
+        /// <summary>
+        /// Set a custom assembliesResolver to get the assemblies from where the types are going to be loaded
+        /// </summary>
+        /// <param name="assembliesResolver">custom assemblies resolver.</param>
+        public void SetAssembliesResolver(IAssembliesResolver assembliesResolver)
+        {
+            System.Web.OData.TypeHelper.SetAssembliesResolver(assembliesResolver);
         }
     }
 }
