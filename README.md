@@ -33,14 +33,14 @@ c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c,
                     }));
 ```
 
-### Enable caching of the swagger requests ###
+### Enable caching of swagger requests ###
 
-To enable the built-in caché funcionality you must set this configuration:
+To enable the built-in cache functionality you must set this configuration:
 
 ```csharp
 c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, GlobalConfiguration.Configuration).Configure(odataConfig =>
                     {
-                        // Enable Caché for swagger doc requests
+                        // Enable Cache for swagger doc requests
                         odataConfig.EnableSwaggerRequestCaching();
                     }));
 ```
