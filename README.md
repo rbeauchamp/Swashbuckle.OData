@@ -45,6 +45,18 @@ c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c,
                     }));
 ```
 
+### Assemblies Resolver dependency injection for OData Models ###
+
+Configuration example to inject your own [IAssembliesResolver](https://msdn.microsoft.com/en-us/library/system.web.http.dispatcher.iassembliesresolver(v=vs.118).aspx) instead of using [DefaultAssembliesResolver](https://msdn.microsoft.com/en-us/library/system.web.http.dispatcher.defaultassembliesresolver(v=vs.118).aspx):
+
+```csharp
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, GlobalConfiguration.Configuration).Configure(odataConfig =>
+                    {
+                        //Set custom AssembliesResolver
+                        odataConfig.SetAssembliesResolver(new CustomAssembliesResolver());
+                    }));
+```
+
 ### Custom Swagger Routes ###
 
 The following snippet demonstrates how to configure a custom swagger route such that it will appear in the Swagger UI:
