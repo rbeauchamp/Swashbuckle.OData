@@ -76,7 +76,7 @@ namespace Swashbuckle.OData.Tests
                 // Assert
                 PathItem pathItem;
                 swaggerDocument.paths.TryGetValue("/odata/Customers", out pathItem);
-                pathItem.get.parameters.Where(parameter => parameter.name.StartsWith("$")).Should().HaveCount(7);
+                pathItem.get.parameters.Where(parameter => parameter.name.StartsWith("$")).Should().HaveCount(8);
 
                 await ValidationUtils.ValidateSwaggerJson();
             }
