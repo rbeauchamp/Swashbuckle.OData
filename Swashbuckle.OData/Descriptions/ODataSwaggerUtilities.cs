@@ -141,6 +141,7 @@ namespace Swashbuckle.OData.Descriptions
                 .Parameter("$expand", "query", "Expands related entities inline.", "string", false)
                 .Parameter("$filter", "query", "Filters the results, based on a Boolean condition.", "string", false)
                 .Parameter("$select", "query", "Selects which properties to include in the response.", "string", false)
+                .Parameter("$apply", "query", "Aggregates the results according to one or more transformations.", "string", false)
                 .Parameter("$orderby", "query", "Sorts the results.", "string", false)
                 .Parameter("$top", "query", "Returns only the first n results.", "integer", false, "int32")
                 .Parameter("$skip", "query", "Skips the first n results.", "integer", false, "int32")
