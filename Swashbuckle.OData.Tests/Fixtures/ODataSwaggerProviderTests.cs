@@ -14,6 +14,8 @@ using SwashbuckleODataSample;
 using SwashbuckleODataSample.ApiControllers;
 using SwashbuckleODataSample.Models;
 using SwashbuckleODataSample.ODataControllers;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -161,16 +163,59 @@ namespace Swashbuckle.OData.Tests
 
                 // First request (Non-cached)
                 var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+                swaggerDocument.Should().NotBeNull();
 
                 //Cached request
                 var swaggerDocument2 = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+                swaggerDocument2.Should().NotBeNull();
 
                 swaggerDocument.ShouldBeEquivalentTo(swaggerDocument2);
 
                 await ValidationUtils.ValidateSwaggerJson();
-            }
+
+            }   
         }
 
+        /// <summary>
+        /// Test to check if the custom assemblies resolver injection works
+        /// </summary>
+        /// <returns></returns>
+        [Test]
+        public async Task It_supports_a_custom_assemblies_resolver()
+        {
+            SwaggerDocument customAssembliesResolverSwaggerDoc;
+            SwaggerDocument defaultAssembliesResolverSwaggerDoc;
+
+            Action<ODataSwaggerDocsConfig> config = c => c.SetAssembliesResolver(new TestAssembliesResolver());
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => 
+                Configuration(appBuilder,odataSwaggerDocsConfig: config)))
+            {                
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);                                
+                customAssembliesResolverSwaggerDoc = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+                customAssembliesResolverSwaggerDoc.Should().NotBeNull();
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+
+            using (WebApp.Start(HttpClientUtils.BaseAddress, builder => Configuration(builder)))
+            {
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+                defaultAssembliesResolverSwaggerDoc = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+                customAssembliesResolverSwaggerDoc.Should().NotBeNull();                
+            }
+
+            customAssembliesResolverSwaggerDoc.ShouldBeEquivalentTo(defaultAssembliesResolverSwaggerDoc);
+            
+        }
+
+        private class TestAssembliesResolver : DefaultAssembliesResolver
+        {
+            public override ICollection<Assembly> GetAssemblies()
+            {
+                ICollection<Assembly> baseAssemblies = base.GetAssemblies();
+                return baseAssemblies;
+            }        
+        }
 
         private static void Configuration(IAppBuilder appBuilder, Type targetController = null, Action<SwaggerDocsConfig> swaggerDocsConfig = null, Action<ODataSwaggerDocsConfig> odataSwaggerDocsConfig = null)
         {
@@ -216,5 +261,7 @@ namespace Swashbuckle.OData.Tests
             builder.EntitySet<Customer>("FakeCustomers");
             return builder.GetEdmModel();
         }
+        
     }
+    
 }

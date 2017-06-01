@@ -178,8 +178,11 @@ namespace SwashbuckleODataSample
                         //
                         odataConfig.IncludeNavigationProperties();
 
-                        // Enable Caché for swagger doc requests
-                        odataConfig.EnableSwaggerRequestCaching();
+                        // Enable Cache for swagger doc requests
+                        odataConfig.EnableSwaggerRequestCaching();                        
+
+                        //Set custom AssembliesResolver
+                        odataConfig.SetAssembliesResolver(new Utils.CustomAssembliesResolver());
                     }));
             })
                 .EnableSwaggerUi(c =>
