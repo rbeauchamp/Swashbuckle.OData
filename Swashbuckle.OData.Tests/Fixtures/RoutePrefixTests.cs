@@ -37,6 +37,7 @@ namespace Swashbuckle.OData.Tests
 
         [TestCase("/Pins")]
         [TestCase("/Pins({key})")]
+        [TestCase("/Pins({key})/Default.Archive()")]
         [TestCase("/Pins/Default.Archived()")]
         [TestCase("/Foo()")]
         public async Task It_handles_an_odata_route_prefix_attribute(string path)
@@ -75,6 +76,8 @@ namespace Swashbuckle.OData.Tests
 
             builder.Function("Foo").Returns<int>();
 
+            builder.EntityType<Pin>().Function("Archive").Returns<Pin>();
+
             builder.EntityType<Pin>().Collection.Function("Archived").ReturnsCollection<Pin>();
 
             return builder.GetEdmModel();
@@ -112,6 +115,12 @@ namespace Swashbuckle.OData.Tests
         [EnableQuery]
         [ODataRoute("({key})")]
         public SingleResult<Pin> GetPin([FromODataUri] long key)
+        {
+            return SingleResult.Create(Enumerable.Empty<Pin>().AsQueryable());
+        }
+
+        [ODataRoute("({key})/Default.Archive")]
+        public SingleResult<Pin> GetArchive([FromODataUri] long key)
         {
             return SingleResult.Create(Enumerable.Empty<Pin>().AsQueryable());
         }
