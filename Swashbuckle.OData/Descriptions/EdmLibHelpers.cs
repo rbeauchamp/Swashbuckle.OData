@@ -6,7 +6,6 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Web.Http.Dispatcher;
 using Microsoft.OData.Edm;
 using Microsoft.Spatial;
 
@@ -14,10 +13,8 @@ namespace System.Web.OData.Formatter
 {
     internal static class EdmLibHelpers
     {
-        private static readonly EdmCoreModel CoreModel = EdmCoreModel.Instance;
-
-        private static readonly IAssembliesResolver DefaultAssemblyResolver = new DefaultAssembliesResolver();
-
+        private static readonly EdmCoreModel CoreModel = EdmCoreModel.Instance;        
+                
         private static readonly Dictionary<Type, IEdmPrimitiveType> BuiltInTypesMapping = new[]
         {
             new KeyValuePair<Type, IEdmPrimitiveType>(typeof (string), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
@@ -215,14 +212,8 @@ namespace System.Web.OData.Formatter
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)
         {
-            return GetClrType(edmTypeReference, edmModel, DefaultAssemblyResolver);
-        }
-
-        public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
-        {
             Contract.Requires(edmTypeReference != null);
             Contract.Requires(edmModel != null);
-            Contract.Requires(assembliesResolver != null);
 
             var primitiveClrType = BuiltInTypesMapping.Where(kvp => edmTypeReference.GetDefinition().IsEquivalentTo(kvp.Value) && (!edmTypeReference.IsNullable || IsNullable(kvp.Key))).Select(kvp => kvp.Key).FirstOrDefault();
 
@@ -232,7 +223,7 @@ namespace System.Web.OData.Formatter
             }
             var edmType = edmTypeReference.GetDefinition();
             Contract.Assume(edmType is IEdmSchemaType);
-            var clrType = GetClrType(edmType, edmModel, assembliesResolver);
+            var clrType = GetClrType(edmType, edmModel);
             if (clrType != null && clrType.IsEnum && edmTypeReference.IsNullable)
             {
                 return clrType.ToNullable();
@@ -241,11 +232,10 @@ namespace System.Web.OData.Formatter
             return clrType;
         }
 
-        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IAssembliesResolver assembliesResolver)
+        public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
         {
             Contract.Requires(edmType is IEdmSchemaType);
             Contract.Requires(edmModel != null);
-            Contract.Requires(assembliesResolver != null);
 
             var edmSchemaType = (IEdmSchemaType) edmType;
 
@@ -256,7 +246,7 @@ namespace System.Web.OData.Formatter
             }
 
             var typeName = edmSchemaType.FullName();
-            var matchingTypes = GetMatchingTypes(typeName, assembliesResolver);
+            var matchingTypes = GetMatchingTypes(typeName);
 
             var matchingTypesList = matchingTypes as IList<Type> ?? matchingTypes.ToList();
             if (matchingTypesList.Count > 1)
@@ -321,12 +311,10 @@ namespace System.Web.OData.Formatter
             Func<Type, bool> matchesInterface = t => t.IsGenericType && t.GetGenericTypeDefinition() == interfaceType;
             return matchesInterface(queryType) ? queryType : queryType.GetInterfaces().FirstOrDefault(matchesInterface);
         }
-
-        private static IEnumerable<Type> GetMatchingTypes(string edmFullName, IAssembliesResolver assembliesResolver)
-        {
-            Contract.Requires(assembliesResolver != null);
-
-            return TypeHelper.GetLoadedTypes(assembliesResolver).Where(t => t.IsPublic && t.EdmFullName() == edmFullName);
+        
+        private static IEnumerable<Type> GetMatchingTypes(string edmFullName)
+        {   
+            return TypeHelper.GetLoadedTypes().Where(t => t.IsPublic && t.EdmFullName() == edmFullName);
         }
 
         // TODO (workitem 336): Support nested types and anonymous types.

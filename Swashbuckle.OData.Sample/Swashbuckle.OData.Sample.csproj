@@ -182,6 +182,7 @@
     <Compile Include="Repositories\SwashbuckleODataContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\TestDbSet.cs" />
+    <Compile Include="Utils\CustomAssembliesResolver.cs" />
     <Compile Include="Utils\SequentialGuidGenerator.cs" />
     <Compile Include="Versioning\ModelValidationFilterAttribute.cs" />
     <Compile Include="Versioning\ODataHelper.cs" />

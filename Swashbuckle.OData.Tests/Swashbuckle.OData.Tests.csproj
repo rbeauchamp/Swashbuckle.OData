@@ -210,8 +210,10 @@
     <Compile Include="ValidationUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <Content Include="schema-draft-v4.json">
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <Contentontent Include="schema-draft-v4.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="swagger-2.0-schema.json">
