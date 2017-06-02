@@ -213,7 +213,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <Contentontent Include="schema-draft-v4.json">
+    <Content Include="schema-draft-v4.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="swagger-2.0-schema.json">
