@@ -25,7 +25,7 @@
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Summary>
     <Description>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Description>
-    <ReleaseNotes>Enable assemblies resolver injection.</ReleaseNotes>
+    <ReleaseNotes>Upgrade everything to the latest NuGet packages, (Including OData 7.2, which supports .NET Standard). Fix bug in Restier controllers where it SwaggerRouteStrategy did not account for unbounded functions. Temporarily replace Microsoft's Restier NuGets with AdvancedREI's newer fork (tests only). Fix unit tests that were relying on relative mapping instead of using absolute locations. Temporarily disables runtime code contracts (causing issues in IIS10). Incremented the major build on the NuGet package (because OData 7.2 may have breaking changes). Added support for the $apply entity set option in OData v4 (#147)</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright © 2015 - 2017 Richard Beauchamp and the Swashbuckle.OData contributors</Copyright>
