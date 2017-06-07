@@ -8,6 +8,7 @@ using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Swashbuckle.Swagger;
+using System.Reflection;
 
 namespace Swashbuckle.OData.Tests
 {
@@ -55,11 +56,13 @@ namespace Swashbuckle.OData.Tests
         private static async Task IsValidAgainstJsonSchemaAsync(HttpResponseMessage response)
         {
             var swaggerJson = await response.Content.ReadAsStringAsync();
+            var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
 
             var resolver = new JSchemaPreloadedResolver();
-            resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText(@"schema-draft-v4.json"));
+            resolver.Add(new Uri("http://json-schema.org/draft-04/schema"), File.ReadAllText(Path.Combine(dir, @"../../schema-draft-v4.json")));
 
-            var swaggerSchema = File.ReadAllText(@"swagger-2.0-schema.json");
+            var swaggerSchema = File.ReadAllText(Path.Combine(dir, @"../../swagger-2.0-schema.json"));
             var schema = JSchema.Parse(swaggerSchema, resolver);
 
             var swaggerJObject = JObject.Parse(swaggerJson);

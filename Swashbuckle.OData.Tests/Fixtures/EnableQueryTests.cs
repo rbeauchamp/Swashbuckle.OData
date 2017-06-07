@@ -51,7 +51,7 @@ namespace Swashbuckle.OData.Tests
 
                 pathItem.get.parameters.Where(parameter => parameter.name.StartsWith("$")).Should().OnlyContain(parameter => parameter.required == false);
 
-                pathItem.get.parameters.Count(parameter => parameter.name.StartsWith("$")).Should().Be(7);
+                pathItem.get.parameters.Count(parameter => parameter.name.StartsWith("$")).Should().Be(8);
 
                 await ValidationUtils.ValidateSwaggerJson();
             }

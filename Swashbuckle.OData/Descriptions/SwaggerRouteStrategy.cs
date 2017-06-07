@@ -115,7 +115,8 @@ namespace Swashbuckle.OData.Descriptions
             if (actionDescriptor.ControllerDescriptor.ControllerName == "Restier")
             {
                 var odataPath = request.ODataProperties().Path;
-                var entitySetName = odataPath.NavigationSource.Name;
+                //RWM: For unbounded functions, the NavigationSource will be null.
+                var entitySetName = odataPath.NavigationSource?.Name ?? "(root)";
                 Type returnType = null;
                 if (ReturnsValue(request))
                 {

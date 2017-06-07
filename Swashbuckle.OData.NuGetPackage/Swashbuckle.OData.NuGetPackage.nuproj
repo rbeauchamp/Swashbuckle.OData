@@ -30,7 +30,8 @@
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright © 2015 - 2017 Richard Beauchamp and the Swashbuckle.OData contributors</Copyright>
     <Tags>Swashbuckle Swagger SwaggerUI OData Documentation Discovery Help WebApi AspNet AspNetWebApi Docs WebHost IIS</Tags>
-    <GenerateSymbolPackage>false</GenerateSymbolPackage>
+    <GenerateSymbolPackage>true</GenerateSymbolPackage>
+    <EmbedSourceFiles>true</EmbedSourceFiles>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Swashbuckle.OData\Swashbuckle.OData.csproj" />
