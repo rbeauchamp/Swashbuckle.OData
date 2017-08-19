@@ -41,17 +41,10 @@ namespace Swashbuckle.OData
             var httpActionDescriptor = apiDescription.ActionDescriptor;
             Contract.Assume(httpActionDescriptor != null);
             return httpActionDescriptor.GetCustomAttributes<EnableQueryAttribute>().Any() || 
-                (ReturnTypeIsCollectionType(apiDescription) && httpActionDescriptor.GetFilterPipeline()
+                (ReturnsCollection(apiDescription) && httpActionDescriptor.GetFilterPipeline()
                                                                                         .Select(f => f.Instance)
                                                                                         .OfType<ActionFilterAttribute>()
                                                                                         .Any(f => f.TypeId is Type && typeof(EnableQueryAttribute).IsAssignableFrom((Type)f.TypeId)));
-        }
-
-        private static bool ReturnTypeIsCollectionType(ApiDescription apiDescription)
-        {
-            var httpActionDescriptor = apiDescription.ActionDescriptor;
-            Contract.Assume(httpActionDescriptor != null);
-            return typeof(SingleResult).IsAssignableFrom(httpActionDescriptor.ReturnType) || (typeof(IEnumerable).IsAssignableFrom(httpActionDescriptor.ReturnType) && httpActionDescriptor.ReturnType != typeof(string)); 
         }
 
         private static bool ReturnsCollection(ApiDescription apiDescription)
