@@ -41,8 +41,8 @@ namespace System.Web.OData
 
         internal static bool IsCollection(this Type type)
         {
-            Contract.Requires(type != null);
-
+            if (type == null)
+                return false;
             Type elementType;
             return type.IsCollection(out elementType);
         }
