@@ -162,7 +162,11 @@ namespace Swashbuckle.OData.Descriptions
             {
                 foreach (var parameterBinding in parameterBindings)
                 {
-                    Contract.Assume(parameterBinding != null);
+                    Contract.Assume(parameterBinding != null || parameterBinding.Descriptor != null);
+                    if(parameterBinding.Descriptor.IsODataLibraryType())
+                    {
+                        continue;
+                    }
                     parameterDescriptions.Add(CreateParameterDescriptionFromBinding(parameterBinding));
                 }
             }
