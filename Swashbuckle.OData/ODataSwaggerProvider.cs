@@ -152,10 +152,20 @@ namespace Swashbuckle.OData
 
                 var httpMethod = group.Key;
 
-                var apiDescription = group.Count() == 1
-                    ? group.First() : (_config.GetSwashbuckleOptions().ConflictingActionsResolver == null
-                                       ? throw new InvalidOperationException("ResolveConflictingActions is not configured for Swagger.")
-                                       : _config.GetSwashbuckleOptions().ConflictingActionsResolver(group));
+                ApiDescription apiDescription = null;
+
+                if (group.Count() == 1)
+                {
+                    apiDescription = group.First();
+                }
+                else if (_config.GetSwashbuckleOptions().ConflictingActionsResolver == null)
+                {
+                    throw new InvalidOperationException("ResolveConflictingActions is not configured for Swagger.");
+                }
+                else
+                {
+                    apiDescription = _config.GetSwashbuckleOptions().ConflictingActionsResolver(group);
+                }
 
                 Contract.Assume(apiDescription != null);
                 Contract.Assume(apiDescription.ParameterDescriptions != null);
