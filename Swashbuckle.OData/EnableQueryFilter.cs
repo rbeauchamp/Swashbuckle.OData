@@ -60,7 +60,7 @@ namespace Swashbuckle.OData
 
             returnType = GetValueTypeFromODataResponseOrDescendants(returnType);
 
-            return returnType.IsCollection();
+            return returnType == null ? false : returnType.IsCollection();
         }
 
         /// <summary>
