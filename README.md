@@ -1,3 +1,7 @@
+| :mega: Calling for Maintainers |
+|--------------|
+| Because OData WebApi does not support ASP.NET Core (see https://github.com/OData/WebApi/issues/939) and I am 100% focused on new ASP.NET Core development, I don't have the capacity to maintain this project. Still, I'd love to see it live on and am seeking one or two "core" contributors / maintainers. Ideally, these would be people who have already contributed through PRs and understand the inner workings and overall design. If you're interested, please let me know by adding a comment [here](https://github.com/rbeauchamp/Swashbuckle.OData/issues/175). Thank you! |
+
 Swashbuckle.OData
 =========
 
