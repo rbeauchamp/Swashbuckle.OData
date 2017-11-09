@@ -166,9 +166,7 @@ namespace Swashbuckle.OData
             Contract.Requires(currentProperty != null);
             Contract.Requires(edmProperty != null);
 
-            var dataMemberAttribute = currentProperty.GetCustomAttributes<DataMemberAttribute>()?.SingleOrDefault();
-
-            return !string.IsNullOrWhiteSpace(dataMemberAttribute?.Name) ? dataMemberAttribute.Name : edmProperty.Name;
+            return TypeHelper.GetPropertyName(currentProperty, edmProperty.Name);
         }
 
         private static bool IsResponseWithPrimiveTypeNotSupportedByJson(Type type, MessageDirection messageDirection)
@@ -196,12 +194,12 @@ namespace Swashbuckle.OData
         {
             Contract.Requires(type != null);
 
-            var isDelta = type.IsGenericType 
-                && type.GetGenericTypeDefinition() == typeof (Delta<>) 
-                && messageDirection == MessageDirection.Input;
-            var isSingleResult = type.IsGenericType 
-                && type.GetGenericTypeDefinition() == typeof (SingleResult<>) 
-                && messageDirection == MessageDirection.Output;
+            var isDelta = type.IsGenericType
+                          && type.GetGenericTypeDefinition() == typeof (Delta<>)
+                          && messageDirection == MessageDirection.Input;
+            var isSingleResult = type.IsGenericType
+                                 && type.GetGenericTypeDefinition() == typeof (SingleResult<>)
+                                 && messageDirection == MessageDirection.Output;
 
             return isDelta || isSingleResult;
         }

@@ -9,6 +9,7 @@ using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
 using System.Xml.XPath;
 using System.Web.Http.Dispatcher;
+using System.Web.OData;
 
 namespace Swashbuckle.OData
 {
@@ -26,7 +27,7 @@ namespace Swashbuckle.OData
 
             Configuration = httpConfiguration;
             _swaggerDocsConfig = swaggerDocsConfig;
-            _includeNavigationProperties = false;            
+            _includeNavigationProperties = false;
             _documentFilters = new List<Func<IDocumentFilter>>();
             enableCache = false;
         }
@@ -99,7 +100,7 @@ namespace Swashbuckle.OData
         internal SwashbuckleOptions GetSwashbuckleOptions()
         {
             AddGlobalDocumentFilters();
-            AddODataDocumentFilters();                    
+            AddODataDocumentFilters();
 
             var swaggerProviderOptions = new SwaggerProviderOptions(
                 _swaggerDocsConfig.GetFieldValue<Func<ApiDescription, string, bool>>("_versionSupportResolver"),
@@ -120,7 +121,7 @@ namespace Swashbuckle.OData
                 _swaggerDocsConfig.GetFieldValue<Func<IEnumerable<ApiDescription>, ApiDescription>>("_conflictingActionsResolver"),
                 _swaggerDocsConfig.GetFieldValue<bool>("_applyFiltersToAllSchemas"),
                 _swaggerDocsConfig.GetFieldValue<IEnumerable<Func<XPathDocument>>>("_xmlDocFactories").Select(factory=>factory).ToList()
-            );            
+            );
 
             return new SwashbuckleOptions(swaggerProviderOptions);
         }
@@ -161,7 +162,7 @@ namespace Swashbuckle.OData
         private void AddGlobalDocumentFilters()
         {
             _swaggerDocsConfig.DocumentFilter<EnsureUniqueOperationIdsFilter>();
-        }  
+        }
 
         /// <summary>
         /// Gets the API versions. I'd rather not use reflection because the implementation may change, but can't find a better way.
@@ -193,6 +194,15 @@ namespace Swashbuckle.OData
         public void SetAssembliesResolver(IAssembliesResolver assembliesResolver)
         {
             System.Web.OData.TypeHelper.SetAssembliesResolver(assembliesResolver);
+        }
+
+        /// <summary>
+        /// Set the custom Property Resolver to be used instead of using the default one.
+        /// </summary>
+        /// <param name="propertyResolver">Cutrom proprty resolver.</param>
+        public void SetProperyResolver(IProperyResolver propertyResolver)
+        {
+            TypeHelper.SetProperyResolver(propertyResolver);
         }
     }
 }
