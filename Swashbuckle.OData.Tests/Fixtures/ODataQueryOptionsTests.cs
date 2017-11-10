@@ -49,6 +49,8 @@ namespace Swashbuckle.OData.Tests.ODataQueryOptions
                 swaggerDocument.paths.TryGetValue("/odata/Products3({Id})", out pathItem2);
                 pathItem.Should().NotBeNull();
                 pathItem.get.Should().NotBeNull();
+                // Verify that ODataQueryOptions types are not in the definition
+                swaggerDocument.definitions.ContainsKey("ApplyQueryOption").Should().BeFalse();
 
                 await ValidationUtils.ValidateSwaggerJson();
             }
