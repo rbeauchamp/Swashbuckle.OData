@@ -6,15 +6,40 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
 using System.Web.OData.Formatter;
 
 namespace System.Web.OData
 {
+    /// <summary> 
+    /// Provides an abstraction for managing the properties of an type.
+    /// </summary>
+    public interface IProperyResolver
+    {
+        string ResolveName(MemberInfo memberInfo, string defaultName);
+    }
+
+    /// <summary>
+    /// Default proprty resolver.
+    /// </summary>
+    /// <remarks>Resolve the property name from DataMemberAttribute.</remarks>
+    public class DefaultProperyResolver : IProperyResolver
+    {
+        public string ResolveName(MemberInfo memberInfo, string defaultName)
+        {
+            Contract.Requires(memberInfo != null);
+
+            var dataMemberAttribute = memberInfo.GetCustomAttributes<DataMemberAttribute>()?.SingleOrDefault();
+            return !string.IsNullOrWhiteSpace(dataMemberAttribute?.Name) ? dataMemberAttribute.Name : defaultName;
+        }
+    }
+
     internal static class TypeHelper
     {
         private static IAssembliesResolver _assembliesResolver =  new DefaultAssembliesResolver();
+        private static IProperyResolver _propertyResolver = new DefaultProperyResolver();
 
         internal static Type ToNullable(this Type t)
         {
@@ -98,6 +123,16 @@ namespace System.Web.OData
         internal static void SetAssembliesResolver(IAssembliesResolver assembliesResolver)
         {
             _assembliesResolver = assembliesResolver;
+        }
+
+        /// <summary>
+        /// Set the custom Property Resolver to be used instead of using the default one.
+        /// </summary>
+        /// <param name="propertyResolver">Property Resolver.</param>
+        /// <remarks>Change default property name strategy (name from DataMemberAttribute) to custom one.</remarks>
+        internal static void SetProperyResolver(IProperyResolver propertyResolver)
+        {
+            _propertyResolver = propertyResolver;
         }
 
         /// <summary>
@@ -214,6 +249,26 @@ namespace System.Web.OData
             return result;
         }
 
+        /// <summary>
+        /// Resolve a proprty name from the metadata.
+        /// </summary>
+        /// <param name="member">Member Info.</param>
+        /// <param name="defaultName">Default property name.</param>
+        /// <returns>Proprty name.</returns>
+        internal static string GetPropertyName(MemberInfo member, string defaultName)
+        {
+            return _propertyResolver.ResolveName(member, defaultName);
+        }
+        /// <summary>
+        /// Resolve a proprty name from the metadata.
+        /// </summary>
+        /// <param name="member">Member Info.</param>
+        /// <returns>Proprty name.</returns>
+        internal static string GetPropertyName(MemberInfo member)
+        {
+            return _propertyResolver.ResolveName(member, member.Name);
+        }
+
         private static Type GetInnerGenericType(Type interfaceType)
         {
             Contract.Requires(interfaceType != null);
@@ -242,7 +297,7 @@ namespace System.Web.OData
         internal static Type FindType(string fullName)
         {
             return GetLoadedTypes()
-                    .First(t => t.FullName.Equals(fullName));
+                .First(t => t.FullName.Equals(fullName));
         }
     }
 }
