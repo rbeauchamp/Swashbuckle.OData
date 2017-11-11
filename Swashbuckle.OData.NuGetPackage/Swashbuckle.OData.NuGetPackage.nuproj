@@ -19,13 +19,13 @@
   <Import Project="$(NuProjPath)\NuProj.props" Condition="Exists('$(NuProjPath)\NuProj.props')" />
   <PropertyGroup Label="Configuration">
     <Id>Swashbuckle.OData</Id>
-    <Version>3.4.1</Version>
+    <Version>3.5.0</Version>
     <Title>Swashbuckle.OData</Title>
     <Authors>Richard Beauchamp and the Swashbuckle.OData contributors</Authors>
     <Owners>Richard Beauchamp</Owners>
     <Summary>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Summary>
     <Description>Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers!</Description>
-    <ReleaseNotes>Fixes https://github.com/rbeauchamp/Swashbuckle.OData/issues/168</ReleaseNotes>
+    <ReleaseNotes>Fixes #168, #174. Provides ability to configure a custom property resolver (see https://github.com/rbeauchamp/Swashbuckle.OData/pull/176)</ReleaseNotes>
     <ProjectUrl>https://github.com/rbeauchamp/Swashbuckle.OData</ProjectUrl>
     <LicenseUrl>https://github.com/rbeauchamp/Swashbuckle.OData/blob/master/License.txt</LicenseUrl>
     <Copyright>Copyright © 2015 - 2017 Richard Beauchamp and the Swashbuckle.OData contributors</Copyright>

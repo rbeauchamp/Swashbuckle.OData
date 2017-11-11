@@ -86,6 +86,17 @@ public async Task<IHttpActionResult> Post([FromODataUri] int customerId, Order o
 }
 ```
 
+### Custom property resolver ###
+
+The following snippet demonstrates how to configure a custom property resolver, which resolves a schema's property name, instead of using a DataMemberAttribute:
+```csharp
+c.CustomProvider(defaultProvider => new ODataSwaggerProvider(defaultProvider, c, GlobalConfiguration.Configuration).Configure(odataConfig =>
+                    {
+                        //Set custom ProperyResolver
+                        odataConfig.SetProperyResolver(new DefaultProperyResolver());
+                    }));
+```
+
 #### RESTier ####
 
 By default, Swashbuckle.OData only displays RESTier routes for top-level entity types. You can describe and display additional routes, for related types, in the Swagger UI by configuring custom swagger routes. For example from the Northwind model, to display a route that queries an Order (a related type) for a Customer (a top-level entity type), configure the following:
