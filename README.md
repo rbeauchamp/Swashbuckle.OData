@@ -77,7 +77,7 @@ config.AddCustomSwaggerRoute(customODataRoute, "/Customers({Id})/Orders")
     // The name of the parameter as it appears in the controller action
     .BodyParameter<Order>("order");
 ```
-The above route resolves to an `OrderController` action of:
+The above route resolves to an `OrdersController` (the last path segment defining the controller) and hits the `Post` action:
 ```csharp
 [ResponseType(typeof(Order))]
 public async Task<IHttpActionResult> Post([FromODataUri] int customerId, Order order)
