@@ -117,6 +117,10 @@ namespace Swashbuckle.OData.Tests
             public int Id { get; set; }
             [DataMember(Name = "differentName")]
             public string Variation { get; set; }
+            [DataMember(Name = "sameNameCamelCasing")]
+            public string SameNameCamelCasing { get; set; }
+            [DataMember(Name = "SameName")]
+            public string SameName { get; set; }
         }
 
         public class DataMemberAttributeModelsController : ODataController

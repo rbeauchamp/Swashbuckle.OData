@@ -147,10 +147,14 @@ namespace Swashbuckle.OData
                                 .OfType<DataMemberAttribute>()
                                 .Any(x => x.Name == property.Key))
                                 .FirstOrDefault();
-                            // shouldn't need this but just in case...
+                            // this can happen if the DataMemberAttributes Name is the same as the Property...
                             if (originalProperty != null)
                             {
                                 key = originalProperty.Name;
+                            }
+                            else
+                            {
+                                key = property.Key;
                             }
                         }
                         else
