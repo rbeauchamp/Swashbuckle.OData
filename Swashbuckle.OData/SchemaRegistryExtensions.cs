@@ -139,7 +139,25 @@ namespace Swashbuckle.OData
                     var edmProperties = new Dictionary<string, Schema>();
                     foreach (var property in schemaDefinition.properties)
                     {
-                        var currentProperty = type.GetProperty(property.Key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                        string key = string.Empty;
+                        if (type.IsDefined(typeof(DataContractAttribute), true))
+                        {
+                            var originalProperty = type.GetProperties()
+                                .Where(p => p.GetCustomAttributes(typeof(DataMemberAttribute), true)
+                                .OfType<DataMemberAttribute>()
+                                .Any(x => x.Name == property.Key))
+                                .FirstOrDefault();
+                            // shouldn't need this but just in case...
+                            if (originalProperty != null)
+                            {
+                                key = originalProperty.Name;
+                            }
+                        }
+                        else
+                        {
+                            key = property.Key;
+                        }
+                        var currentProperty = type.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
                         var edmPropertyName = GetEdmPropertyName(currentProperty, edmType);
                         if (edmPropertyName != null)
                         {
