@@ -129,6 +129,7 @@ namespace Swashbuckle.OData
         private static void ApplyEdmModelPropertyNamesToSchema(SchemaRegistry registry, IEdmModel edmModel, Type type)
         {
             var entityReference = registry.GetOrRegister(type);
+            var hasDataMemberAttribute = false;
             if (entityReference.@ref != null)
             {
                 var definitionKey = entityReference.@ref.Replace("#/definitions/", string.Empty);
@@ -150,6 +151,7 @@ namespace Swashbuckle.OData
                             // this can happen if the DataMemberAttributes Name is the same as the Property...
                             if (originalProperty != null)
                             {
+                                hasDataMemberAttribute = true;
                                 key = originalProperty.Name;
                             }
                             else
@@ -162,7 +164,10 @@ namespace Swashbuckle.OData
                             key = property.Key;
                         }
                         var currentProperty = type.GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                        var edmPropertyName = GetEdmPropertyName(currentProperty, edmType);
+
+
+                        var edmPropertyName = GetEdmPropertyName(currentProperty, edmType, hasDataMemberAttribute ? property.Key : currentProperty.Name);
+
                         if (edmPropertyName != null)
                         {
                             edmProperties.Add(edmPropertyName, property.Value);
@@ -173,12 +178,12 @@ namespace Swashbuckle.OData
             }
         }
 
-        private static string GetEdmPropertyName(MemberInfo currentProperty, IEdmStructuredType edmType)
+        private static string GetEdmPropertyName(MemberInfo currentProperty, IEdmStructuredType edmType, string propertyName)
         {
             Contract.Requires(currentProperty != null);
             Contract.Requires(edmType != null);
 
-            var edmProperty = edmType.Properties().SingleOrDefault(property => property.Name.Equals(currentProperty.Name, StringComparison.CurrentCultureIgnoreCase));
+            var edmProperty = edmType.Properties().SingleOrDefault(property => property.Name.Equals(propertyName, StringComparison.CurrentCultureIgnoreCase));
 
             return edmProperty != null ? GetPropertyNameForEdmModel(currentProperty, edmProperty) : null;
         }
