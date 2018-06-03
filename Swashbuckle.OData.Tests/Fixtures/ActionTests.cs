@@ -214,6 +214,52 @@ namespace Swashbuckle.OData.Tests
             }
         }
 
+        [Test]
+        public async Task It_supports_custom_parameter_actions_against_an_entity() {
+            using (WebApp.Start(HttpClientUtils.BaseAddress, appBuilder => Configuration(appBuilder, typeof(SuppliersController)))) {
+                // Arrange
+                var httpClient = HttpClientUtils.GetHttpClient(HttpClientUtils.BaseAddress);
+                // Verify that the OData route in the test controller is valid
+                var rating = new RatingDto
+                {
+                    Rating = 1
+                };
+                var result = await httpClient.PostAsJsonAsync("/odata/Suppliers(1)/Default.Rate2", rating);
+                result.IsSuccessStatusCode.Should().BeTrue();
+
+                // Act
+                var swaggerDocument = await httpClient.GetJsonAsync<SwaggerDocument>("swagger/docs/v1");
+
+                // Assert
+                PathItem pathItem;
+                swaggerDocument.paths.TryGetValue("/odata/Suppliers({Id})/Default.Rate2", out pathItem);
+                pathItem.Should().NotBeNull();
+                pathItem.post.Should().NotBeNull();
+                pathItem.post.parameters.Count.Should().Be(2);
+
+                var idParameter = pathItem.post.parameters.SingleOrDefault(parameter => parameter.@in == "path");
+                idParameter.Should().NotBeNull();
+                idParameter.type.Should().Be("integer");
+                idParameter.format.Should().Be("int32");
+                idParameter.name.Should().Be("Id");
+
+                var bodyParameter = pathItem.post.parameters.SingleOrDefault(parameter => parameter.@in == "body");
+                bodyParameter.Should().NotBeNull();
+                bodyParameter.@in.Should().Be("body");
+                bodyParameter.schema.Should().NotBeNull();
+                bodyParameter.schema.type.Should().Be("object");
+                bodyParameter.schema.properties.Should().NotBeNull();
+                bodyParameter.schema.properties.Count.Should().Be(1);
+                bodyParameter.schema.properties.Should().ContainKey("Rating");
+                bodyParameter.schema.properties.Single(pair => pair.Key == "Rating").Value.@ref.Should().Be("#/definitions/RatingDto");
+                bodyParameter.schema.required.Should().NotBeNull();
+                bodyParameter.schema.required.Count.Should().Be(1);
+                bodyParameter.schema.required.Should().Contain("Rating");
+
+                await ValidationUtils.ValidateSwaggerJson();
+            }
+        }
+
         private static void Configuration(IAppBuilder appBuilder, Type targetController)
         {
             var config = appBuilder.GetStandardHttpConfig(targetController);
@@ -247,6 +293,10 @@ namespace Swashbuckle.OData.Tests
 
             entityType.Action("Rate")
                 .Parameter<int>("Rating");
+
+            entityType.Action("Rate2")
+                .Parameter<RatingDto>("Rating").OptionalParameter = false;
+
 
             return builder.GetEdmModel();
         }
@@ -315,6 +365,14 @@ namespace Swashbuckle.OData.Tests
         public IHttpActionResult Rate([FromODataUri] int key, ODataActionParameters parameters)
         {
             parameters.Should().ContainKey("Rating");
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [HttpPost]
+        public IHttpActionResult Rate2([FromODataUri] int key, RatingDto rating) {
+            rating.Rating.Should().Be(1);
+            key.Should().Be(1);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
