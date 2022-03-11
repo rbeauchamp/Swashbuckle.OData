@@ -1,7 +1,6 @@
 Swashbuckle.OData
 =========
 
-[![Build status](https://ci.appveyor.com/api/projects/status/lppv9403dgwrntpa?svg=true)](https://ci.appveyor.com/project/rbeauchamp/swashbuckle-odata/)
 [![Coverage Status](https://coveralls.io/repos/github/rbeauchamp/Swashbuckle.OData/badge.svg?branch=master)](https://coveralls.io/github/rbeauchamp/Swashbuckle.OData?branch=master)
 
 Extends Swashbuckle with OData v4 support! Supports both WebApi and OData controllers! 
