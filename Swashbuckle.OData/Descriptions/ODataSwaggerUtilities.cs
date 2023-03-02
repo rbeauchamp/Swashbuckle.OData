@@ -8,7 +8,7 @@ using System.Linq;
 using System.Web.Http.Routing;
 using System.Web.Http.Routing.Constraints;
 using System.Web.OData.Formatter;
-using System.Web.OData.Routing;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;

@@ -6,6 +6,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Spatial;
 

@@ -6,10 +6,10 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using System.Web.OData.Extensions;
-using System.Web.OData.Routing;
-using System.Web.OData.Routing.Conventions;
-using System.Web.OData.Routing.Template;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Swashbuckle.OData.Descriptions

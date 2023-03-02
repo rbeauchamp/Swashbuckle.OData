@@ -1,3 +1,4 @@
+using Microsoft.AspNet.OData.Formatter;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -9,7 +10,6 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Routing;
 using System.Web.Http.Services;
-using System.Web.OData.Formatter;
 
 namespace Swashbuckle.OData.Descriptions
 {

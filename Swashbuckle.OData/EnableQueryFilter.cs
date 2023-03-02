@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNet.OData;
+using Swashbuckle.OData.Descriptions;
+using Swashbuckle.Swagger;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Description;
 using System.Web.OData;
-using Swashbuckle.OData.Descriptions;
-using Swashbuckle.Swagger;
-using System;
 
 namespace Swashbuckle.OData
 {

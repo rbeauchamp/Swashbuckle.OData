@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 using System.Web;
-using System.Web.OData.Routing;
+using Microsoft.AspNet.OData.Routing;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions

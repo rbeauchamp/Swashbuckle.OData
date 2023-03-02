@@ -4,12 +4,12 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
-using System.Web.OData.Routing;
 using Microsoft.OData.Edm;
 using Swashbuckle.Application;
 using Swashbuckle.OData.Descriptions;
 using Swashbuckle.Swagger;
 using System.Collections.Concurrent;
+using Microsoft.AspNet.OData.Routing;
 
 namespace Swashbuckle.OData
 {

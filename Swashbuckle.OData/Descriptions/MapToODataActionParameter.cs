@@ -1,7 +1,7 @@
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Web.Http.Controllers;
-using System.Web.OData;
+using Microsoft.AspNet.OData;
 using Swashbuckle.Swagger;
 
 namespace Swashbuckle.OData.Descriptions
