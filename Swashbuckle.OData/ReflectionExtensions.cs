@@ -71,15 +71,19 @@ namespace Swashbuckle.OData
         /// <param name="instance">The instance.</param>
         /// <param name="methodName">Name of the method.</param>
         /// <returns></returns>
-        internal static T InvokeFunction<T>(this object instance, string methodName)
+        internal static T InvokeFunction<T>(this object instance, string methodName, params object[] methodParams)
         {
             Contract.Requires(instance != null);
             Contract.Requires(methodName != null);
 
             var methodInfo = instance.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (methodInfo == null)
+            {
+                methodInfo = instance.GetType().BaseType.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+            }
             Contract.Assume(methodInfo != null);
 
-            var result = methodInfo.Invoke(instance, null);
+            var result = methodInfo.Invoke(instance, methodParams);
 
             return result != null ? (T) result : default(T);
         }

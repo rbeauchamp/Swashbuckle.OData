@@ -21,7 +21,7 @@ namespace Swashbuckle.OData
         {
             if (IsODataActionParameter(parameterDescriptor))
             {
-                var schema = ((ODataActionParameterDescriptor) parameterDescriptor).Schema;
+                var schema = ((ODataActionParameterDescriptor)parameterDescriptor).Schema;
                 RegisterReferencedTypes(registry, edmModel, schema);
                 return schema;
             }
@@ -106,9 +106,9 @@ namespace Swashbuckle.OData
             Type elementType;
             if (IsResponseCollection(type, MessageDirection.Output, out elementType))
             {
-                var openListType = typeof (List<>);
+                var openListType = typeof(List<>);
                 var listType = openListType.MakeGenericType(elementType);
-                var openOdataType = typeof (ODataResponse<>);
+                var openOdataType = typeof(ODataResponse<>);
                 var odataType = openOdataType.MakeGenericType(listType);
                 var schema = registry.GetOrRegister(odataType);
                 ApplyEdmModelPropertyNamesToSchema(registry, edmModel, elementType);
@@ -140,10 +140,13 @@ namespace Swashbuckle.OData
                     foreach (var property in schemaDefinition.properties)
                     {
                         var currentProperty = type.GetProperty(property.Key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-                        var edmPropertyName = GetEdmPropertyName(currentProperty, edmType);
-                        if (edmPropertyName != null)
+                        if (currentProperty != null)
                         {
-                            edmProperties.Add(edmPropertyName, property.Value);
+                            var edmPropertyName = GetEdmPropertyName(currentProperty, edmType);
+                            if (edmPropertyName != null)
+                            {
+                                edmProperties.Add(edmPropertyName, property.Value);
+                            }
                         }
                     }
                     schemaDefinition.properties = edmProperties;
@@ -173,7 +176,7 @@ namespace Swashbuckle.OData
         {
             if (messageDirection == MessageDirection.Output)
             {
-                if (type == typeof (long))
+                if (type == typeof(long))
                 {
                     return true;
                 }
@@ -195,10 +198,10 @@ namespace Swashbuckle.OData
             Contract.Requires(type != null);
 
             var isDelta = type.IsGenericType
-                          && type.GetGenericTypeDefinition() == typeof (Delta<>)
+                          && type.GetGenericTypeDefinition() == typeof(Delta<>)
                           && messageDirection == MessageDirection.Input;
             var isSingleResult = type.IsGenericType
-                                 && type.GetGenericTypeDefinition() == typeof (SingleResult<>)
+                                 && type.GetGenericTypeDefinition() == typeof(SingleResult<>)
                                  && messageDirection == MessageDirection.Output;
 
             return isDelta || isSingleResult;

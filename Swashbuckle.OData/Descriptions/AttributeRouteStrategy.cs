@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Dispatcher;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -35,8 +37,12 @@ namespace Swashbuckle.OData.Descriptions
 
             if (attributeRoutingConvention != null)
             {
-                return attributeRoutingConvention
-                    .GetInstanceField<IDictionary<ODataPathTemplate, HttpActionDescriptor>>("_attributeMappings", true)
+                // AttributeRoutingConvention's private _attributeMapping field is not accessible any more due
+                // to IWebApiActionDescriptor being internal - which rules out reflection. 
+
+                //return attributeRoutingConvention
+                //  .GetInstanceField<IDictionary<ODataPathTemplate, HttpActionDescriptor>>("_attributeMappings", true)
+                return GetAttributeRoutingActionMap(httpConfig, attributeRoutingConvention)
                     .Select(pair => GetODataActionDescriptorFromAttributeRoute(pair.Value, oDataRoute, httpConfig))
                     .Where(descriptor => descriptor != null);
             }
@@ -44,7 +50,100 @@ namespace Swashbuckle.OData.Descriptions
             return new List<ODataActionDescriptor>();
         }
 
-        private static ODataActionDescriptor GetODataActionDescriptorFromAttributeRoute(HttpActionDescriptor actionDescriptor, ODataRoute oDataRoute, HttpConfiguration httpConfig)
+        // changes where taken from gitrepo https://github.com/andyward/Swashbuckle.OData Where Swashbuckle was extended with OData v4 support
+        #region Copied Code from AttributeRoutingConvention
+        private static IDictionary<ODataPathTemplate, HttpActionDescriptor> GetAttributeRoutingActionMap(HttpConfiguration httpConfig,
+            AttributeRoutingConvention routingConvention)
+        {
+            IHttpControllerSelector controllerSelector = httpConfig.Services.GetHttpControllerSelector();
+            return BuildAttributeMappings(controllerSelector.GetControllerMapping().Values, routingConvention);
+        }
+
+        private static IDictionary<ODataPathTemplate, HttpActionDescriptor> BuildAttributeMappings(ICollection<HttpControllerDescriptor> controllers,
+            AttributeRoutingConvention routingConvention)
+        {
+            IDictionary<ODataPathTemplate, HttpActionDescriptor> attributeMappings =
+                new Dictionary<ODataPathTemplate, HttpActionDescriptor>();
+
+            foreach (HttpControllerDescriptor controller in controllers)
+            {
+                if (IsODataController(controller) && ShouldMapController(controller))
+                {
+                    IHttpActionSelector actionSelector = controller.Configuration.Services.GetActionSelector();
+                    ILookup<string, HttpActionDescriptor> actionMapping = actionSelector.GetActionMapping(controller);
+                    HttpActionDescriptor[] actions = actionMapping.SelectMany(a => a).ToArray();
+
+                    foreach (string prefix in GetODataRoutePrefixes(controller))
+                    {
+                        foreach (HttpActionDescriptor action in actions)
+                        {
+                            IEnumerable<ODataPathTemplate> pathTemplates = // Invoke private method
+                                routingConvention.InvokeFunction<IEnumerable<ODataPathTemplate>>("GetODataPathTemplates", prefix, action);
+                            foreach (ODataPathTemplate pathTemplate in pathTemplates)
+                            {
+                                //attributeMappings.Add(pathTemplate, new WebApiActionDescriptor(action));
+                                attributeMappings.Add(pathTemplate, action);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return attributeMappings;
+        }
+
+        private static bool IsODataController(HttpControllerDescriptor controller)
+        {
+            return typeof(ODataController).IsAssignableFrom(controller.ControllerType);
+        }
+
+        public static bool ShouldMapController(HttpControllerDescriptor controller)
+        {
+            return true;
+        }
+
+        private static IEnumerable<string> GetODataRoutePrefixes(HttpControllerDescriptor controllerDescriptor)
+        {
+            Contract.Assert(controllerDescriptor != null);
+
+            var prefixAttributes = controllerDescriptor.GetCustomAttributes<ODataRoutePrefixAttribute>(inherit: false);
+
+            return GetODataRoutePrefixes(prefixAttributes, controllerDescriptor.ControllerType.FullName);
+        }
+
+        private static IEnumerable<string> GetODataRoutePrefixes(IEnumerable<ODataRoutePrefixAttribute> prefixAttributes, string controllerName)
+        {
+            Contract.Assert(prefixAttributes != null);
+
+            if (!prefixAttributes.Any())
+            {
+                yield return null;
+            }
+            else
+            {
+                foreach (ODataRoutePrefixAttribute prefixAttribute in prefixAttributes)
+                {
+                    string prefix = prefixAttribute.Prefix;
+
+                    if (prefix != null && prefix.StartsWith("/", StringComparison.Ordinal))
+                    {
+                        throw new InvalidOperationException("Route should not start with a /");//Error.InvalidOperation(SRResources.RoutePrefixStartsWithSlash, prefix, controllerName);
+                    }
+
+                    if (prefix != null && prefix.EndsWith("/", StringComparison.Ordinal))
+                    {
+                        prefix = prefix.TrimEnd('/');
+                    }
+
+                    yield return prefix;
+                }
+            }
+        }
+
+        #endregion  // Cloned from OData
+
+        private static ODataActionDescriptor GetODataActionDescriptorFromAttributeRoute(HttpActionDescriptor actionDescriptor, ODataRoute oDataRoute,
+            HttpConfiguration httpConfig)
         {
             Contract.Requires(actionDescriptor != null);
             Contract.Requires(oDataRoute != null);
@@ -89,6 +188,7 @@ namespace Swashbuckle.OData.Descriptions
 
             return prefix + "/" + pathTemplate;
         }
+
 
         private static HttpRequestMessage CreateHttpRequestMessage(HttpActionDescriptor actionDescriptor, ODataRoute oDataRoute, HttpConfiguration httpConfig)
         {

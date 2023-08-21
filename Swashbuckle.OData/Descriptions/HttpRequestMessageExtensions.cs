@@ -20,8 +20,8 @@ namespace Swashbuckle.OData.Descriptions
 
             if (controllerDescriptor != null)
             {
-                actionDescriptor = controllerDescriptor.ControllerName == "Restier" 
-                    ? GetHttpActionDescriptorForRestierController(request, controllerDescriptor) 
+                actionDescriptor = controllerDescriptor.ControllerName == "Restier"
+                    ? GetHttpActionDescriptorForRestierController(request, controllerDescriptor)
                     : GetHttpActionDescriptorForODataController(request, httpConfig, controllerDescriptor);
             }
 
@@ -44,14 +44,14 @@ namespace Swashbuckle.OData.Descriptions
             requestContext.Url = new UrlHelper(request);
             requestContext.VirtualPathRoot = perControllerConfig.VirtualPathRoot;
 
-            var controllerContext = new HttpControllerContext(httpConfig, request.GetRouteData(), request)
-            {
-                ControllerDescriptor = controllerDescriptor,
-                RequestContext = requestContext
-            };
-
             try
             {
+                var controllerContext = new HttpControllerContext(httpConfig, request.GetRouteData(), request)
+                {
+                    ControllerDescriptor = controllerDescriptor,
+                    RequestContext = requestContext
+                };
+
                 var actionSelector = perControllerConfig.Services?.GetActionSelector();
                 Contract.Assume(actionSelector != null);
                 actionDescriptor = actionSelector.SelectAction(controllerContext);
@@ -67,6 +67,11 @@ namespace Swashbuckle.OData.Descriptions
                     throw;
                 }
             }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+
             return actionDescriptor;
         }
 

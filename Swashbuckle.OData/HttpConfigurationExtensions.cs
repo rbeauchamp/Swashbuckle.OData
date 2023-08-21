@@ -53,13 +53,14 @@ namespace Swashbuckle.OData
                 : new JsonSerializerSettings();
         }
 
-        private static readonly MethodInfo GetODataRootContainerMethod = typeof(HttpConfigurationExtensions).GetMethod("GetODataRootContainer", BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo GetODataRootContainerMethod = typeof(Microsoft.AspNet.OData.Extensions.HttpConfigurationExtensions).GetMethod("GetODataRootContainer", BindingFlags.Static | BindingFlags.NonPublic);
 
         // We need access to the root container but System.Web.OData.Extensions.HttpConfigurationExtensions.GetODataRootContainer is internal.
         public static IServiceProvider GetODataRootContainer(this HttpConfiguration configuration, ODataRoute oDataRoute)
         {
             Contract.Requires(configuration != null);
             Contract.Requires(oDataRoute != null);
+            
             return (IServiceProvider)GetODataRootContainerMethod.Invoke(null, new object[] {configuration, oDataRoute.PathRouteConstraint.RouteName});
         }
 
